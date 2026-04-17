@@ -1,0 +1,2121 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GC BURGUER</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --gold: #e8a930;
+            --gold-dim: rgba(232,169,48,0.15);
+            --dark: #080808;
+            --card: #111111;
+            --card2: #161616;
+            --border: rgba(255,255,255,0.07);
+            --green: #2ecc71;
+            --red: #e74c3c;
+            --orange: #e67e22;
+        }
+        * { box-sizing: border-box; }
+        body {
+            background: var(--dark);
+            background-image: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(232,169,48,0.07), transparent);
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        /* ── TOP BAR ─────────────────────────── */
+        .topbar {
+            background: rgba(10,10,10,0.97);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .topbar-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+        }
+        .brand {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.3rem;
+            letter-spacing: 3px;
+            color: var(--gold);
+            padding: 12px 16px;
+            border-right: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+        .tabs-menu {
+            display: flex;
+            flex: 1;
+            align-items: center;
+            overflow: visible;
+            position: relative;
+        }
+        .tab-btn {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.4);
+            padding: 16px 14px;
+            cursor: pointer;
+            font-weight: 600;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            font-family: 'Outfit', sans-serif;
+            transition: 0.2s;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .tab-btn::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 14px; right: 14px;
+            height: 2px;
+            background: var(--gold);
+            transform: scaleX(0);
+            transition: transform 0.2s;
+        }
+        .tab-btn.active::after { transform: scaleX(1); }
+        .tab-btn:hover { color: rgba(255,255,255,0.75); background: rgba(255,255,255,0.03); }
+        .tab-btn.active { color: var(--gold); background: rgba(232,169,48,0.07); }
+        .tab-btn i { font-size: 0.85rem; }
+
+        /* ── MENU MOBILE ── */
+        .btn-mais { display: none !important; }
+        .menu-extras { display: flex; }
+
+        @media (max-width: 700px) {
+            .topbar-inner { flex-wrap: wrap; }
+            .brand {
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                width: 100%;
+                padding: 10px 14px;
+                font-size: 1.1rem;
+            }
+            .tabs-menu {
+                width: 100%;
+                gap: 4px;
+                padding: 6px 8px;
+                flex-wrap: nowrap;
+            }
+            .tab-btn:not(.btn-mais) {
+                flex: 1;
+                padding: 10px 6px;
+                font-size: 0.68rem;
+                letter-spacing: 0.5px;
+            }
+            .tab-btn::after { display: none; }
+            .tab-btn.active { border-radius: 8px; background: rgba(232,169,48,0.15); }
+            .btn-mais {
+                display: flex !important;
+                flex: 0 0 40px;
+                align-items: center;
+                justify-content: center;
+                background: transparent !important;
+                border: 1px solid rgba(255,215,0,0.3) !important;
+                color: var(--gold) !important;
+                height: 38px;
+                border-radius: 8px;
+                cursor: pointer;
+                padding: 0 10px;
+                font-size: 0.9rem;
+            }
+            .menu-extras {
+                display: none;
+                flex-direction: column;
+                position: absolute;
+                top: calc(100% + 4px);
+                right: 8px;
+                width: 200px;
+                background: #111;
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                z-index: 9999;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.9);
+                overflow: hidden;
+            }
+            .menu-extras.show {
+                display: flex;
+                animation: fadeIn 0.18s ease-out;
+            }
+            .menu-extras .tab-btn {
+                width: 100%;
+                justify-content: flex-start;
+                padding: 14px 16px;
+                border-bottom: 1px solid rgba(255,255,255,0.05);
+                border-radius: 0;
+                font-size: 0.82rem;
+            }
+            .menu-extras .tab-btn::after { display: none; }
+            .menu-extras .tab-btn:last-child { border-bottom: none; }
+        }
+
+        @media (min-width: 701px) and (max-width: 960px) {
+            .tab-btn { padding: 14px 10px; font-size: 0.72rem; letter-spacing: 1px; }
+            .tab-btn::after { left: 10px; right: 10px; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .content-section { display: none; max-width: 1200px; margin: 0 auto; padding: 16px 12px; }
+        .content-section.active { display: block; }
+
+        /* ── BLUETOOTH BAR ───────────────────── */
+        .bt-bar-wrapper {
+            max-width: 1200px;
+            margin: 10px auto 0;
+            padding: 0 12px;
+        }
+        .bt-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(37,211,102,0.05);
+            border: 1px solid rgba(37,211,102,0.18);
+            border-radius: 10px;
+            padding: 10px 14px;
+            flex-wrap: wrap;
+        }
+        .bt-status-dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            background: #555; flex-shrink: 0; transition: background 0.3s;
+        }
+        .bt-status-dot.conectado { background: #2ecc71; box-shadow: 0 0 6px #2ecc71; }
+        .bt-status-dot.erro { background: #e74c3c; }
+        .bt-status-text { font-size: 0.8rem; font-weight: 600; flex: 1; color: rgba(255,255,255,0.6); }
+        .btn-bt-conectar {
+            background: rgba(37,211,102,0.12);
+            color: #2ecc71;
+            border: 1px solid rgba(37,211,102,0.3);
+            border-radius: 8px;
+            padding: 7px 14px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            transition: 0.18s;
+            white-space: nowrap;
+        }
+        .btn-bt-conectar:hover { background: rgba(37,211,102,0.25); }
+        .btn-imprimir-bt {
+            background: rgba(232,169,48,0.1);
+            color: var(--gold);
+            border: 1px solid rgba(232,169,48,0.28);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.74rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            transition: 0.18s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+            margin-top: 8px;
+            width: 100%;
+            justify-content: center;
+        }
+        .btn-imprimir-bt:hover { background: rgba(232,169,48,0.22); }
+        .btn-imprimir-bt:disabled { opacity: 0.35; cursor: not-allowed; }
+
+        /* ── MESAS ──────────────────────────── */
+        .mesas-header { margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+        .mesas-header h2 { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 3px; color: var(--gold); margin: 0; }
+        .mesas-stats { display: flex; gap: 10px; }
+        .stat-pill {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 5px 14px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .stat-pill.ocp { border-color: rgba(230,126,34,0.4); color: var(--orange); background: rgba(230,126,34,0.07); }
+        .stat-pill.liv { border-color: rgba(46,204,113,0.4); color: var(--green); background: rgba(46,204,113,0.07); }
+
+        .mesas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 14px;
+        }
+        @media(max-width: 520px) { .mesas-grid { grid-template-columns: 1fr; } }
+
+        .mesa-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 18px 16px;
+            cursor: pointer;
+            transition: all 0.22s;
+            position: relative;
+            overflow: hidden;
+        }
+        .mesa-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: var(--border);
+            transition: 0.22s;
+        }
+        .mesa-card:hover { transform: translateY(-2px); border-color: rgba(232,169,48,0.3); }
+        .mesa-card:hover::before { background: var(--gold); }
+        .mesa-card.ocupada { border-color: rgba(230,126,34,0.3); background: linear-gradient(135deg, #141008, #0f0f0f); }
+        .mesa-card.ocupada::before { background: var(--orange); }
+        .mesa-card.livre { border-color: rgba(46,204,113,0.2); }
+        .mesa-card.livre::before { background: var(--green); }
+
+        .mesa-card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+        .mesa-num { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 2px; line-height: 1; color: white; }
+        .mesa-status-badge { font-size: 0.65rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 3px 9px; border-radius: 20px; }
+        .badge-livre { background: rgba(46,204,113,0.12); color: var(--green); border: 1px solid rgba(46,204,113,0.3); }
+        .badge-ocupada { background: rgba(230,126,34,0.12); color: var(--orange); border: 1px solid rgba(230,126,34,0.3); }
+
+        .mesa-garcom-row { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-bottom: 12px; }
+        .mesa-garcom-row span { color: var(--gold); font-weight: 600; }
+
+        .mesa-itens-lista { background: rgba(0,0,0,0.35); border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; border: 1px solid var(--border); }
+        .mesa-item-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .mesa-item-row:last-child { border-bottom: none; }
+        .mesa-item-nome { color: rgba(255,255,255,0.75); }
+        .mesa-item-preco { color: var(--gold); font-weight: 600; white-space: nowrap; margin-left: 8px; }
+
+        .mesa-total-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+        .mesa-total-label { font-size: 0.75rem; color: rgba(255,255,255,0.4); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+        .mesa-total-val { font-size: 1.25rem; font-weight: 700; color: var(--green); }
+
+        .mesa-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .mesa-act-btn {
+            padding: 10px 6px;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            font-family: 'Outfit', sans-serif;
+            transition: 0.18s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        .mesa-act-btn.btn-pedido { background: rgba(232,169,48,0.15); color: var(--gold); border: 1px solid rgba(232,169,48,0.35); }
+        .mesa-act-btn.btn-pedido:hover { background: rgba(232,169,48,0.28); }
+        .mesa-act-btn.btn-cozinha { background: rgba(230,126,34,0.15); color: var(--orange); border: 1px solid rgba(230,126,34,0.35); }
+        .mesa-act-btn.btn-cozinha:hover { background: rgba(230,126,34,0.28); }
+        .mesa-act-btn.btn-cozinha-ok { background: rgba(46,204,113,0.08); color: rgba(46,204,113,0.5); border: 1px solid rgba(46,204,113,0.2); cursor: default; }
+        .mesa-act-btn.btn-fechar { background: rgba(46,204,113,0.15); color: var(--green); border: 1px solid rgba(46,204,113,0.35); }
+        .mesa-act-btn.btn-fechar:hover { background: rgba(46,204,113,0.28); }
+
+        .mesa-livre-inner { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px 0; gap: 8px; }
+        .mesa-livre-icon { font-size: 2.2rem; opacity: 0.35; }
+        .mesa-livre-text { font-size: 0.8rem; color: rgba(255,255,255,0.3); font-weight: 500; }
+        .btn-abrir-mesa { width: 100%; padding: 12px; background: rgba(46,204,113,0.1); color: var(--green); border: 1px solid rgba(46,204,113,0.3); border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 0.8rem; font-family: 'Outfit', sans-serif; letter-spacing: 1px; transition: 0.18s; }
+        .btn-abrir-mesa:hover { background: rgba(46,204,113,0.22); }
+
+        /* ── PEDIDOS ────────────────────────── */
+       .pedidos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+@media(max-width: 640px) { .pedidos-grid { grid-template-columns: 1fr; } }
+
+        .pedido-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 16px;
+            position: relative;
+            border-top: 3px solid var(--gold);
+            transition: all 0.3s;
+        }
+        .pedido-card.mesa-card-closed { border-top-color: var(--green); }
+
+        /* ── CARD SAIU ENTREGA DESTAQUE ── */
+        .pedido-card.saiu-entrega {
+            border-color: rgba(52,152,219,0.6);
+            border-top-color: #3498db;
+            background: linear-gradient(135deg, #050d14, #0a0a0a);
+            box-shadow: 0 0 18px rgba(52,152,219,0.15);
+        }
+        .badge-saiu {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(52,152,219,0.15);
+            color: #3498db;
+            border: 1px solid rgba(52,152,219,0.4);
+            border-radius: 20px;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 3px 10px;
+            margin-top: 8px;
+        }
+        .badge-saiu i { font-size: 0.72rem; }
+
+        /* ── BTN DELETE COM SENHA ── */
+        .btn-del {
+            position: absolute;
+            top: 10px; right: 10px;
+            background: none;
+            border: none;
+            color: #ff4d4d;
+            font-size: 20px;
+            cursor: pointer;
+            opacity: 0.55;
+            line-height: 1;
+            transition: opacity 0.18s;
+        }
+        .btn-del:hover { opacity: 1; }
+
+        .lista-itens-card { background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; margin: 8px 0; font-size: 0.88rem; }
+        .item-linha { border-bottom: 1px solid rgba(255,255,255,0.05); padding: 4px 0; display: flex; justify-content: space-between; }
+        .status-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+        .btn-wa { border: none; padding: 10px; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; font-size: 0.78rem; font-family: 'Outfit', sans-serif; transition: 0.2s; }
+        .bg-blue { background: #2980b9; }
+        .bg-blue:hover { background: #3498db; }
+        .bg-green { background: #27ae60; }
+        .bg-green:hover { background: #2ecc71; }
+        .btn-wa-ativo { background: linear-gradient(135deg, #1a4a72, #1e6091) !important; border: 1px solid #3498db !important; }
+
+        .tag { display: inline-block; border-radius: 6px; font-size: 0.68rem; padding: 2px 9px; font-weight: 700; margin-bottom: 5px; letter-spacing: 1px; }
+        .tag-delivery { background: rgba(232,169,48,0.15); color: var(--gold); border: 1px solid rgba(232,169,48,0.4); }
+        .tag-mesa { background: rgba(46,204,113,0.12); color: var(--green); border: 1px solid rgba(46,204,113,0.35); }
+        .section-label {
+            color: rgba(255,255,255,0.3);
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin: 24px 0 12px;
+            grid-column: 1 / -1;
+            padding-left: 10px;
+            border-left: 3px solid var(--gold);
+        }
+
+        /* ── VER MAIS / VER MENOS ── */
+        .btn-ver-mais {
+            grid-column: 1 / -1;
+            background: rgba(232,169,48,0.08);
+            color: var(--gold);
+            border: 1px solid rgba(232,169,48,0.25);
+            border-radius: 10px;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.8rem;
+            font-family: 'Outfit', sans-serif;
+            letter-spacing: 1px;
+            transition: 0.18s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 4px;
+        }
+        .btn-ver-mais:hover { background: rgba(232,169,48,0.18); }
+
+        /* ── OBS NOS PEDIDOS ── */
+        .obs-badge {
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+            background: rgba(232,169,48,0.06);
+            border: 1px solid rgba(232,169,48,0.18);
+            border-radius: 8px;
+            padding: 7px 10px;
+            margin: 8px 0;
+            font-size: 0.77rem;
+            color: rgba(255,255,255,0.6);
+            line-height: 1.4;
+        }
+        .obs-badge i { color: var(--gold); flex-shrink: 0; margin-top: 1px; }
+
+        .taxa-entrega-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            color: #3498db;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        /* ── ESTOQUE ────────────────────────── */
+        .estoque-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        @media(min-width: 500px) { .estoque-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); } }
+        .item-estoque { background: var(--card); padding: 16px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); }
+        .switch { position: relative; display: inline-block; width: 46px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .3s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 17px; width: 17px; left: 3.5px; bottom: 3.5px; background-color: white; transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--gold); }
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        /* ── CAIXA ──────────────────────────── */
+        .caixa-container { display: flex; flex-direction: column; gap: 20px; }
+        @media(min-width: 900px) { .caixa-container { display: grid; grid-template-columns: 1fr 340px; } }
+        .caixa-sidebar { background: var(--card); padding: 25px; border-radius: 20px; border: 1px solid rgba(232,169,48,0.25); text-align: center; height: fit-content; }
+        .valor-total { font-family: 'Bebas Neue', sans-serif; font-size: 3rem; color: var(--gold); letter-spacing: 3px; margin: 12px 0; }
+
+        /* ── MODAL ──────────────────────────── */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 1000; justify-content: center; align-items: flex-start; overflow-y: auto; padding: 12px; }
+        .modal-overlay.open { display: flex; }
+        .modal-box { background: #0f0f0f; border: 1px solid rgba(232,169,48,0.3); border-radius: 20px; width: 100%; max-width: 540px; overflow: hidden; }
+        .modal-header { background: linear-gradient(135deg, #150f00, #1a1400); padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(232,169,48,0.15); }
+        .modal-header h3 { margin: 0; color: var(--gold); font-family: 'Bebas Neue', sans-serif; letter-spacing: 2px; font-size: 1.2rem; }
+        .modal-close { background: none; border: none; color: white; font-size: 20px; cursor: pointer; line-height: 1; opacity: 0.6; transition: 0.15s; }
+        .modal-close:hover { opacity: 1; }
+        .modal-body { padding: 16px 18px; max-height: 85vh; overflow-y: auto; }
+
+        /* GARÇONS */
+        .garcons-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .garcom-btn { background: var(--card2); border: 1px solid var(--border); color: white; padding: 16px 8px; border-radius: 12px; cursor: pointer; text-align: center; transition: 0.2s; font-size: 0.88rem; font-weight: 500; font-family: 'Outfit', sans-serif; }
+        .garcom-btn:hover, .garcom-btn.sel { background: var(--gold-dim); color: var(--gold); border-color: rgba(232,169,48,0.5); font-weight: 700; }
+        .garcom-icon { font-size: 1.8rem; display: block; margin-bottom: 6px; }
+
+        /* ACORDEÃO */
+        .cat-bloco { margin-bottom: 7px; border-radius: 11px; overflow: hidden; border: 1px solid var(--border); }
+        .cat-header { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.04); padding: 12px 15px; cursor: pointer; user-select: none; transition: background 0.18s; }
+        .cat-header:hover { background: var(--gold-dim); }
+        .cat-header .cat-name { font-weight: 700; font-size: 0.9rem; }
+        .cat-header .chev { font-size: 0.72rem; opacity: 0.5; transition: transform 0.22s; }
+        .cat-header.open .chev { transform: rotate(180deg); }
+        .cat-itens { display: none; padding: 6px 8px 8px; background: rgba(0,0,0,0.2); }
+        .cat-itens.open { display: block; }
+        .item-btn { width: 100%; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); color: white; padding: 10px 13px; border-radius: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; margin-top: 5px; transition: 0.15s; text-align: left; font-family: 'Outfit', sans-serif; }
+        .item-btn:hover { background: var(--gold-dim); border-color: rgba(232,169,48,0.4); }
+        .item-btn .i-nome { font-size: 0.86rem; }
+        .item-btn .i-preco { color: var(--gold); font-weight: 700; font-size: 0.86rem; white-space: nowrap; margin-left: 10px; }
+
+        /* CARRINHO */
+        .cart-box { background: rgba(0,0,0,0.38); border-radius: 12px; padding: 14px; margin-top: 16px; border: 1px solid var(--border); }
+        .cart-title { font-weight: 700; color: var(--gold); margin-bottom: 9px; font-size: 0.88rem; letter-spacing: 1px; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.84rem; }
+        .qtd-ctrl { display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
+        .qtd-btn { background: rgba(255,255,255,0.08); border: none; color: white; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; transition: 0.15s; }
+        .qtd-btn:hover { background: var(--gold); color: black; }
+        .cart-total { display: flex; justify-content: space-between; margin-top: 10px; font-size: 1rem; font-weight: 700; }
+        .cart-total span:last-child { color: var(--green); }
+        .obs-inp { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: white; border-radius: 8px; padding: 9px 12px; font-size: 0.82rem; margin-top: 8px; resize: none; font-family: 'Outfit', sans-serif; }
+
+        /* BOTÕES AÇÃO MODAL */
+        .act-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 13px; }
+        .act-row button { padding: 13px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 0.82rem; transition: 0.18s; font-family: 'Outfit', sans-serif; }
+
+        /* TICKET */
+        .ticket-item { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 0.86rem; }
+        .ticket-total { display: flex; justify-content: space-between; font-size: 1.18rem; font-weight: 700; margin-top: 12px; color: var(--green); }
+        .pag-btns { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 12px; }
+        .pag-btn { padding: 12px 5px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); color: white; border-radius: 10px; cursor: pointer; font-size: 0.79rem; font-weight: 700; transition: 0.18s; text-align: center; font-family: 'Outfit', sans-serif; }
+        .pag-btn:hover, .pag-btn.sel { border-color: var(--gold); background: var(--gold-dim); color: var(--gold); }
+
+        /* PDV RESPONSIVO */
+        .pdv-grid-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            gap: 16px;
+            padding: 10px 0;
+        }
+        @media(max-width: 800px) {
+            .pdv-grid-wrapper { grid-template-columns: 1fr; }
+            .pdv-resumo-col { order: -1; }
+        }
+
+        /* TOAST */
+        #toast {
+            position: fixed; bottom: 20px; left: 50%;
+            transform: translateX(-50%) translateY(70px);
+            background: #0a2010; border: 1px solid var(--green); color: var(--green);
+            padding: 10px 24px; border-radius: 50px; font-size: 0.85rem;
+            font-weight: 700; z-index: 9999; opacity: 0; white-space: nowrap;
+            transition: transform 0.28s cubic-bezier(.34,1.56,.64,1), opacity 0.28s;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.7); pointer-events: none;
+            font-family: 'Outfit', sans-serif;
+            max-width: 90vw;
+            text-align: center;
+        }
+        #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+        /* PRINT */
+        @media print {
+            body > *:not(#print-area) { display: none !important; }
+            #print-area { display: block !important; }
+        }
+        #print-area { display: none; }
+        .cp { font-family: monospace; font-size: 13px; max-width: 300px; padding: 10px; color: #000; }
+        .cp h3 { text-align: center; border-bottom: 1px dashed #000; padding-bottom: 8px; margin-bottom: 8px; }
+        .cp .il { display: flex; justify-content: space-between; padding: 3px 0; }
+        .cp .rod { text-align: center; border-top: 1px dashed #000; margin-top: 8px; padding-top: 8px; font-size: 11px; }
+
+        /* INPUT PADRÃO */
+        .inp-pdv {
+            width: 100%;
+            padding: 11px 12px;
+            background: #000;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            transition: border-color 0.2s;
+        }
+        .inp-pdv:focus { border-color: rgba(232,169,48,0.5); outline: none; }
+        .inp-pdv::placeholder { color: rgba(255,255,255,0.3); }
+
+        /* ── SECTION LABEL COM CONTADOR ── */
+        .section-label-count {
+            background: rgba(232,169,48,0.12);
+            color: var(--gold);
+            border: 1px solid rgba(232,169,48,0.3);
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-size: 0.65rem;
+            margin-left: 8px;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+    <div class="topbar-inner">
+        <div class="brand">GC BURGUER</div>
+        <div class="tabs-menu">
+            <button class="tab-btn active" onclick="switchTab('aba-pedidos',this)"><i class="fas fa-fire"></i> PEDIDOS</button>
+            <button class="tab-btn" onclick="switchTab('aba-mesas',this)"><i class="fas fa-utensils"></i> MESAS</button>
+            <div class="menu-extras" id="menu-extras">
+                <button class="tab-btn" onclick="switchTabProtegida('aba-estoque',this)"><i class="fas fa-box"></i> ESTOQUE</button>
+                <button class="tab-btn" onclick="switchTabProtegida('aba-caixa',this)"><i class="fas fa-wallet"></i> CAIXA</button>
+            </div>
+            <button class="tab-btn btn-mais" onclick="toggleMenuMobile(event)"><i class="fas fa-bars"></i></button>
+        </div>
+    </div>
+</div>
+
+<!-- BARRA BLUETOOTH -->
+<!-- <div class="bt-bar-wrapper">
+    <div class="bt-bar">
+        <div class="bt-status-dot" id="bt-dot"></div>
+        <span class="bt-status-text" id="bt-texto">Impressora Bluetooth desconectada</span>
+        <button class="btn-bt-conectar" onclick="btConectar()">
+            <i class="fas fa-bluetooth-b"></i> CONECTAR BT
+        </button>
+    </div>
+</div> -->
+
+<!-- PEDIDOS -->
+<div id="aba-pedidos" class="content-section active">
+    <div class="pedidos-grid" id="lista-pedidos"></div>
+</div>
+
+<!-- MESAS -->
+<div id="aba-mesas" class="content-section">
+    <div class="mesas-header">
+        <h2><i class="fas fa-utensils" style="margin-right:8px;font-size:1.4rem;"></i>MESAS</h2>
+        <div class="mesas-stats">
+            <div class="stat-pill ocp" id="stat-ocp">0 ocupadas</div>
+            <div class="stat-pill liv" id="stat-liv">0 livres</div>
+        </div>
+    </div>
+    <div class="mesas-grid" id="mesas-grid"></div>
+</div>
+
+<!-- PDV -->
+<div id="aba-pdv" class="content-section">
+    <div id="pdv-conteudo"></div>
+</div>
+
+<!-- ESTOQUE -->
+<div id="aba-estoque" class="content-section">
+    <div id="estoque-conteudo"></div>
+</div>
+
+<!-- CAIXA -->
+<div id="aba-caixa" class="content-section">
+    <div id="caixa-conteudo"></div>
+</div>
+
+<!-- CLIENTES -->
+<div id="aba-clientes" class="content-section">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:15px;padding:20px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+            <h2 style="font-family:'Bebas Neue';color:var(--gold);letter-spacing:2px;margin:0;">CLIENTES CADASTRADOS</h2>
+            <input type="text" id="busca-cliente-lista" placeholder="🔍 Pesquisar por nome ou tel..." oninput="window.renderListaClientes(this.value)"
+                style="padding:10px 12px;background:#000;border:1px solid var(--border);color:#fff;border-radius:8px;width:100%;max-width:320px;font-family:'Outfit',sans-serif;">
+        </div>
+        <div id="lista-clientes-geral" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;"></div>
+    </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3 id="modal-titulo">Mesa</h3>
+            <button class="modal-close" onclick="fecharModal()">Fechar ❌</button>
+        </div>
+        <div class="modal-body" id="modal-body"></div>
+    </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+<div id="print-area"></div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, onSnapshot, query, orderBy, deleteDoc, doc, getDocs, updateDoc, setDoc, addDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const fb = initializeApp({
+        apiKey: "AIzaSyBBQTI4ziKYQn9OLA8cjLAwcal7gdBy8mk",
+        authDomain: "catalogo-c7700.firebaseapp.com",
+        projectId: "catalogo-c7700",
+        storageBucket: "catalogo-c7700.firebasestorage.app",
+        messagingSenderId: "668924901739",
+        appId: "1:668924901739:web:035c64ea31ac3d9da3742e"
+    });
+    const db = getFirestore(fb);
+
+    // ── CONFIG ──────────────────────────────────────
+    const TOTAL_MESAS = 10;
+    const SENHA_HASH        = "d7ec2793150059c378b7496df91e0649b09b0604e0b55635da7e13116c248f22";
+    // Mesma senha usada no caixa/estoque – mas você pode trocar para uma senha diferente
+    const SENHA_EXCLUIR_HASH = "d7ec2793150059c378b7496df91e0649b09b0604e0b55635da7e13116c248f22";
+    const LIMITE_INICIAL_PEDIDOS = 3; // cards visíveis antes de "Ver mais"
+
+    const GARCONS = [
+        { nome: 'Carlos',  icon: '👨‍🍳' },
+        { nome: 'Júlia',   icon: '👩‍🍳' },
+        { nome: 'Rafael',  icon: '👨‍🍳' },
+        { nome: 'Beatriz', icon: '👩‍🍳' },
+    ];
+
+    const CARDAPIO = {
+    'hamburgueres': [
+        { nome: 'X-Tudo', preco: 11.99, img: 'x-tudo.jpg' },
+        { nome: 'Calabresa Prime', preco: 13.99, img: 'xcala.jpg' },
+        { nome: 'Bacon Prime', preco: 15.99, img: 'x-bacon.jpg' },
+        { nome: 'Cala-Bacon Prime', preco: 17.99, img: 'xcalas.jpg' },
+        { nome: 'Imperador Duplo', preco: 19.99, img: 'xtud.jpg' }
+    ],
+    'combos': [
+        { nome: 'Super Combo', preco: 22.00, img: 'c1.jpeg' },
+        { nome: 'Combo Casal', preco: 45.00, img: 'c3.jpeg' },
+        { nome: 'Super Barca GC', preco: 60.00, img: 'c4.jpeg' }
+    ],
+    'batatas': [
+        { nome: 'Batata Simples P', preco: 10.00, img: 'batata.jpg' },
+        { nome: 'Batata Simples G', preco: 20.00, img: 'batata.jpg' },
+        { nome: 'Batata c/ Bacon e Cheddar P', preco: 13.00, img: 'batataq.jpg' },
+        { nome: 'Batata c/ Bacon e Cheddar G', preco: 23.00, img: 'batataq.jpg' }
+    ],
+    'pastéis': [
+        { nome: 'Pastel de Carne', preco: 8.00, img: 'pascar.webp' },
+        { nome: 'Pastel de Pizza', preco: 8.00, img: 'paspiz.jpg' },
+        { nome: 'Pastel de Frango', preco: 8.00, img: 'pasfr.webp' },
+        { nome: 'Pastel Frango c/ Catupiry', preco: 9.00, img: 'pasfra.webp' },
+        { nome: 'Pastel Frango c/ Queijo', preco: 9.00, img: 'pasfrq.webp' },
+        { nome: 'Pastel Calabresa c/ Queijo', preco: 9.00, img: 'pascala.jpg' },
+        { nome: 'Pastel Carne c/ Queijo', preco: 9.00, img: 'pascarq.jpg' },
+        { nome: 'Pastel de Queijo', preco: 11.00, img: 'pasq.jpg' },
+        { nome: 'Pastel Tudão', preco: 12.00, img: 'past.jpg' },
+        { nome: 'Pastel Romeu e Julieta', preco: 10.00, img: 'pasro.jpg' }
+    ],
+    'bebidas': [
+        { nome: 'Refrigerante lata 220ml', preco: 4.00, img: 'refri220.jpg' },
+        { nome: 'Refrigerante lata 350ml', preco: 5.00, img: 'refri350.jpg' },
+        { nome: 'Refrigerante 1 litro', preco: 10.00, img: 'refri1.jpg' },
+        { nome: 'Refrigerante 2 litros', preco: 15.00, img: 'refri2.jpg' },
+        { nome: 'Agua sem gás', preco: 3.00, img: 'agua.jpg' },
+        { nome: 'Agua com gás', preco: 4.00, img: 'agua.jpg' },
+        { nome: 'Suco 300ml', preco: 8.00, img: 'suc.jpg' },
+        { nome: 'Suco 500ml', preco: 10.00, img: 'suc.jpg' },
+        { nome: 'Vitamina 300ml', preco: 11.00, img: 'vit.webp' },
+        { nome: 'Vitamina 500ml', preco: 13.00, img: 'vit.webp' }
+    ],
+    'açaí': [
+        { nome: 'Açaí 300ml', preco: 11.00, img: 'acai.jpg' },
+        { nome: 'Açaí 400ml', preco: 13.00, img: 'acai.jpg' },
+        { nome: 'Açaí 500ml', preco: 15.00, img: 'acai.jpg' }
+    ]
+};
+
+    const ESTOQUE_ITENS = [
+    // Hambúrgueres
+    "X-Tudo", "Calabresa Prime", "Bacon Prime", "Cala-Bacon Prime", "Imperador Duplo", 
+    
+    // Combos
+    "Super Combo", "Combo Casal", "Super Barca GC",
+    
+    // Batatas
+    "Batata Simples P", "Batata Simples G", "Batata c/ Bacon e Cheddar P", "Batata c/ Bacon e Cheddar G",
+    
+    // Pastéis
+    "Pastel de Carne", "Pastel de Pizza", "Pastel de Frango", "Pastel Frango c/ Catupiry", 
+    "Pastel Frango c/ Queijo", "Pastel Calabresa c/ Queijo", "Pastel Carne c/ Queijo", 
+    "Pastel de Queijo", "Pastel Tudão", "Pastel Romeu e Julieta",
+    
+    // Bebidas (Geral)
+    "Refrigerante lata 220ml", "Refrigerante lata 350ml", "Refrigerante 1 litro", 
+    "Refrigerante 2 litros", "Agua sem gás", "Agua com gás", 
+    
+    // Sucos e Vitaminas
+    "Suco 300ml", "Suco 500ml", "Vitamina 300ml", "Vitamina 500ml",
+    
+    // Açaí
+    "Açaí 300ml", "Açaí 400ml", "Açaí 500ml",
+
+    // Extras (Mantive os que você citou anteriormente)
+    "Coca-Cola Lata", "Cerveja Heineken", "Cerveja Skol Lata"
+];
+
+    const TAXAS_BAIRRO = {
+        "Centro": 5.00,
+        "Vila Nova": 7.00,
+        "Jardim América": 8.50,
+        "Industrial": 6.00,
+        "Retirada no Balcão": 0.00
+    };
+
+    function normalizarPagamento(pag) {
+        if (!pag) return 'Outros';
+        const p = pag.trim().toLowerCase();
+        if (p === 'pix') return 'PIX';
+        if (p === 'dinheiro') return 'Dinheiro';
+        if (p === 'cartão' || p === 'cartao' || p === 'credito' || p === 'crédito' || p === 'débito' || p === 'debito') return 'Cartão';
+        return pag;
+    }
+
+    const R = v => (typeof v === 'number' ? v : 0).toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
+
+    function parseTotal(v) {
+        if (typeof v === 'number') return v;
+        if (typeof v === 'string') {
+            const s = v.includes(',') ? v.replace(/[^\d,]/g,'').replace(',','.') : v.replace(/[^\d.]/g,'');
+            return parseFloat(s) || 0;
+        }
+        return 0;
+    }
+
+    async function hashSenha(s) {
+        const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+        return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    }
+
+    let toastTimer;
+    window.toast = (msg) => {
+        const el = document.getElementById('toast');
+        el.textContent = '✅ ' + msg;
+        el.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => el.classList.remove('show'), 2000);
+    };
+
+    // ── STATE ────────────────────────────────────────
+    let pedidos     = [];
+    let mesasFech   = [];
+    let mesasAtivas = {};
+    let mesaAtual   = null;
+    let carrinho    = [];
+    let garcomAtual = '';
+    let pagAtual    = '';
+    let abasLiberadas = { 'aba-estoque': false, 'aba-caixa': false };
+
+    // Controla quais seções estão expandidas ("ver mais")
+    let verMaisDelivery = false;
+    let verMaisMesas    = false;
+
+    // Controla quais cards estão com "Saiu para entrega" ativado
+    let pedidosSaiu = new Set();
+
+    // ── TABS ─────────────────────────────────────────
+    window.switchTab = (id, el) => {
+        document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        const target = document.getElementById(id);
+        if (target) target.classList.add('active');
+        if (el) el.classList.add('active');
+        document.getElementById('menu-extras').classList.remove('show');
+        if (id === 'aba-pdv') window.renderPDVConteudo();
+        if (id === 'aba-clientes') window.renderListaClientes();
+    };
+
+    window.switchTabProtegida = async (id, el) => {
+        if (abasLiberadas[id]) { switchTab(id, el); return; }
+        const { value: senha } = await Swal.fire({
+            title: '🔒 Acesso Restrito', input: 'password',
+            inputLabel: 'Senha de acesso', inputPlaceholder: 'Digite a senha...',
+            confirmButtonText: 'Entrar', confirmButtonColor: '#e8a930',
+            background: '#111', color: '#fff',
+        });
+        if (!senha) return;
+        const h = await hashSenha(senha);
+        if (h === SENHA_HASH) {
+            abasLiberadas[id] = true;
+            switchTab(id, el);
+            if (id === 'aba-estoque') renderEstoqueConteudo();
+            if (id === 'aba-caixa')   renderCaixaConteudo();
+        } else {
+            Swal.fire({ icon:'error', title:'Senha incorreta!', background:'#111', color:'#fff', timer:1500, showConfirmButton:false });
+        }
+    };
+
+    function renderEstoqueConteudo() {
+        document.getElementById('estoque-conteudo').innerHTML = `
+            <h2 style="font-family:'Bebas Neue',sans-serif;letter-spacing:3px;color:var(--gold);margin-top:0;">DISPONIBILIDADE</h2>
+            <p style="opacity:0.5;font-size:0.88rem;margin-bottom:18px;">Itens desativados aparecerão como ESGOTADO no site.</p>
+            <div class="estoque-grid" id="lista-estoque"></div>`;
+        iniciarEstoque();
+    }
+
+    function renderCaixaConteudo() {
+        document.getElementById('caixa-conteudo').innerHTML = `
+            <div class="caixa-container">
+                <div style="background:var(--card);padding:20px;border-radius:15px;border:1px solid var(--border);">
+                    <h3 style="font-family:'Bebas Neue',sans-serif;letter-spacing:3px;color:var(--gold);margin-top:0;font-size:1.4rem;">RELATÓRIO DO DIA</h3>
+                    <div id="caixa-detalhe"></div>
+                </div>
+                <div class="caixa-sidebar">
+                    <p style="margin:0;opacity:0.55;letter-spacing:2px;font-size:0.75rem;font-weight:600;">FATURAMENTO TOTAL</p>
+                    <div class="valor-total" id="c-total">R$ 0,00</div>
+                    <hr style="opacity:0.08;margin:16px 0;">
+                    <div id="c-metodos"></div>
+                    <div style="margin-top:22px;display:flex;flex-direction:column;gap:10px;">
+                        <button onclick="gerarPDF()" style="background:#27ae60;color:white;border:none;padding:14px;border-radius:10px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;"><i class="fas fa-file-pdf"></i> BAIXAR RELATÓRIO</button>
+                        <button onclick="zerarDia()" style="background:#c0392b;color:white;border:none;padding:14px;border-radius:10px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;"><i class="fas fa-trash"></i> ZERAR DIA</button>
+                    </div>
+                </div>
+            </div>`;
+        renderCaixa();
+    }
+
+    // ── FIREBASE LISTENERS ───────────────────────────
+    onSnapshot(query(collection(db,'pedidos'), orderBy('data','desc')), snap => {
+        pedidos = snap.docs.map(d => ({ id:d.id, tipo:'delivery', ...d.data() }));
+        renderPedidos();
+        renderCaixa();
+    });
+
+    onSnapshot(collection(db,'mesas'), snap => {
+        mesasAtivas = {};
+        snap.docs.forEach(d => { mesasAtivas[d.id] = { id:d.id, ...d.data() }; });
+        renderMesasGrid();
+        renderPedidos(); // atualiza mesas no painel de pedidos também
+    });
+
+    onSnapshot(query(collection(db,'mesas_historico'), orderBy('fechadoEm','desc')), snap => {
+        mesasFech = snap.docs.map(d => ({ id:d.id, tipo:'mesa', ...d.data() }));
+        renderPedidos();
+        renderCaixa();
+    });
+
+    // ── SENHA PARA EXCLUIR ───────────────────────────
+    async function confirmarSenhaExcluir() {
+        const { value: senha } = await Swal.fire({
+            title: '🔒 Confirmar exclusão',
+            input: 'password',
+            inputLabel: 'Digite a senha para excluir',
+            inputPlaceholder: '••••••',
+            confirmButtonText: 'Confirmar',
+            confirmButtonColor: '#e74c3c',
+            showCancelButton: true,
+            cancelButtonText: 'Cancelar',
+            background: '#111', color: '#fff',
+        });
+        if (!senha) return false;
+        const h = await hashSenha(senha);
+        if (h === SENHA_EXCLUIR_HASH) return true;
+        Swal.fire({ icon:'error', title:'Senha incorreta!', background:'#111', color:'#fff', timer:1500, showConfirmButton:false });
+        return false;
+    }
+
+   // ── RENDER PEDIDOS ATUALIZADO (Bairro + Sabores/Obs de Itens) ───────────────────────────────
+function renderPedidos() {
+    const el = document.getElementById('lista-pedidos');
+    if (!el) return;
+    let html = '';
+
+    // ── MESAS ABERTAS (ocupadas) ──
+    const mesasOcupadas = Object.values(mesasAtivas);
+    if (mesasOcupadas.length) {
+        html += `<div class="section-label">🍽️ Mesas Abertas <span class="section-label-count">${mesasOcupadas.length}</span></div>`;
+        const visiveis = verMaisMesas ? mesasOcupadas : mesasOcupadas.slice(0, LIMITE_INICIAL_PEDIDOS);
+        visiveis.forEach(mesa => {
+            const val = mesa.itens.reduce((s, x) => s + x.preco * x.qty, 0);
+            const obsGeralHtml = mesa.obs
+                ? `<div class="obs-badge"><i class="fas fa-sticky-note"></i><span>${mesa.obs}</span></div>`
+                : '';
+            html += `
+            <div class="pedido-card" style="border-top-color:var(--orange);">
+                <span class="tag" style="background:rgba(230,126,34,0.12);color:var(--orange);border:1px solid rgba(230,126,34,0.35);">🍽️ MESA ${mesa.numero} — ABERTA</span>
+                <div><strong>🧑‍🍳 ${mesa.garcom}</strong></div>
+                <div style="font-size:0.76rem;opacity:0.45;margin-bottom:8px;">${mesa.itens.reduce((s, x) => s + x.qty, 0)} itens no pedido</div>
+                <div class="lista-itens-card">
+                    ${mesa.itens.map(i => `
+                        <div class="item-linha-wrapper" style="margin-bottom: 5px;">
+                            <div class="item-linha"><span>${i.qty}x ${i.nome}</span><b>${R(i.preco * i.qty)}</b></div>
+                            ${i.obs ? `<div style="font-size:0.72rem; color:var(--gold); margin-left:15px; opacity:0.8;">↳ ${i.obs.toUpperCase()}</div>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+                ${obsGeralHtml}
+                <div style="font-size:1.18rem;color:var(--orange);font-weight:700;">${R(val)}</div>
+                <div style="display:flex;gap:8px;margin-top:12px;">
+                    <button onclick="abrirMesa('${mesa.id}',${mesa.numero})" style="flex:1;background:rgba(232,169,48,0.12);color:var(--gold);border:1px solid rgba(232,169,48,0.3);padding:9px;border-radius:8px;cursor:pointer;font-weight:700;font-family:'Outfit',sans-serif;font-size:0.78rem;">
+                        <i class="fas fa-plus"></i> PEDIDO
+                    </button>
+                    <button onclick="abrirFechamentoDireto('${mesa.id}',${mesa.numero})" style="flex:1;background:rgba(46,204,113,0.1);color:var(--green);border:1px solid rgba(46,204,113,0.3);padding:9px;border-radius:8px;cursor:pointer;font-weight:700;font-family:'Outfit',sans-serif;font-size:0.78rem;">
+                        <i class="fas fa-check-circle"></i> FECHAR
+                    </button>
+                </div>
+            </div>`;
+        });
+        if (mesasOcupadas.length > LIMITE_INICIAL_PEDIDOS) {
+            html += `<button class="btn-ver-mais" onclick="toggleVerMais('mesas')">
+                <i class="fas fa-${verMaisMesas ? 'chevron-up' : 'chevron-down'}"></i>
+                ${verMaisMesas ? 'Ver menos' : `Ver mais (${mesasOcupadas.length - LIMITE_INICIAL_PEDIDOS} ocultos)`}
+            </button>`;
+        }
+    }
+
+    // ── DELIVERY & BALCÃO ──
+    if (pedidos.length) {
+        html += `<div class="section-label">🛵 Delivery & Balcão <span class="section-label-count">${pedidos.length}</span></div>`;
+        const visiveisDel = verMaisDelivery ? pedidos : pedidos.slice(0, LIMITE_INICIAL_PEDIDOS);
+        visiveisDel.forEach(p => {
+            const totalNum = parseTotal(p.total);
+            const saiu = pedidosSaiu.has(p.id);
+
+            // Detecção de Bairro para tag e taxa
+            let bairroTag = p.bairro || '';
+            if (p.origem === 'PDV' && !bairroTag) {
+                const parts = (p.endereco || '').split(' - ');
+                bairroTag = parts.length > 1 ? parts[parts.length - 1].trim() : '';
+            }
+
+            let taxaHtml = '';
+            const tv = TAXAS_BAIRRO[bairroTag];
+            if (bairroTag === 'Retirada' || p.endereco === 'Retirada') {
+                taxaHtml = `<div class="taxa-entrega-row" style="color:var(--green);"><i class="fas fa-store" style="font-size:0.8rem;"></i><span>Retirada no balcão</span></div>`;
+            } else if (bairroTag && tv !== undefined) {
+                taxaHtml = `<div class="taxa-entrega-row"><i class="fas fa-motorcycle" style="font-size:0.8rem;"></i><span>Entrega — ${bairroTag}: <b>${R(tv)}</b></span></div>`;
+            }
+
+            const obsGeralHtml = p.obs
+                ? `<div class="obs-badge"><i class="fas fa-sticky-note"></i><span>${p.obs}</span></div>`
+                : '';
+
+            const dadosBT = JSON.stringify({
+                cliente: p.cliente,
+                endereco: p.endereco || '',
+                bairro: bairroTag,
+                pagamento: p.pagamento,
+                itens: p.itens,
+                total: totalNum
+            });
+
+            html += `
+            <div class="pedido-card${saiu ? ' saiu-entrega' : ''}" id="card-${p.id}">
+                <button class="btn-del" onclick="delPedido('${p.id}')">×</button>
+                <div style="display:flex; gap:5px; flex-wrap:wrap; margin-bottom:8px;">
+                    <span class="tag tag-delivery">${p.origem === 'PDV' ? '🏪 BALCÃO/PDV' : '🛵 DELIVERY'}</span>
+                    ${bairroTag && bairroTag !== 'Retirada' ? `<span class="tag" style="background:rgba(232,169,48,0.1); color:var(--gold); border:1px solid rgba(232,169,48,0.3);">📍 ${bairroTag.toUpperCase()}</span>` : ''}
+                </div>
+                ${saiu ? '<div class="badge-saiu"><i class="fas fa-motorcycle"></i> SAIU PARA ENTREGA</div>' : ''}
+                <div style="margin-top:6px;"><strong>${p.cliente.toUpperCase()}</strong></div>
+                <div style="font-size:0.78rem;opacity:0.5;margin-bottom:8px;">Pagamento: ${normalizarPagamento(p.pagamento)}</div>
+                <div class="lista-itens-card">
+                    ${p.itens.map(i => {
+                        const vUnit = parseFloat(i.preco) || parseFloat(i.precoTotal) || 0;
+                        const qtd = parseInt(i.qty) || 1;
+                        return `
+                        <div class="item-linha-wrapper" style="margin-bottom: 5px;">
+                            <div class="item-linha"><span>${qtd}x ${i.nome}</span><b>${R(vUnit * qtd)}</b></div>
+                            ${i.obs ? `<div style="font-size:0.72rem; color:var(--blue-light); margin-left:15px; opacity:0.8;">↳ ${i.obs}</div>` : ''}
+                        </div>`;
+                    }).join('')}
+                </div>
+                ${obsGeralHtml}
+                <div style="font-size:0.78rem;margin-bottom:5px;opacity:0.6;"><i class="fas fa-map-marker-alt"></i> ${p.endereco || 'Não informado'}</div>
+                ${taxaHtml}
+                <div style="font-size:1.18rem;color:var(--gold);font-weight:700;">${R(totalNum)}</div>
+                <div class="status-actions">
+                    <button class="btn-wa bg-blue" onclick="waStatus('${p.telefone || ''}','recebido','${p.cliente}')">RECEBIDO</button>
+                    <button class="btn-wa bg-green${saiu ? ' btn-wa-ativo' : ''}" onclick="marcarSaiu('${p.id}','${p.telefone || ''}','${p.cliente}')">
+                        ${saiu ? '✅ SAIU' : 'SAIU ENTREGA'}
+                    </button>
+                </div>
+             <button class="btn-imprimir-bt" onclick='reimprimirNota(${JSON.stringify(dadosBT)})'>
+    <i class="fas fa-print"></i> REIMPRIMIR NOTA
+</button>
+</div>`;
+        });
+        if (pedidos.length > LIMITE_INICIAL_PEDIDOS) {
+            html += `<button class="btn-ver-mais" onclick="toggleVerMais('delivery')">
+                <i class="fas fa-${verMaisDelivery ? 'chevron-up' : 'chevron-down'}"></i>
+                ${verMaisDelivery ? 'Ver menos' : `Ver mais (${pedidos.length - LIMITE_INICIAL_PEDIDOS} ocultos)`}
+            </button>`;
+        }
+    }
+
+    // ── MESAS FECHADAS ──
+    if (mesasFech.length) {
+        html += `<div class="section-label">✅ Mesas Fechadas <span class="section-label-count">${mesasFech.length}</span></div>`;
+        mesasFech.forEach(m => {
+            const val = parseFloat(m.total) || 0;
+            const hora = m.fechadoEm?.toDate
+                ? new Date(m.fechadoEm.toDate()).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+                : '--:--';
+
+            const obsGeralHtml = m.obs
+                ? `<div class="obs-badge"><i class="fas fa-sticky-note"></i><span>${m.obs}</span></div>`
+                : '';
+
+            const dadosMesaBT = JSON.stringify({
+                numero: m.numero,
+                garcom: m.garcom,
+                itens: m.itens,
+                pagamento: m.pagamento,
+                obs: m.obs || '',
+                total: val
+            });
+
+            html += `
+            <div class="pedido-card mesa-card-closed">
+                <button class="btn-del" onclick="delMesaFech('${m.id}',${val})">×</button>
+                <span class="tag tag-mesa">🍽️ MESA ${m.numero}</span>
+                <div><strong>🧑‍🍳 ${m.garcom}</strong></div>
+                <div style="font-size:0.76rem;opacity:0.45;margin-bottom:8px;">Fechado às ${hora} · ${normalizarPagamento(m.pagamento)}</div>
+                <div class="lista-itens-card">
+                    ${m.itens.map(i => {
+                        const vUnit = parseFloat(i.preco) || 0;
+                        const q = parseInt(i.qty) || 1;
+                        return `
+                        <div class="item-linha-wrapper" style="margin-bottom: 5px;">
+                            <div class="item-linha"><span>${q}x ${i.nome}</span><b>${R(vUnit * q)}</b></div>
+                            ${i.obs ? `<div style="font-size:0.72rem; color:var(--green); margin-left:15px; opacity:0.8;">↳ ${i.obs.toUpperCase()}</div>` : ''}
+                        </div>`;
+                    }).join('')}
+                </div>
+                ${obsGeralHtml}
+                <div style="font-size:1.18rem;color:var(--green);font-weight:700;">${R(val)}</div>
+                <button class="btn-imprimir-bt" onclick='imprimirMesaBT(${JSON.stringify(dadosMesaBT)})'>
+                    <i class="fas fa-bluetooth-b"></i> REIMPRIMIR FECHAMENTO
+                </button>
+            </div>`;
+        });
+    }
+
+    if (!html) html = '<p style="opacity:0.3;text-align:center;margin-top:60px;grid-column:1/-1;font-size:0.9rem;">Nenhum pedido no momento.</p>';
+    el.innerHTML = html;
+}
+
+    // ── VER MAIS / VER MENOS ─────────────────────────
+    window.toggleVerMais = (tipo) => {
+        if (tipo === 'delivery') verMaisDelivery = !verMaisDelivery;
+        if (tipo === 'mesas')    verMaisMesas    = !verMaisMesas;
+        renderPedidos();
+    };
+
+    // ── MARCAR SAIU PARA ENTREGA ─────────────────────
+   window.marcarSaiu = async (pedidoId, tel, cliente) => {
+    if (pedidosSaiu.has(pedidoId)) {
+        pedidosSaiu.delete(pedidoId);
+        renderPedidos();
+        return;
+    }
+    pedidosSaiu.add(pedidoId);
+    renderPedidos();
+    const msg = `Boa Notícia! 🎉 Seu pedido já saiu para entrega 🛵 Agradecemos a preferência e volte sempre! GC BURGUER`;
+    window.open(`https://wa.me/55${tel.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`);
+    window.toast('Pedido marcado como saiu!');
+};
+window.reimprimirNota = async (dadosJson) => {
+    try {
+        const p = typeof dadosJson === 'string' ? JSON.parse(dadosJson) : dadosJson;
+        const docRef = await addDoc(collection(db, 'reimpressoes'), {
+            cliente: p.cliente,
+            endereco: p.endereco || '',
+            bairro: p.bairro || '',
+            pagamento: p.pagamento || '',
+            itens: p.itens || [],
+            total: p.total || 0,
+            data: new Date(),
+            tipo: 'FINALIZADO'
+        });
+        // Apaga após 10 segundos (tempo suficiente pro servidor capturar)
+        setTimeout(async () => {
+            try { await deleteDoc(docRef); } catch(e) {}
+        }, 10000);
+        window.toast('Nota enviada para impressão!');
+    } catch(e) {
+        Swal.fire({ icon:'error', title:'Erro!', text: e.message, background:'#111', color:'#fff' });
+    }
+};
+    // ── CAIXA ────────────────────────────────────────
+    function renderCaixa() {
+        if (!abasLiberadas['aba-caixa']) return;
+        let tPix=0, tDin=0, tCrd=0;
+        pedidos.forEach(p => {
+            const v = parseTotal(p.total);
+            const pg = normalizarPagamento(p.pagamento);
+            if(pg==='PIX') tPix+=v; else if(pg==='Dinheiro') tDin+=v; else tCrd+=v;
+        });
+        mesasFech.forEach(m => {
+            const v = parseFloat(m.total)||0;
+            const pg = normalizarPagamento(m.pagamento);
+            if(pg==='PIX') tPix+=v; else if(pg==='Dinheiro') tDin+=v; else tCrd+=v;
+        });
+        const tot = tPix+tDin+tCrd;
+        const cel = document.getElementById('c-total');
+        const met = document.getElementById('c-metodos');
+        if(cel) cel.textContent = R(tot);
+        if(met) met.innerHTML = `
+            <div style="display:flex;justify-content:space-between;margin-bottom:10px;font-size:0.88rem;"><span style="opacity:0.6;">PIX</span><b>${R(tPix)}</b></div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:10px;font-size:0.88rem;"><span style="opacity:0.6;">Dinheiro</span><b>${R(tDin)}</b></div>
+            <div style="display:flex;justify-content:space-between;font-size:0.88rem;"><span style="opacity:0.6;">Cartão</span><b>${R(tCrd)}</b></div>`;
+    }
+
+    window.waStatus = (tel,tipo,cliente) => {
+        const msg = tipo==='recebido'
+            ? `Olá ${cliente}! Recebemos seu pedido. Já estamos preparando! 🔥`
+            : `Olá ${cliente}! Seu pedido saiu para entrega! 🛵`;
+        window.open(`https://wa.me/55${tel.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`);
+    };
+
+    // ── EXCLUIR COM SENHA ────────────────────────────
+    window.delPedido = async id => {
+        const ok = await confirmarSenhaExcluir();
+        if (!ok) return;
+        await deleteDoc(doc(db,'pedidos',id));
+        toast('Pedido excluído!');
+    };
+
+    window.delMesaFech = async (id,val) => {
+        const ok = await confirmarSenhaExcluir();
+        if (!ok) return;
+        await deleteDoc(doc(db,'mesas_historico',id));
+        toast('Mesa removida do caixa!');
+    };
+
+    // ── MESAS GRID ───────────────────────────────────
+    function renderMesasGrid() {
+        const g = document.getElementById('mesas-grid');
+        if (!g) return;
+        g.innerHTML = '';
+        let nOcp=0, nLiv=0;
+
+        for (let i=1; i<=TOTAL_MESAS; i++) {
+            const id   = `mesa_${i}`;
+            const mesa = mesasAtivas[id];
+            const oc   = !!mesa;
+            oc ? nOcp++ : nLiv++;
+
+            if (oc) {
+                const val  = mesa.itens.reduce((s,x) => s + x.preco*x.qty, 0);
+                const nIt  = mesa.itens.reduce((s,x) => s + x.qty, 0);
+                const itensHtml = mesa.itens.length > 0
+                    ? mesa.itens.slice(0,4).map(it => `
+                        <div class="mesa-item-row">
+                            <span class="mesa-item-nome">${it.qty}x ${it.nome}</span>
+                            <span class="mesa-item-preco">${R(it.preco*it.qty)}</span>
+                        </div>`).join('') + (mesa.itens.length>4?`<div style="font-size:0.72rem;opacity:0.4;padding-top:4px;">+${mesa.itens.length-4} itens...</div>`:'')
+                    : '<div style="font-size:0.78rem;opacity:0.3;text-align:center;padding:6px 0;">Sem itens ainda</div>';
+
+                const jaEnviado = mesa.enviadoCozinhaEm && mesa.ultimaAtualizacao &&
+                    (mesa.enviadoCozinhaEm?.seconds||0) >= (mesa.ultimaAtualizacao?.seconds||0);
+
+                const obsHtml = mesa.obs
+                    ? `<div style="font-size:0.75rem;color:rgba(255,255,255,0.45);margin-bottom:10px;display:flex;align-items:flex-start;gap:5px;"><i class="fas fa-sticky-note" style="color:var(--gold);margin-top:2px;font-size:0.7rem;flex-shrink:0;"></i><span>${mesa.obs}</span></div>`
+                    : '';
+
+                g.innerHTML += `
+                <div class="mesa-card ocupada">
+                    <div class="mesa-card-top">
+                        <div class="mesa-num">MESA ${i}</div>
+                        <div class="mesa-status-badge badge-ocupada">OCUPADA</div>
+                    </div>
+                    <div class="mesa-garcom-row">
+                        <i class="fas fa-user-tie" style="font-size:0.75rem;"></i>
+                        <span>${mesa.garcom}</span>
+                        <span style="margin-left:auto;font-size:0.7rem;color:rgba(255,255,255,0.3);">${nIt} itens</span>
+                    </div>
+                    <div class="mesa-itens-lista">${itensHtml}</div>
+                    ${obsHtml}
+                    <div class="mesa-total-row">
+                        <div class="mesa-total-label">Total parcial</div>
+                        <div class="mesa-total-val">${R(val)}</div>
+                    </div>
+                    <div class="mesa-actions">
+                        <button class="mesa-act-btn btn-pedido" onclick="abrirMesa('${id}',${i});event.stopPropagation();">
+                            <i class="fas fa-plus"></i> PEDIDO
+                        </button>
+                        <button class="mesa-act-btn ${jaEnviado?'btn-cozinha-ok':'btn-cozinha'}" onclick="enviarCozinhaDireto('${id}');event.stopPropagation();">
+                            <i class="fas fa-${jaEnviado?'check':'fire'}"></i> ${jaEnviado?'ENVIADO':'COZINHA'}
+                        </button>
+                        <button class="mesa-act-btn btn-fechar" style="grid-column:1/-1;" onclick="abrirFechamentoDireto('${id}',${i});event.stopPropagation();">
+                            <i class="fas fa-check-circle"></i> FECHAR CONTA
+                        </button>
+                    </div>
+                </div>`;
+            } else {
+                g.innerHTML += `
+                <div class="mesa-card livre">
+                    <div class="mesa-card-top">
+                        <div class="mesa-num">MESA ${i}</div>
+                        <div class="mesa-status-badge badge-livre">LIVRE</div>
+                    </div>
+                    <div class="mesa-livre-inner">
+                        <div class="mesa-livre-icon">🪑</div>
+                        <div class="mesa-livre-text">Disponível</div>
+                    </div>
+                    <button class="btn-abrir-mesa" onclick="abrirMesa('${id}',${i})">
+                        <i class="fas fa-plus"></i> ABRIR MESA
+                    </button>
+                </div>`;
+            }
+        }
+
+        const so = document.getElementById('stat-ocp');
+        const sl = document.getElementById('stat-liv');
+        if(so) so.textContent = `${nOcp} ocupada${nOcp!==1?'s':''}`;
+        if(sl) sl.textContent = `${nLiv} livre${nLiv!==1?'s':''}`;
+    }
+
+    window.enviarCozinhaDireto = async (mesaId) => {
+        const mesa = mesasAtivas[mesaId];
+        if (!mesa || !mesa.itens.length) { Swal.fire({ icon:'warning', title:'Mesa vazia!', text:'Adicione itens primeiro.', background:'#111', color:'#fff' }); return; }
+        const jaEnviado = mesa.enviadoCozinhaEm && mesa.ultimaAtualizacao &&
+            mesa.enviadoCozinhaEm.seconds >= mesa.ultimaAtualizacao.seconds;
+        if (jaEnviado) { Swal.fire({ icon:'info', title:'Já enviado!', text:'Nenhum item novo desde o último envio.', background:'#111', color:'#fff', timer:2000, showConfirmButton:false }); return; }
+        try {
+            await updateDoc(doc(db,'mesas',mesaId), { ultimaAtualizacao: new Date(), enviadoCozinhaEm: new Date() });
+            Swal.fire({ icon:'success', title:'Enviado!', text:`Mesa ${mesa.numero} enviada para a cozinha.`, timer:1500, showConfirmButton:false, background:'#111', color:'#fff' });
+        } catch(e) { Swal.fire({ icon:'error', title:'Erro!', text:e.message, background:'#111', color:'#fff' }); }
+    };
+
+    window.abrirFechamentoDireto = async (mesaId, numero) => {
+        mesaAtual = { mesaId, numero };
+        pagAtual = '';
+        const mesa = mesasAtivas[mesaId];
+        if (!mesa || !mesa.itens.length) { Swal.fire({ icon:'warning', title:'Mesa vazia!', background:'#111', color:'#fff' }); return; }
+        garcomAtual = mesa.garcom;
+        carrinho    = mesa.itens.map(x=>({...x}));
+        document.getElementById('modal-titulo').textContent = `🧾 Fechar Mesa ${numero}`;
+        document.getElementById('modal').classList.add('open');
+        renderFechamento();
+    };
+
+    function renderFechamento() {
+        const mesa = mesasAtivas[mesaAtual?.mesaId];
+        if (!mesa) return;
+        const tot = mesa.itens.reduce((s,i) => s + (i.preco * i.qty), 0);
+        pagAtual = '';
+        const obsHtml = mesa.obs
+            ? `<div class="obs-badge" style="margin-bottom:10px;"><i class="fas fa-sticky-note"></i><span>${mesa.obs}</span></div>`
+            : '';
+        document.getElementById('modal-body').innerHTML = `
+            <div style="text-align:center;margin-bottom:14px;">
+                <div style="font-size:1.5rem;">🧾</div>
+                <div style="color:var(--gold);font-weight:700;margin-top:4px;font-family:'Bebas Neue',sans-serif;letter-spacing:2px;font-size:1.2rem;">Mesa ${mesa.numero} — ${mesa.garcom}</div>
+            </div>
+            ${obsHtml}
+            ${mesa.itens.map(i => `
+                <div class="ticket-item">
+                    <span>${i.qty}x ${i.nome}</span>
+                    <span>${R(i.preco * i.qty)}</span>
+                </div>`).join('')}
+            <div class="ticket-total"><span>TOTAL</span><span>${R(tot)}</span></div>
+            <p style="margin:15px 0 8px;font-size:0.82rem;opacity:0.5;">Forma de pagamento:</p>
+            <div class="pag-btns">
+                <button class="pag-btn" onclick="selPag('PIX',this)">💠 PIX</button>
+                <button class="pag-btn" onclick="selPag('Dinheiro',this)">💵 Dinheiro</button>
+                <button class="pag-btn" onclick="selPag('Cartão',this)">💳 Cartão</button>
+            </div>
+            <div class="act-row" style="margin-top:15px;">
+                <button style="background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.6);border:1px solid var(--border);" onclick="fecharModal()">← Cancelar</button>
+                <button style="background:#27ae60;color:white;" onclick="confirmarFechamento(${tot})">✅ CONFIRMAR</button>
+            </div>`;
+    }
+
+    window.abrirMesa = (mesaId, numero) => {
+        mesaAtual   = { mesaId, numero };
+        carrinho    = [];
+        garcomAtual = '';
+        pagAtual    = '';
+        document.getElementById('modal-titulo').textContent = `🍽️ Mesa ${numero}`;
+        const mesa = mesasAtivas[mesaId];
+        if (!mesa) { renderGarcons(numero); }
+        else { garcomAtual = mesa.garcom; carrinho = mesa.itens.map(x=>({...x})); renderCardapio(); }
+        document.getElementById('modal').classList.add('open');
+    };
+
+    window.fecharModal = () => {
+        document.getElementById('modal').classList.remove('open');
+        mesaAtual = null; carrinho = [];
+    };
+
+    function renderGarcons(numero) {
+        document.getElementById('modal-body').innerHTML = `
+            <p style="opacity:0.5;margin-bottom:14px;font-size:0.86rem;">Quem está atendendo a <b>Mesa ${numero}</b>?</p>
+            <div class="garcons-grid">
+                ${GARCONS.map(g=>`
+                    <button class="garcom-btn" onclick="escolherGarcom('${g.nome}')">
+                        <span class="garcom-icon">${g.icon}</span>${g.nome}
+                    </button>`).join('')}
+            </div>`;
+    }
+
+    window.escolherGarcom = nome => { garcomAtual = nome; carrinho = []; renderCardapio(); };
+
+    let carrinhoSnapshot = [];
+
+    function renderCardapio() {
+        const mesa = mesasAtivas[mesaAtual?.mesaId];
+        carrinhoSnapshot = mesa ? JSON.parse(JSON.stringify(mesa.itens)) : [];
+
+        document.getElementById('modal-body').innerHTML = `
+            <div style="font-size:0.8rem;opacity:0.45;margin-bottom:13px;">
+                Garçom: <b style="color:var(--gold);opacity:1;">${garcomAtual}</b>
+            </div>
+            ${Object.entries(CARDAPIO).map(([cat,itens])=>`
+                <div class="cat-bloco">
+                    <div class="cat-header" onclick="toggleCat(this)">
+                        <span class="cat-name">${cat}</span>
+                        <i class="fas fa-chevron-down chev"></i>
+                    </div>
+                    <div class="cat-itens">
+                        ${itens.map(item=>`
+                            <button class="item-btn" onclick="addItem('${item.nome}',${item.preco})">
+                                <span class="i-nome">${item.nome}</span>
+                                <span class="i-preco">${R(item.preco)}</span>
+                            </button>`).join('')}
+                    </div>
+                </div>`).join('')}
+            <div class="cart-box">
+                <div class="cart-title"><i class="fas fa-shopping-cart"></i> Carrinho</div>
+                <div id="cart-itens">${renderCartItens()}</div>
+                <textarea class="obs-inp" id="obs" placeholder="📝 Observação (ex: sem cebola, ponto mal passado...)" rows="2">${mesa?.obs||''}</textarea>
+                <div class="cart-total"><span>Total:</span><span id="cart-tot">${R(totalCarrinho())}</span></div>
+            </div>
+            <div style="margin-top:13px;">
+                <button style="width:100%;background:rgba(232,169,48,0.12);color:var(--gold);border:1px solid rgba(232,169,48,0.3);padding:13px;border-radius:10px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;font-size:0.85rem;" onclick="salvarPedido()">
+                    💾 SALVAR PEDIDO
+                </button>
+            </div>
+            ${mesa?`
+            <div style="margin-top:8px;">
+                <button onclick="cancelarMesa()" style="width:100%;background:rgba(231,76,60,0.08);color:#e74c3c;border:1px solid rgba(231,76,60,0.25);padding:11px;border-radius:10px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;font-size:0.8rem;">🗑️ CANCELAR MESA</button>
+            </div>`:''}`;
+    }
+
+    window.toggleCat = header => { header.classList.toggle('open'); header.nextElementSibling.classList.toggle('open'); };
+
+    function renderCartItens() {
+        if (!carrinho.length) return '<p style="opacity:0.3;font-size:0.82rem;text-align:center;padding:8px 0;">Nenhum item ainda.</p>';
+        return carrinho.map((it,i)=>`
+            <div class="cart-item">
+                <span style="flex:1;margin-right:6px;">${it.nome}</span>
+                <div class="qtd-ctrl">
+                    <button class="qtd-btn" onclick="chgQtd(${i},-1)">−</button>
+                    <span>${it.qty}x</span>
+                    <button class="qtd-btn" onclick="chgQtd(${i},1)">+</button>
+                    <span style="color:var(--gold);min-width:55px;text-align:right;">${R(it.preco*it.qty)}</span>
+                </div>
+            </div>`).join('');
+    }
+
+    const totalCarrinho = () => carrinho.reduce((s,i) => s+i.preco*i.qty, 0);
+
+    function refreshCart() {
+        const el = document.getElementById('cart-itens');
+        if (el) el.innerHTML = renderCartItens();
+        const tv = document.getElementById('cart-tot');
+        if (tv) tv.textContent = R(totalCarrinho());
+    }
+
+    window.addItem = (nome, preco) => {
+        const ex = carrinho.find(i=>i.nome===nome);
+        if (ex) ex.qty++; else carrinho.push({ nome, preco, qty:1 });
+        refreshCart();
+        toast(`${nome} adicionado!`);
+    };
+
+    window.chgQtd = (idx, d) => {
+        carrinho[idx].qty += d;
+        if (carrinho[idx].qty <= 0) carrinho.splice(idx,1);
+        refreshCart();
+    };
+
+    function temItensNovos() {
+        if (carrinho.length === 0) return false;
+        const snapMap = {};
+        carrinhoSnapshot.forEach(i => { snapMap[i.nome] = (snapMap[i.nome]||0) + i.qty; });
+        for (const it of carrinho) { if (it.qty > (snapMap[it.nome]||0)) return true; }
+        return false;
+    }
+
+    window.salvarPedido = async () => {
+        if (!mesaAtual?.mesaId) return;
+        if (!carrinho.length) { Swal.fire({ icon:'warning', title:'Carrinho vazio!', text:'Adicione itens antes de salvar.', background:'#111', color:'#fff' }); return; }
+        try {
+            const mesaRef = doc(db,'mesas',mesaAtual.mesaId);
+            const novos   = temItensNovos();
+            const obs     = document.getElementById('obs')?.value || '';
+            const dados = {
+                itens: carrinho, garcom: garcomAtual||'Balcão',
+                numero: mesaAtual.numero, obs,
+                ...(novos ? { ultimaAtualizacao: new Date(), enviadoCozinhaEm: new Date() } : {})
+            };
+            if (mesasAtivas[mesaAtual.mesaId]) await updateDoc(mesaRef, dados);
+            else await setDoc(mesaRef, dados);
+            const msg = novos ? `Pedido salvo e enviado para a cozinha! 🍳` : `Pedido salvo! Nenhum item novo — cozinha não notificada.`;
+            Swal.fire({ icon:'success', title:'Salvo!', text:msg, timer:2000, showConfirmButton:false, background:'#111', color:'#fff' });
+            fecharModal();
+        } catch(e) { Swal.fire({ icon:'error', title:'Erro!', text:e.message, background:'#111', color:'#fff' }); }
+    };
+
+    window.selPag = (tipo, el) => {
+        pagAtual = tipo;
+        document.querySelectorAll('.pag-btn').forEach(b=>b.classList.remove('sel'));
+        el.classList.add('sel');
+    };
+
+    window.confirmarFechamento = async tot => {
+        if (!pagAtual) { Swal.fire({ icon:'warning', title:'Selecione o pagamento!', background:'#111', color:'#fff' }); return; }
+        const mesa = mesasAtivas[mesaAtual.mesaId];
+        await addDoc(collection(db,'mesas_historico'), {
+            numero: mesa.numero, garcom: mesa.garcom, itens: mesa.itens,
+            obs: mesa.obs||'', pagamento: pagAtual, total: tot, fechadoEm: new Date()
+        });
+        await deleteDoc(doc(db,'mesas',mesaAtual.mesaId));
+        fecharModal();
+        Swal.fire({ icon:'success', title:'🎉 Mesa Fechada!', html:`Total: <b>${R(tot)}</b><br>Pagamento: ${pagAtual}`, background:'#111', color:'#fff', timer:2500, showConfirmButton:false });
+    };
+
+    window.cancelarMesa = async () => {
+        const r = await Swal.fire({ title:'Cancelar mesa?', text:'Todos os itens serão removidos.', icon:'warning', showCancelButton:true, confirmButtonColor:'#c0392b', confirmButtonText:'Cancelar mesa', background:'#111', color:'#fff' });
+        if (r.isConfirmed) { await deleteDoc(doc(db,'mesas',mesaAtual.mesaId)); fecharModal(); }
+    };
+
+    // ── ESTOQUE ──────────────────────────────────────
+    let estoqueIniciado = false;
+    function iniciarEstoque() {
+        if (estoqueIniciado) return;
+        estoqueIniciado = true;
+        onSnapshot(doc(db,'estoque','disponibilidade'), snap => {
+            const data = snap.data() || {};
+            const el = document.getElementById('lista-estoque');
+            if (!el) return;
+            el.innerHTML = '';
+            ESTOQUE_ITENS.forEach(item => {
+                const id  = item.toLowerCase().replace(/\s/g,'_');
+                const ok  = data[id] !== false;
+                el.innerHTML += `
+                <div class="item-estoque">
+                    <span style="font-weight:500;">${item}</span>
+                    <label class="switch">
+                        <input type="checkbox" ${ok?'checked':''} onchange="toggleEstoque('${id}',this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </div>`;
+            });
+        });
+    }
+
+    window.toggleEstoque = async (id, status) => {
+        await updateDoc(doc(db,'estoque','disponibilidade'), { [id]: status })
+            .catch(() => setDoc(doc(db,'estoque','disponibilidade'), { [id]: status }));
+    };
+
+    window.zerarDia = async () => {
+        const ok = await confirmarSenhaExcluir();
+        if (!ok) return;
+        const r = await Swal.fire({ title:'Zerar o Caixa?', text:'Todos os pedidos serão apagados!', icon:'warning', showCancelButton:true, background:'#111', color:'#fff' });
+        if (r.isConfirmed) {
+            const [s1,s2] = await Promise.all([getDocs(collection(db,'pedidos')), getDocs(collection(db,'mesas_historico'))]);
+            s1.docs.forEach(d=>deleteDoc(doc(db,'pedidos',d.id)));
+            s2.docs.forEach(d=>deleteDoc(doc(db,'mesas_historico',d.id)));
+            toast('Caixa zerado!');
+        }
+    };
+
+    window.gerarPDF = () => {
+        const { jsPDF } = window.jspdf;
+        const p = new jsPDF();
+        p.setFontSize(13);
+        p.text("Relatório de Vendas — ESPETINHO DO KAKA", 14, 14);
+        const rows = [
+            ...pedidos.map(x => ['PDV/Delivery: '+x.cliente, normalizarPagamento(x.pagamento), R(parseTotal(x.total))]),
+            ...mesasFech.map(x => [`Mesa ${x.numero} (${x.garcom})`, normalizarPagamento(x.pagamento), R(x.total)])
+        ];
+        p.autoTable({ head:[['Cliente / Mesa','Pagamento','Total']], body:rows, startY:22 });
+        p.save('caixa_espetinho.pdf');
+    };
+
+    // ── PDV ──────────────────────────────────────────
+    let carrinhoPDV = [];
+    let totalPDV = 0;
+
+    window.renderPDVConteudo = () => {
+        const conteiner = document.getElementById('pdv-conteudo');
+        if (!conteiner) return;
+        conteiner.innerHTML = `
+        <div class="pdv-grid-wrapper">
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:15px;padding:18px;">
+                <h2 style="font-family:'Bebas Neue';color:var(--gold);letter-spacing:2px;margin:0 0 16px;">NOVO ATENDIMENTO</h2>
+                <div style="display:grid;grid-template-columns:1fr 2fr 44px;gap:10px;margin-bottom:10px;">
+                    <input type="tel" id="pdv-tel" placeholder="WhatsApp" onblur="window.buscarClientePDV(this.value)" class="inp-pdv" style="min-width:0;">
+                    <div style="position:relative;min-width:0;">
+                        <input type="text" id="pdv-nome" placeholder="Nome do Cliente" oninput="window.sugerirClientes(this.value)" autocomplete="off" class="inp-pdv">
+                        <div id="pdv-sugestoes" style="display:none;position:absolute;top:calc(100% + 4px);left:0;width:100%;background:#1a1a1a;border:1px solid var(--gold);border-radius:8px;z-index:999;max-height:200px;overflow-y:auto;box-shadow:0 10px 20px rgba(0,0,0,0.8);"></div>
+                    </div>
+                    <button onclick="window.salvarCadastroCliente()" title="Salvar Cadastro" style="background:var(--gold);border:none;border-radius:8px;cursor:pointer;color:#000;display:flex;align-items:center;justify-content:center;height:44px;width:44px;flex-shrink:0;">
+                        <i class="fas fa-save" style="font-size:1rem;"></i>
+                    </button>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+                    <select id="pdv-bairro" onchange="window.atualizarResumoPDV()" class="inp-pdv">
+                        <option value="">Selecione bairro/entrega</option>
+                        ${Object.entries(TAXAS_BAIRRO).map(([b,v]) => `<option value="${b}">${b} (+${R(v)})</option>`).join('')}
+                    </select>
+                    <input type="text" id="pdv-end" placeholder="Rua e Número" class="inp-pdv">
+                </div>
+                <div id="pdv-produtos-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;max-height:380px;overflow-y:auto;">
+                    ${Object.entries(CARDAPIO).flatMap(([cat, itens]) => itens).map(it => `
+                        <button onclick="window.addAoCarrinhoPDV('${it.nome}',${it.preco})"
+                            style="background:rgba(255,255,255,0.03);border:1px solid var(--border);padding:12px 10px;border-radius:10px;color:#fff;cursor:pointer;text-align:left;transition:0.2s;font-family:'Outfit',sans-serif;"
+                            onmouseover="this.style.borderColor='var(--gold)';this.style.background='rgba(232,169,48,0.08)'"
+                            onmouseout="this.style.borderColor='var(--border)';this.style.background='rgba(255,255,255,0.03)'">
+                            <strong style="font-size:0.84rem;display:block;margin-bottom:4px;">${it.nome}</strong>
+                            <span style="color:var(--gold);font-size:0.88rem;font-weight:700;">${R(it.preco)}</span>
+                        </button>`).join('')}
+                </div>
+            </div>
+            <div class="pdv-resumo-col" style="background:var(--card);border:1px solid var(--border);border-radius:15px;padding:18px;display:flex;flex-direction:column;">
+                <h3 style="font-family:'Bebas Neue';letter-spacing:2px;color:var(--gold);margin:0 0 12px;">RESUMO DO PEDIDO</h3>
+                <div id="lista-carrinho-pdv" style="flex:1;overflow-y:auto;min-height:160px;margin-bottom:14px;"></div>
+                <div style="border-top:1px solid var(--border);padding-top:14px;">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:5px;opacity:0.6;font-size:0.88rem;">
+                        <span>Subtotal:</span><span id="pdv-subtotal">R$ 0,00</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;margin-bottom:5px;color:#3498db;font-size:0.88rem;">
+                        <span id="pdv-taxa-label">Taxa de entrega:</span><span id="pdv-taxa-val">R$ 0,00</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+                        <span style="font-weight:700;">TOTAL GERAL:</span>
+                        <span id="pdv-total-display" style="font-size:1.8rem;color:var(--gold);font-family:'Bebas Neue',sans-serif;">R$ 0,00</span>
+                    </div>
+                    <select id="pdv-pagamento" class="inp-pdv" style="margin-bottom:12px;">
+                        <option value="PIX">💠 PIX</option>
+                        <option value="Dinheiro">💵 Dinheiro</option>
+                        <option value="Cartão">💳 Cartão</option>
+                    </select>
+                    <button onclick="window.finalizarPedidoPDV()" style="width:100%;background:#27ae60;color:white;border:none;padding:16px;border-radius:10px;font-weight:700;cursor:pointer;font-size:1rem;font-family:'Outfit',sans-serif;letter-spacing:1px;">
+                        ✅ FINALIZAR PEDIDO
+                    </button>
+                </div>
+            </div>
+        </div>`;
+        carrinhoPDV = [];
+        totalPDV = 0;
+    };
+
+    window.sugerirClientes = async (busca) => {
+        const divSugestoes = document.getElementById('pdv-sugestoes');
+        if (!divSugestoes) return;
+        if (busca.length < 2) { divSugestoes.style.display = 'none'; return; }
+        try {
+            const snap = await getDocs(query(collection(db,'clientes'), orderBy('nome')));
+            let html = '', encontrou = false;
+            snap.forEach(docSnap => {
+                const c = docSnap.data(); const tel = docSnap.id;
+                if (c.nome.toLowerCase().includes(busca.toLowerCase())) {
+                    encontrou = true;
+                    html += `<div onclick="window.selecionarClienteSugestao('${tel}','${c.nome.replace(/'/g,"\\'")}','${(c.endereco||'').replace(/'/g,"\\'")}','${(c.bairro||'').replace(/'/g,"\\'")}') "
+                        style="padding:11px 14px;border-bottom:1px solid #333;cursor:pointer;"
+                        onmouseover="this.style.background='#222'" onmouseout="this.style.background='transparent'">
+                        <strong style="color:var(--gold);font-size:0.88rem;">${c.nome.toUpperCase()}</strong><br>
+                        <small style="opacity:0.6;">📞 ${tel}${c.bairro?' | 📍 '+c.bairro:''}</small>
+                    </div>`;
+                }
+            });
+            divSugestoes.innerHTML = html;
+            divSugestoes.style.display = encontrou ? 'block' : 'none';
+        } catch(e) { console.error(e); }
+    };
+
+    window.selecionarClienteSugestao = (tel, nome, end, bairro) => {
+        const f = id => document.getElementById(id);
+        if(f('pdv-tel')) f('pdv-tel').value = tel;
+        if(f('pdv-nome')) f('pdv-nome').value = nome;
+        if(f('pdv-end')) f('pdv-end').value = end;
+        if(bairro && f('pdv-bairro')) f('pdv-bairro').value = bairro;
+        const d = document.getElementById('pdv-sugestoes');
+        if(d) d.style.display = 'none';
+        window.atualizarResumoPDV();
+        toast(`Cliente ${nome} carregado!`);
+    };
+
+    window.salvarCadastroCliente = async () => {
+        const tel  = (document.getElementById('pdv-tel')?.value||'').replace(/\D/g,'');
+        const nome = document.getElementById('pdv-nome')?.value||'';
+        const end  = document.getElementById('pdv-end')?.value||'';
+        const bairro = document.getElementById('pdv-bairro')?.value||'';
+        if (!tel || !nome) { Swal.fire({ icon:'warning', title:'Atenção!', text:'Nome e Telefone são obrigatórios.', background:'#111', color:'#fff' }); return; }
+        try {
+            await setDoc(doc(db,'clientes',tel), { nome, telefone:tel, endereco:end, bairro, ultimaAtualizacao:new Date() }, { merge:true });
+            toast('Cadastro atualizado!');
+        } catch(e) { Swal.fire({ icon:'error', title:'Erro!', text:e.message }); }
+    };
+
+    window.buscarClientePDV = async (tel) => {
+        const t = tel.replace(/\D/g,'');
+        if (t.length < 8) return;
+        try {
+            const snap = await getDoc(doc(db,'clientes',t));
+            if (snap.exists()) {
+                const d = snap.data();
+                if(document.getElementById('pdv-nome')) document.getElementById('pdv-nome').value = d.nome||'';
+                if(document.getElementById('pdv-end'))  document.getElementById('pdv-end').value  = d.endereco||'';
+                if(d.bairro && document.getElementById('pdv-bairro')) document.getElementById('pdv-bairro').value = d.bairro;
+                window.atualizarResumoPDV();
+                toast('Cliente localizado!');
+            }
+        } catch(e) { console.error(e); }
+    };
+
+    window.addAoCarrinhoPDV = (nome, preco) => {
+        const item = carrinhoPDV.find(i => i.nome === nome);
+        if (item) item.qty++;
+        else carrinhoPDV.push({ nome, preco: parseFloat(preco), qty: 1 });
+        window.atualizarResumoPDV();
+        toast(`${nome} adicionado!`);
+    };
+
+    window.atualizarResumoPDV = () => {
+        const lista = document.getElementById('lista-carrinho-pdv');
+        if (!lista) return;
+        const subtotal = carrinhoPDV.reduce((acc,i) => acc + (i.preco * i.qty), 0);
+        const bairroSel = document.getElementById('pdv-bairro')?.value || '';
+        const taxa = TAXAS_BAIRRO[bairroSel] !== undefined ? TAXAS_BAIRRO[bairroSel] : 0;
+        const totalGeral = subtotal + taxa;
+        const sub = document.getElementById('pdv-subtotal');
+        const tv  = document.getElementById('pdv-taxa-val');
+        const tl  = document.getElementById('pdv-taxa-label');
+        const td  = document.getElementById('pdv-total-display');
+        if(sub) sub.textContent = R(subtotal);
+        if(tv)  tv.textContent  = R(taxa);
+        if(tl)  tl.textContent  = bairroSel && taxa > 0 ? `Entrega (${bairroSel}):` : bairroSel === 'Retirada no Balcão' ? 'Retirada:' : 'Taxa de entrega:';
+        if(td)  td.textContent  = R(totalGeral);
+        totalPDV = totalGeral;
+        if (carrinhoPDV.length === 0) {
+            lista.innerHTML = '<p style="opacity:0.3;text-align:center;margin-top:40px;font-size:0.88rem;">Carrinho vazio</p>';
+            return;
+        }
+        lista.innerHTML = carrinhoPDV.map((it, idx) => `
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:0.88rem;">
+                <div style="flex:1;min-width:0;">
+                    <span style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${it.qty}x ${it.nome}</span>
+                    <span style="color:var(--gold);font-size:0.82rem;">${R(it.preco*it.qty)}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:8px;">
+                    <button onclick="window.chgQtdPDV(${idx},-1)" style="background:rgba(255,255,255,0.08);border:none;color:white;width:24px;height:24px;border-radius:50%;cursor:pointer;">−</button>
+                    <span style="min-width:16px;text-align:center;">${it.qty}</span>
+                    <button onclick="window.chgQtdPDV(${idx},1)" style="background:rgba(255,255,255,0.08);border:none;color:white;width:24px;height:24px;border-radius:50%;cursor:pointer;">+</button>
+                    <button onclick="window.removerItemPDV(${idx})" style="color:#e74c3c;background:none;border:none;cursor:pointer;font-size:1.1rem;padding:0 4px;">&times;</button>
+                </div>
+            </div>`).join('');
+    };
+
+    window.chgQtdPDV = (idx, d) => {
+        carrinhoPDV[idx].qty += d;
+        if (carrinhoPDV[idx].qty <= 0) carrinhoPDV.splice(idx,1);
+        window.atualizarResumoPDV();
+    };
+
+    window.removerItemPDV = (idx) => {
+        carrinhoPDV.splice(idx,1);
+        window.atualizarResumoPDV();
+    };
+
+    window.finalizarPedidoPDV = async () => {
+        const tel    = (document.getElementById('pdv-tel')?.value||'').replace(/\D/g,'');
+        const nome   = document.getElementById('pdv-nome')?.value||'';
+        const end    = document.getElementById('pdv-end')?.value||'';
+        const bairro = document.getElementById('pdv-bairro')?.value||'';
+        const selectPag = document.getElementById('pdv-pagamento');
+        const pag = normalizarPagamento(selectPag?.value || 'PIX');
+        if (!nome || carrinhoPDV.length === 0) {
+            Swal.fire({ icon:'warning', title:'Atenção!', text:'Preencha o nome e adicione itens.', background:'#111', color:'#fff' }); return;
+        }
+        try {
+            const itensFormatados = carrinhoPDV.map(item => ({
+                nome: item.nome, preco: parseFloat(item.preco)||0, qty: parseInt(item.qty)||1
+            }));
+            const valorFinal = parseFloat(totalPDV)||0;
+            const endCompleto = bairro ? `${end} - ${bairro}` : (end||'Retirada');
+            await addDoc(collection(db,'pedidos'), {
+                cliente: nome, telefone: tel, endereco: endCompleto, bairro,
+                itens: itensFormatados, total: valorFinal, pagamento: pag,
+                data: new Date(), status: 'RECEBIDO', origem: 'PDV'
+            });
+            await addDoc(collection(db,'caixa'), {
+                descricao: `Venda PDV: ${nome}`, valor: valorFinal,
+                tipo: 'entrada', metodo: pag, data: new Date()
+            });
+            if (tel) {
+                await setDoc(doc(db,'clientes',tel), {
+                    nome, telefone:tel, endereco:end, bairro, ultimaCompra:new Date()
+                }, { merge:true });
+            }
+            Swal.fire({ icon:'success', title:'Pedido Concluído!', text:`Pago via ${pag}`, timer:1500, showConfirmButton:false, background:'#111', color:'#fff' });
+            carrinhoPDV = []; totalPDV = 0;
+            window.renderPDVConteudo();
+        } catch(e) {
+            console.error('Erro PDV:', e);
+            Swal.fire({ icon:'error', title:'Erro!', text:'Falha ao salvar no banco de dados.', background:'#111', color:'#fff' });
+        }
+    };
+
+    // ── CLIENTES ─────────────────────────────────────
+    window.renderListaClientes = async (filtro='') => {
+        const container = document.getElementById('lista-clientes-geral');
+        if (!container) return;
+        try {
+            const snap = await getDocs(query(collection(db,'clientes'), orderBy('nome')));
+            let html = '';
+            snap.forEach(docSnap => {
+                const c = docSnap.data(); const id = docSnap.id;
+                if (c.nome.toLowerCase().includes(filtro.toLowerCase()) || id.includes(filtro)) {
+                    html += `
+                    <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);padding:14px;border-radius:12px;display:flex;justify-content:space-between;align-items:center;gap:10px;">
+                        <div style="min-width:0;flex:1;">
+                            <strong style="color:var(--gold);font-size:1rem;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.nome.toUpperCase()}</strong>
+                            <span style="font-size:0.85rem;opacity:0.75;"><i class="fab fa-whatsapp"></i> ${id}</span><br>
+                            <span style="font-size:0.78rem;opacity:0.55;">📍 ${c.bairro||'Sem bairro'}${c.endereco?' — '+c.endereco:''}</span>
+                        </div>
+                        <button onclick="window.removerCliente('${id}','${c.nome.replace(/'/g,"\\'")}') " style="background:#e74c3c;color:white;border:none;padding:10px 12px;border-radius:8px;cursor:pointer;flex-shrink:0;">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>`;
+                }
+            });
+            container.innerHTML = html || `<p style="text-align:center;grid-column:1/-1;opacity:0.4;">Nenhum cliente encontrado.</p>`;
+        } catch(e) { console.error(e); }
+    };
+
+    window.removerCliente = async (id, nome) => {
+        const ok = await confirmarSenhaExcluir();
+        if (!ok) return;
+        try {
+            await deleteDoc(doc(db,'clientes',id));
+            toast('Cliente removido!');
+            window.renderListaClientes();
+        } catch(e) { Swal.fire('Erro!','Falha ao excluir.','error'); }
+    };
+
+    // ── MENU MOBILE ──────────────────────────────────
+    window.toggleMenuMobile = (event) => {
+        event.stopPropagation();
+        document.getElementById('menu-extras').classList.toggle('show');
+    };
+
+    document.addEventListener('click', (e) => {
+        const menu = document.getElementById('menu-extras');
+        if (menu && !menu.contains(e.target)) menu.classList.remove('show');
+        const sug = document.getElementById('pdv-sugestoes');
+        if (sug && e.target.id !== 'pdv-nome') sug.style.display = 'none';
+    });
+
+</script>
+
+<!-- ════════════════════════════════════════════
+     BLUETOOTH — ESC/POS GENÉRICO
+════════════════════════════════════════════ -->
+<script>
+const BT = {
+    device: null,
+    char: null,
+    _keepAliveTimer: null,
+    LARGURA: 32,
+
+    async verificarAutoConectar() {
+        if (navigator.bluetooth && navigator.bluetooth.getDevices) {
+            try {
+                const devices = await navigator.bluetooth.getDevices();
+                if (devices.length > 0) {
+                    this.device = devices[0];
+                    return await this.reconectar();
+                }
+            } catch (e) { console.error("Erro na auto-conexão:", e); }
+        }
+    },
+
+    _iniciarKeepAlive() {
+        this._pararKeepAlive();
+        this._keepAliveTimer = setInterval(async () => {
+            if (!this.char) { this._pararKeepAlive(); return; }
+            try {
+                await this.char.writeValueWithoutResponse(new Uint8Array([0x1B, 0x40]));
+            } catch(e) {
+                this.char = null;
+                btSetStatus('erro', 'Impressora desconectada');
+                this._pararKeepAlive();
+            }
+        }, 20000);
+    },
+
+    _pararKeepAlive() {
+        if (this._keepAliveTimer) { clearInterval(this._keepAliveTimer); this._keepAliveTimer = null; }
+    },
+
+    async reconectar() {
+        if (!this.device) return false;
+        try {
+            btSetStatus('aguardando', 'Reconectando...');
+            const server   = await this.device.gatt.connect();
+            const services = await server.getPrimaryServices();
+            let charEncontrada = null;
+            for (const svc of services) {
+                const chars = await svc.getCharacteristics();
+                for (const c of chars) {
+                    if (c.properties.writeWithoutResponse || c.properties.write) { charEncontrada = c; break; }
+                }
+                if (charEncontrada) break;
+            }
+            if (!charEncontrada) throw new Error('Característica não encontrada.');
+            this.char = charEncontrada;
+            btSetStatus('conectado', `Conectado: ${this.device.name || 'Impressora BT'}`);
+            this._iniciarKeepAlive();
+            return true;
+        } catch(e) { btSetStatus('erro', 'Falha ao reconectar: ' + e.message); return false; }
+    },
+
+    async conectar() {
+        if (!navigator.bluetooth) {
+            Swal.fire({ icon:'warning', title:'Bluetooth não suportado', text:'Use o Chrome no Android com Bluetooth ativado.', background:'#111', color:'#fff' });
+            return false;
+        }
+        try {
+            btSetStatus('aguardando', 'Buscando impressoras BT...');
+            this.device = await navigator.bluetooth.requestDevice({
+                acceptAllDevices: true,
+                optionalServices: [
+                    '000018f0-0000-1000-8000-00805f9b34fb',
+                    '49535343-fe7d-4ae5-8fa9-9fafd205e455',
+                    '0000ff00-0000-1000-8000-00805f9b34fb',
+                    'e7810a71-73ae-499d-8c15-faa9aef0c3f2',
+                ]
+            });
+            btSetStatus('aguardando', 'Conectando...');
+            const server   = await this.device.gatt.connect();
+            const services = await server.getPrimaryServices();
+            let charEncontrada = null;
+            for (const svc of services) {
+                const chars = await svc.getCharacteristics();
+                for (const c of chars) {
+                    if (c.properties.writeWithoutResponse || c.properties.write) { charEncontrada = c; break; }
+                }
+                if (charEncontrada) break;
+            }
+            if (!charEncontrada) throw new Error('Característica de escrita não encontrada.');
+            this.char = charEncontrada;
+            this.device.addEventListener('gattserverdisconnected', async () => {
+                this.char = null;
+                this._pararKeepAlive();
+                btSetStatus('aguardando', 'Desconectou — reconectando...');
+                for (let t = 0; t < 3; t++) {
+                    await new Promise(r => setTimeout(r, 1500));
+                    const ok = await this.reconectar();
+                    if (ok) return;
+                }
+                btSetStatus('erro', 'Impressora desconectada');
+            });
+            btSetStatus('conectado', `Conectado: ${this.device.name || 'Impressora BT'}`);
+            this._iniciarKeepAlive();
+            window.toast('Impressora conectada!');
+            return true;
+        } catch (e) {
+            if (e.name !== 'NotFoundError') btSetStatus('erro', 'Falha: ' + e.message);
+            else btSetStatus('', 'Nenhuma impressora selecionada');
+            return false;
+        }
+    },
+
+    async enviar(bytes) {
+        if (!this.char) {
+            if (this.device) { const ok = await this.reconectar(); if (!ok) return false; }
+            else { const ok = await this.conectar(); if (!ok) return false; }
+        }
+        const CHUNK = 64;
+        try {
+            for (let i = 0; i < bytes.length; i += CHUNK) {
+                const fatia = bytes.slice(i, i + CHUNK);
+                if (this.char.properties.writeWithoutResponse) await this.char.writeValueWithoutResponse(fatia);
+                else await this.char.writeValue(fatia);
+                await new Promise(r => setTimeout(r, 50));
+            }
+            return true;
+        } catch(e) {
+            console.error("Erro GATT:", e);
+            btSetStatus('erro', 'Erro na impressão: ' + e.message);
+            this.char = null;
+            return false;
+        }
+    }
+};
+
+function btSetStatus(estado, texto) {
+    const dot  = document.getElementById('bt-dot');
+    const span = document.getElementById('bt-texto');
+    if (!dot || !span) return;
+    dot.className = 'bt-status-dot' + (estado === 'conectado' ? ' conectado' : estado === 'erro' ? ' erro' : '');
+    span.textContent = texto;
+}
+
+window.addEventListener('load', () => BT.verificarAutoConectar());
+window.btConectar = () => BT.conectar();
+
+function escPos() {
+    const buf = [];
+    const enc = new TextEncoder();
+    const p   = (b) => buf.push(...(typeof b === 'string' ? enc.encode(limparEsc(b)) : b));
+    const INIT=[0x1B,0x40],CENTRALIZAR=[0x1B,0x61,0x01],ESQUERDA=[0x1B,0x61,0x00],
+          BOLD_ON=[0x1B,0x45,0x01],BOLD_OFF=[0x1B,0x45,0x00],
+          DUPLO_ON=[0x1D,0x21,0x11],DUPLO_OFF=[0x1D,0x21,0x00],
+          CORTAR=[0x1D,0x56,0x41,0x03],NOVA_LINHA=[0x0A];
+    return {
+        init()        { p(INIT); return this; },
+        centro()      { p(CENTRALIZAR); return this; },
+        esquerda()    { p(ESQUERDA); return this; },
+        bold(on)      { p(on ? BOLD_ON : BOLD_OFF); return this; },
+        duplo(on)     { p(on ? DUPLO_ON : DUPLO_OFF); return this; },
+        linha(t='')   { p(t + '\n'); return this; },
+        nl()          { p(NOVA_LINHA); return this; },
+        separador(c='-'){ p(c.repeat(BT.LARGURA) + '\n'); return this; },
+        cortar()      { p(CORTAR); return this; },
+        bytes()       { return new Uint8Array(buf); }
+    };
+}
+
+function limparEsc(t) {
+    return String(t).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^\x20-\x7E\n]/g,'');
+}
+
+function Fmt(v) {
+    const n = typeof v === 'number' ? v : parseFloat(v) || 0;
+    return 'R$' + n.toFixed(2).replace('.', ',');
+}
+
+function agora() {
+    const d = new Date();
+    return String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + d.getFullYear() + ' ' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+}
+
+function linhaItem(nome, valor) {
+    const valStr = Fmt(valor);
+    const limiteNome = BT.LARGURA - valStr.length - 1;
+    let nomeLimpo = limparEsc(nome).substring(0, limiteNome);
+    const espacos = BT.LARGURA - nomeLimpo.length - valStr.length;
+    return nomeLimpo + ' '.repeat(Math.max(1, espacos)) + valStr;
+}
+
+function gerarCupomDelivery(p) {
+    const itens   = p.itens || [];
+    const total   = typeof p.total === 'number' ? p.total : parseFloat(p.total) || 0;
+    const bairro  = limparEsc(p.bairro || '');
+    const taxa    = (p.taxaEntrega !== undefined) ? p.taxaEntrega : 0;
+    const subtotal = total - taxa;
+
+    const doc = escPos().init()
+        .centro().duplo(true).bold(true).linha('ESPETO DO KAKA').duplo(false).bold(false)
+        .linha('DELIVERY / BALCAO').separador('=').esquerda()
+        .linha('DATA: ' + agora())
+        .bold(true).linha('CLIENTE: ' + limparEsc(p.cliente || '').toUpperCase()).bold(false)
+        .linha('END: ' + limparEsc(p.endereco || 'Retirada'));
+    if (bairro) doc.linha('BAIRRO: ' + bairro);
+    doc.linha('PAG: ' + limparEsc(p.pagamento || '')).separador('-')
+        .bold(true).linha('ITENS DO PEDIDO:').bold(false).nl();
+    itens.forEach(i => {
+        const q = parseInt(i.qty) || 1;
+        const vUnit = parseFloat(i.preco) || parseFloat(i.precoTotal) || 0;
+        doc.linha(`${q}x ${limparEsc(i.nome)}`).linha(' '.repeat(17) + 'Sub: ' + Fmt(vUnit * q));
+        if (i.obs) doc.linha('  >> ' + limparEsc(i.obs));
+    });
+    doc.separador('-');
+    if (taxa > 0) { doc.linha(linhaItem('Subtotal', subtotal)).linha(linhaItem('Entrega', taxa)).separador('-'); }
+    doc.bold(true).duplo(true).linha(linhaItem('TOTAL', total)).duplo(false).bold(false)
+        .separador('=').nl().centro().linha('OBRIGADO PELA PREFERENCIA! VOLTE SEMPRE E QUE DEUS ABENÇOE.').nl().nl().cortar();
+    return doc.bytes();
+}
+
+function gerarCupomMesa(m) {
+    const itens = m.itens || [];
+    const total = parseFloat(m.total) || itens.reduce((s,i) => s + (i.preco||0) * (i.qty||1), 0);
+    const doc = escPos().init()
+        .centro().duplo(true).bold(true).linha('MESA ' + m.numero).duplo(false).bold(false)
+        .linha('CONTA FECHADA').separador('=').esquerda()
+        .linha('ATENDENTE: ' + limparEsc(m.garcom || ''))
+        .linha('PAG: '    + limparEsc(m.pagamento || ''))
+        .linha('HORA: '   + agora()).separador('-')
+        .bold(true).linha('ITENS:').bold(false).nl();
+    itens.forEach(i => {
+        const q    = parseInt(i.qty) || 1;
+        const vUnit = parseFloat(i.preco) || 0;
+        doc.linha(`${q}x ${limparEsc(i.nome)}`).linha(' '.repeat(17) + 'Sub: ' + Fmt(vUnit * q));
+    });
+    if (m.obs) doc.linha('OBS: ' + limparEsc(m.obs));
+    doc.separador('-').bold(true).duplo(true).linha(linhaItem('TOTAL', total)).duplo(false).bold(false)
+        .nl().centro().linha('OBRIGADO PELA PREFERENCIA! VOLTE SEMPRE E QUE DEUS ABENÇOE.').nl().nl().cortar();
+    return doc.bytes();
+}
+
+window.imprimirDeliveryBT = async (dadosJson) => {
+    try {
+        const p = JSON.parse(dadosJson);
+        const bytes = gerarCupomDelivery(p);
+        const ok = await BT.enviar(bytes);
+        if (ok) window.toast('Cupom impresso!');
+    } catch (err) { console.error("Erro ao imprimir delivery:", err); }
+};
+
+window.imprimirMesaBT = async (dadosJson) => {
+    try {
+        const m = JSON.parse(dadosJson);
+        const bytes = gerarCupomMesa(m);
+        const ok = await BT.enviar(bytes);
+        if (ok) window.toast('Cupom impresso!');
+    } catch (err) { console.error("Erro ao imprimir mesa:", err); }
+};
+</script>
+
+</body>
+</html>
