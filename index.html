@@ -602,11 +602,12 @@
     </style>
 </head>
 <body>
-
+<audio id="bell" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 <!-- TOP BAR -->
 <div class="topbar">
     <div class="topbar-inner">
         <div class="brand">GC BURGUER</div>
+        
         <div class="tabs-menu">
             <button class="tab-btn active" onclick="switchTab('aba-pedidos',this)"><i class="fas fa-fire"></i> PEDIDOS</button>
             <button class="tab-btn" onclick="switchTab('aba-mesas',this)"><i class="fas fa-utensils"></i> MESAS</button>
@@ -614,7 +615,11 @@
                 <button class="tab-btn" onclick="switchTabProtegida('aba-estoque',this)"><i class="fas fa-box"></i> ESTOQUE</button>
                 <button class="tab-btn" onclick="switchTabProtegida('aba-caixa',this)"><i class="fas fa-wallet"></i> CAIXA</button>
             </div>
+            <button id="btn-som" onclick="toggleSom()" title="Ativar/Desativar som" style="background:none;border:1px solid rgba(232,169,48,0.3);color:var(--gold);border-radius:8px;padding:8px 12px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:0.75rem;font-weight:700;display:flex;align-items:center;gap:6px;transition:0.2s;margin-left:8px;">
+    <i class="fas fa-volume-mute" id="som-icon"></i> <span id="som-label">SOM</span>
+            </button>
             <button class="tab-btn btn-mais" onclick="toggleMenuMobile(event)"><i class="fas fa-bars"></i></button>
+            
         </div>
     </div>
 </div>
@@ -726,7 +731,9 @@
         { nome: 'Imperador Duplo', preco: 19.99, img: 'xtud.jpg' }
     ],
     'combos': [
+        { nome: 'Barca Simples', preco: 30.00, img: 'c5.jpeg' },
         { nome: 'Super Combo', preco: 22.00, img: 'c1.jpeg' },
+        { nome: 'Combo Classico', preco: 26.00, img: 'c2.jpeg' },
         { nome: 'Combo Casal', preco: 45.00, img: 'c3.jpeg' },
         { nome: 'Super Barca GC', preco: 60.00, img: 'c4.jpeg' }
     ],
@@ -772,7 +779,7 @@
    "Misto", "X-Tudo", "Calabresa Prime", "Bacon Prime", "Cala-Bacon Prime", "Imperador Duplo", 
     
     // Combos
-    "Combo Simples", "Super Combo", "Combo Casal", "Super Barca GC",
+    "Barca Simples", "Super Combo", "Combo Casal", "Super Barca GC",
     
     // Batatas
     "Batata Simples P", "Batata Simples G", "Batata c/ Bacon e Cheddar P", "Batata c/ Bacon e Cheddar G",
@@ -914,11 +921,14 @@
     }
 
     // ── FIREBASE LISTENERS ───────────────────────────
-    onSnapshot(query(collection(db,'pedidos'), orderBy('data','desc')), snap => {
-        pedidos = snap.docs.map(d => ({ id:d.id, tipo:'delivery', ...d.data() }));
-        renderPedidos();
-        renderCaixa();
-    });
+   let primeiroSnapPedidos = true;
+onSnapshot(query(collection(db,'pedidos'), orderBy('data','desc')), snap => {
+    pedidos = snap.docs.map(d => ({ id:d.id, tipo:'delivery', ...d.data() }));
+    renderPedidos();
+    renderCaixa();
+    if (primeiroSnapPedidos) { primeiroSnapPedidos = false; return; }
+    window.tocarSino?.();
+});
 
     onSnapshot(collection(db,'mesas'), snap => {
         mesasAtivas = {};
@@ -927,11 +937,14 @@
         renderPedidos(); // atualiza mesas no painel de pedidos também
     });
 
-    onSnapshot(query(collection(db,'mesas_historico'), orderBy('fechadoEm','desc')), snap => {
-        mesasFech = snap.docs.map(d => ({ id:d.id, tipo:'mesa', ...d.data() }));
-        renderPedidos();
-        renderCaixa();
-    });
+   let primeiroSnapMesas = true;
+onSnapshot(query(collection(db,'mesas_historico'), orderBy('fechadoEm','desc')), snap => {
+    mesasFech = snap.docs.map(d => ({ id:d.id, tipo:'mesa', ...d.data() }));
+    renderPedidos();
+    renderCaixa();
+    if (primeiroSnapMesas) { primeiroSnapMesas = false; return; }
+    window.tocarSino?.();
+});
 
     // ── SENHA PARA EXCLUIR ───────────────────────────
     async function confirmarSenhaExcluir() {
@@ -2351,15 +2364,38 @@ window.imprimirMesaBT = async (dadosJson) => {
     } catch (err) { console.error("Erro ao imprimir mesa:", err); }
 };
 
+//som
+let somAtivo = false;
+
+window.toggleSom = () => {
+    somAtivo = !somAtivo;
+    document.getElementById('som-icon').className  = somAtivo ? 'fas fa-volume-up' : 'fas fa-volume-mute';
+    document.getElementById('som-label').textContent = somAtivo ? 'SOM ON' : 'SOM';
+    document.getElementById('btn-som').style.background = somAtivo ? 'rgba(232,169,48,0.15)' : 'none';
+    if (somAtivo) {
+        // Desbloqueia o áudio no mobile com interação do usuário
+        const b = document.getElementById('bell');
+        b.volume = 0; b.play().then(() => b.pause()).catch(()=>{});
+        b.volume = 1;
+    }
+    window.toast(somAtivo ? '🔔 Som ativado!' : '🔕 Som desativado!');
+};
+
+window.tocarSino = () => {
+    if (!somAtivo) return;
+    const b = document.getElementById('bell');
+    b.currentTime = 0;
+    b.play().catch(e => console.warn('Áudio bloqueado:', e));
+};
  // Bloqueios de segurança
-  document.addEventListener('keydown', function (e) {
-    if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) { e.preventDefault(); }
-    if (e.key === 'F12') { e.preventDefault(); }
-  });
-  document.addEventListener('keydown', function (event) {
-    if (event.ctrlKey && event.shiftKey && event.key === 'I') { event.preventDefault(); }
-  });
-  document.addEventListener('contextmenu', function (event) { event.preventDefault(); });
+//   document.addEventListener('keydown', function (e) {
+//     if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) { e.preventDefault(); }
+//     if (e.key === 'F12') { e.preventDefault(); }
+//   });
+//   document.addEventListener('keydown', function (event) {
+//     if (event.ctrlKey && event.shiftKey && event.key === 'I') { event.preventDefault(); }
+//   });
+//   document.addEventListener('contextmenu', function (event) { event.preventDefault(); });
 </script>
 
 </body>
