@@ -705,16 +705,16 @@
 
     // ── CONFIG ──────────────────────────────────────
     const TOTAL_MESAS = 10;
-    const SENHA_HASH        = "d7ec2793150059c378b7496df91e0649b09b0604e0b55635da7e13116c248f22";
+    const SENHA_HASH        = "9754f15d9ed62a1dc6ae8f7c457515f562ff3830af3bbdd528c347b40ff87b9d";
     // Mesma senha usada no caixa/estoque – mas você pode trocar para uma senha diferente
-    const SENHA_EXCLUIR_HASH = "d7ec2793150059c378b7496df91e0649b09b0604e0b55635da7e13116c248f22";
+    const SENHA_EXCLUIR_HASH = "9754f15d9ed62a1dc6ae8f7c457515f562ff3830af3bbdd528c347b40ff87b9d";
     const LIMITE_INICIAL_PEDIDOS = 3; // cards visíveis antes de "Ver mais"
 
     const GARCONS = [
-        { nome: 'Carlos',  icon: '👨‍🍳' },
-        { nome: 'Júlia',   icon: '👩‍🍳' },
-        { nome: 'Rafael',  icon: '👨‍🍳' },
-        { nome: 'Beatriz', icon: '👩‍🍳' },
+        { nome: 'Wania Brasil',  icon: '👨‍🍳' },
+        { nome: 'Gabriel Costa',   icon: '👩‍🍳' },
+        { nome: 'Emanuelle Brasil',  icon: '👨‍🍳' },
+
     ];
 
     const CARDAPIO = {
@@ -749,10 +749,10 @@
         { nome: 'Pastel Romeu e Julieta', preco: 10.00, img: 'pasro.jpg' }
     ],
     'bebidas': [
-        { nome: 'Refrigerante lata 220ml', preco: 4.00, img: 'refri220.jpg' },
-        { nome: 'Refrigerante lata 350ml', preco: 5.00, img: 'refri350.jpg' },
-        { nome: 'Refrigerante 1 litro', preco: 10.00, img: 'refri1.jpg' },
-        { nome: 'Refrigerante 2 litros', preco: 15.00, img: 'refri2.jpg' },
+        { nome: 'Refri 220ml', preco: 4.00, img: 'refri220.jpg' },
+        { nome: 'Refri 350ml', preco: 5.00, img: 'refri350.jpg' },
+        { nome: 'Refri 1 litro', preco: 10.00, img: 'refri1.jpg' },
+        { nome: 'Refri 2 litros', preco: 15.00, img: 'refri2.jpg' },
         { nome: 'Agua sem gás', preco: 3.00, img: 'agua.jpg' },
         { nome: 'Agua com gás', preco: 4.00, img: 'agua.jpg' },
         { nome: 'Suco 300ml', preco: 8.00, img: 'suc.jpg' },
@@ -769,10 +769,10 @@
 
     const ESTOQUE_ITENS = [
     // Hambúrgueres
-    "X-Tudo", "Calabresa Prime", "Bacon Prime", "Cala-Bacon Prime", "Imperador Duplo", 
+   "Misto", "X-Tudo", "Calabresa Prime", "Bacon Prime", "Cala-Bacon Prime", "Imperador Duplo", 
     
     // Combos
-    "Super Combo", "Combo Casal", "Super Barca GC",
+    "Combo Simples", "Super Combo", "Combo Casal", "Super Barca GC",
     
     // Batatas
     "Batata Simples P", "Batata Simples G", "Batata c/ Bacon e Cheddar P", "Batata c/ Bacon e Cheddar G",
@@ -783,17 +783,14 @@
     "Pastel de Queijo", "Pastel Tudão", "Pastel Romeu e Julieta",
     
     // Bebidas (Geral)
-    "Refrigerante lata 220ml", "Refrigerante lata 350ml", "Refrigerante 1 litro", 
-    "Refrigerante 2 litros", "Agua sem gás", "Agua com gás", 
+    "Refri lata 220ml", "Refri lata 350ml", "Refri 1 litro", 
+    "Refri 2 litros", "Agua sem gás", "Agua com gás", 
     
     // Sucos e Vitaminas
     "Suco 300ml", "Suco 500ml", "Vitamina 300ml", "Vitamina 500ml",
     
     // Açaí
     "Açaí 300ml", "Açaí 400ml", "Açaí 500ml",
-
-    // Extras (Mantive os que você citou anteriormente)
-    "Coca-Cola Lata", "Cerveja Heineken", "Cerveja Skol Lata"
 ];
 
     const TAXAS_BAIRRO = {
@@ -1049,8 +1046,14 @@ function renderPedidos() {
                     ${bairroTag && bairroTag !== 'Retirada' ? `<span class="tag" style="background:rgba(232,169,48,0.1); color:var(--gold); border:1px solid rgba(232,169,48,0.3);">📍 ${bairroTag.toUpperCase()}</span>` : ''}
                 </div>
                 ${saiu ? '<div class="badge-saiu"><i class="fas fa-motorcycle"></i> SAIU PARA ENTREGA</div>' : ''}
-                <div style="margin-top:6px;"><strong>${p.cliente.toUpperCase()}</strong></div>
-                <div style="font-size:0.78rem;opacity:0.5;margin-bottom:8px;">Pagamento: ${normalizarPagamento(p.pagamento)}</div>
+               <div style="margin-top:6px;"><strong>${p.cliente.toUpperCase()}</strong></div>
+<div style="font-size:0.78rem;opacity:0.5;margin-bottom:2px;">Pagamento: ${normalizarPagamento(p.pagamento)}</div>
+<div style="font-size:0.78rem;margin-bottom:8px;">
+    ${p.telefone 
+        ? `<a href="https://wa.me/55${(p.telefone||'').replace(/\D/g,'')}" target="_blank" style="color:#25d366;text-decoration:none;"><i class="fab fa-whatsapp"></i> ${p.telefone}</a>` 
+        : '<span style="opacity:0.35;"><i class="fas fa-phone-slash"></i> Sem telefone</span>'
+    }
+</div>
                 <div class="lista-itens-card">
                     ${p.itens.map(i => {
                         const vUnit = parseFloat(i.preco) || parseFloat(i.precoTotal) || 0;
@@ -1067,11 +1070,11 @@ function renderPedidos() {
                 ${taxaHtml}
                 <div style="font-size:1.18rem;color:var(--gold);font-weight:700;">${R(totalNum)}</div>
                 <div class="status-actions">
-                    <button class="btn-wa bg-blue" onclick="waStatus('${p.telefone || ''}','recebido','${p.cliente}')">RECEBIDO</button>
-                    <button class="btn-wa bg-green${saiu ? ' btn-wa-ativo' : ''}" onclick="marcarSaiu('${p.id}','${p.telefone || ''}','${p.cliente}')">
-                        ${saiu ? '✅ SAIU' : 'SAIU ENTREGA'}
-                    </button>
-                </div>
+    <button class="btn-wa bg-blue" onclick="waStatus('${(p.telefone||'').replace(/\D/g,'')}','recebido','${p.cliente}')">RECEBIDO</button>
+    <button class="btn-wa bg-green${saiu ? ' btn-wa-ativo' : ''}" onclick="marcarSaiu('${p.id}','${(p.telefone||'').replace(/\D/g,'')}','${p.cliente}')">
+        ${saiu ? '✅ SAIU' : 'SAIU ENTREGA'}
+    </button>
+</div>
              <button class="btn-imprimir-bt" onclick='reimprimirNota(${JSON.stringify(dadosBT)})'>
     <i class="fas fa-print"></i> REIMPRIMIR NOTA
 </button>
@@ -1153,7 +1156,7 @@ function renderPedidos() {
     }
     pedidosSaiu.add(pedidoId);
     renderPedidos();
-    const msg = `Boa Notícia! 🎉 Seu pedido já saiu para entrega 🛵 Agradecemos a preferência e volte sempre! GC BURGUER`;
+    const msg = `Boa Notícia! Seu pedido já saiu para entrega. Agradecemos a preferência e volte sempre! GC BURGUER.`;
     window.open(`https://wa.me/55${tel.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`);
     window.toast('Pedido marcado como saiu!');
 };
@@ -1181,34 +1184,90 @@ window.reimprimirNota = async (dadosJson) => {
 };
     // ── CAIXA ────────────────────────────────────────
     function renderCaixa() {
-        if (!abasLiberadas['aba-caixa']) return;
-        let tPix=0, tDin=0, tCrd=0;
-        pedidos.forEach(p => {
-            const v = parseTotal(p.total);
-            const pg = normalizarPagamento(p.pagamento);
-            if(pg==='PIX') tPix+=v; else if(pg==='Dinheiro') tDin+=v; else tCrd+=v;
-        });
-        mesasFech.forEach(m => {
-            const v = parseFloat(m.total)||0;
-            const pg = normalizarPagamento(m.pagamento);
-            if(pg==='PIX') tPix+=v; else if(pg==='Dinheiro') tDin+=v; else tCrd+=v;
-        });
-        const tot = tPix+tDin+tCrd;
-        const cel = document.getElementById('c-total');
-        const met = document.getElementById('c-metodos');
-        if(cel) cel.textContent = R(tot);
-        if(met) met.innerHTML = `
-            <div style="display:flex;justify-content:space-between;margin-bottom:10px;font-size:0.88rem;"><span style="opacity:0.6;">PIX</span><b>${R(tPix)}</b></div>
-            <div style="display:flex;justify-content:space-between;margin-bottom:10px;font-size:0.88rem;"><span style="opacity:0.6;">Dinheiro</span><b>${R(tDin)}</b></div>
-            <div style="display:flex;justify-content:space-between;font-size:0.88rem;"><span style="opacity:0.6;">Cartão</span><b>${R(tCrd)}</b></div>`;
+    if (!abasLiberadas['aba-caixa']) return;
+
+    let tPix=0, tDin=0, tCrd=0;
+    const todosItens = [];
+
+    pedidos.forEach(p => {
+        const pg = normalizarPagamento(p.pagamento);
+        const v  = parseTotal(p.total);
+        if(pg==='PIX') tPix+=v; else if(pg==='Dinheiro') tDin+=v; else tCrd+=v;
+        (p.itens||[]).forEach(i => todosItens.push({ ...i, _origem: 'delivery' }));
+    });
+    mesasFech.forEach(m => {
+        const pg = normalizarPagamento(m.pagamento);
+        const v  = parseFloat(m.total)||0;
+        if(pg==='PIX') tPix+=v; else if(pg==='Dinheiro') tDin+=v; else tCrd+=v;
+        (m.itens||[]).forEach(i => todosItens.push({ ...i, _origem: 'mesa' }));
+    });
+
+    const tot = tPix + tDin + tCrd;
+
+    // Agrupa itens por nome somando qty e valor
+    const mapa = {};
+    todosItens.forEach(i => {
+        const nome = i.nome || '?';
+        const preco = parseFloat(i.preco) || 0;
+        const qty   = parseInt(i.qty) || 1;
+        if (!mapa[nome]) mapa[nome] = { qty: 0, total: 0, preco };
+        mapa[nome].qty   += qty;
+        mapa[nome].total += preco * qty;
+    });
+
+    // Separa lanches de bebidas (bebidas = itens do grupo 'bebidas' e 'açaí')
+    const nomesBebidas = new Set([
+        ...CARDAPIO['bebidas'].map(x=>x.nome),
+        ...CARDAPIO['açaí'].map(x=>x.nome)
+    ]);
+
+    const lanches  = Object.entries(mapa).filter(([n]) => !nomesBebidas.has(n));
+    const bebidas  = Object.entries(mapa).filter(([n]) =>  nomesBebidas.has(n));
+
+    function renderGrupo(lista) {
+        if (!lista.length) return '<div style="opacity:0.3;font-size:0.82rem;">Nenhum item.</div>';
+        return lista.map(([nome, d]) => `
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:0.88rem;">
+                <span>${d.qty}x ${nome}</span>
+                <b style="color:var(--gold);">${R(d.total)}</b>
+            </div>`).join('');
     }
 
-    window.waStatus = (tel,tipo,cliente) => {
-        const msg = tipo==='recebido'
-            ? `Olá ${cliente}! Recebemos seu pedido. Já estamos preparando! 🔥`
-            : `Olá ${cliente}! Seu pedido saiu para entrega! 🛵`;
-        window.open(`https://wa.me/55${tel.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`);
-    };
+    const cel = document.getElementById('c-total');
+    const met = document.getElementById('c-metodos');
+    const det = document.getElementById('caixa-detalhe');
+
+    if(cel) cel.textContent = R(tot);
+    if(met) met.innerHTML = `
+        <div style="display:flex;justify-content:space-between;margin-bottom:10px;font-size:0.88rem;"><span style="opacity:0.6;">PIX</span><b>${R(tPix)}</b></div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:10px;font-size:0.88rem;"><span style="opacity:0.6;">Dinheiro</span><b>${R(tDin)}</b></div>
+        <div style="display:flex;justify-content:space-between;font-size:0.88rem;"><span style="opacity:0.6;">Cartão</span><b>${R(tCrd)}</b></div>`;
+
+    if(det) det.innerHTML = `
+        <div style="margin-bottom:18px;">
+            <div style="font-size:0.75rem;letter-spacing:2px;opacity:0.4;font-weight:600;margin-bottom:8px;">🍔 LANCHES & COMBOS</div>
+            ${renderGrupo(lanches)}
+        </div>
+        <div style="margin-bottom:18px;">
+            <div style="font-size:0.75rem;letter-spacing:2px;opacity:0.4;font-weight:600;margin-bottom:8px;">🥤 BEBIDAS & AÇAÍ</div>
+            ${renderGrupo(bebidas)}
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:2px solid rgba(255,255,255,0.1);font-weight:700;font-size:1rem;">
+            <span>TOTAL GERAL</span>
+            <span style="color:var(--gold);font-size:1.2rem;">${R(tot)}</span>
+        </div>`;
+}
+
+   window.waStatus = (tel, tipo, cliente) => {
+    if (!tel) {
+        Swal.fire({ icon:'warning', title:'Sem telefone!', text:'Este pedido não tem número cadastrado.', background:'#111', color:'#fff', timer:2000, showConfirmButton:false });
+        return;
+    }
+    const msg = tipo === 'recebido'
+        ? `Olá ${cliente}!  Recebemos seu pedido. Já estamos preparando! — GC BURGUER`
+        : `Olá ${cliente}!  Seu pedido saiu para entrega! Em breve chegará. — GC BURGUER`;
+    window.open(`https://wa.me/55${tel}?text=${encodeURIComponent(msg)}`);
+};
 
     // ── EXCLUIR COM SENHA ────────────────────────────
     window.delPedido = async id => {
@@ -1397,60 +1456,107 @@ window.reimprimirNota = async (dadosJson) => {
 
     let carrinhoSnapshot = [];
 
-    function renderCardapio() {
-        const mesa = mesasAtivas[mesaAtual?.mesaId];
-        carrinhoSnapshot = mesa ? JSON.parse(JSON.stringify(mesa.itens)) : [];
+   function renderCardapio() {
+    const mesa = mesasAtivas[mesaAtual?.mesaId];
+    carrinhoSnapshot = mesa ? JSON.parse(JSON.stringify(mesa.itens)) : [];
 
-        document.getElementById('modal-body').innerHTML = `
-            <div style="font-size:0.8rem;opacity:0.45;margin-bottom:13px;">
-                Garçom: <b style="color:var(--gold);opacity:1;">${garcomAtual}</b>
+    document.getElementById('modal-body').innerHTML = `
+        <div style="font-size:0.8rem;opacity:0.45;margin-bottom:13px;">
+            Atendente: <b style="color:var(--gold);opacity:1;">${garcomAtual}</b>
+        </div>
+        ${Object.entries(CARDAPIO).map(([cat,itens])=>`
+            <div class="cat-bloco">
+                <div class="cat-header" onclick="toggleCat(this)">
+                    <span class="cat-name">${cat}</span>
+                    <i class="fas fa-chevron-down chev"></i>
+                </div>
+                <div class="cat-itens">
+                    ${itens.map(item=>`
+                        <button class="item-btn" onclick="addItem('${item.nome.replace(/'/g,"\\'")}',${item.preco})">
+                            <span class="i-nome">${item.nome}</span>
+                            <span class="i-preco">${R(item.preco)}</span>
+                        </button>`).join('')}
+                </div>
+            </div>`).join('')}
+
+        <!-- ADICIONAIS (accordeon discreto) -->
+        <div class="cat-bloco" style="margin-top:4px;">
+            <div class="cat-header" onclick="toggleCat(this)" style="background:rgba(255,255,255,0.03);border:1px dashed rgba(255,255,255,0.1);border-radius:8px;">
+                <span class="cat-name" style="font-size:0.8rem;opacity:0.6;">➕ Adicionais / Extras</span>
+                <i class="fas fa-chevron-down chev"></i>
             </div>
-            ${Object.entries(CARDAPIO).map(([cat,itens])=>`
-                <div class="cat-bloco">
-                    <div class="cat-header" onclick="toggleCat(this)">
-                        <span class="cat-name">${cat}</span>
-                        <i class="fas fa-chevron-down chev"></i>
-                    </div>
-                    <div class="cat-itens">
-                        ${itens.map(item=>`
-                            <button class="item-btn" onclick="addItem('${item.nome}',${item.preco})">
-                                <span class="i-nome">${item.nome}</span>
-                                <span class="i-preco">${R(item.preco)}</span>
-                            </button>`).join('')}
-                    </div>
-                </div>`).join('')}
-            <div class="cart-box">
-                <div class="cart-title"><i class="fas fa-shopping-cart"></i> Carrinho</div>
-                <div id="cart-itens">${renderCartItens()}</div>
-                <textarea class="obs-inp" id="obs" placeholder="📝 Observação (ex: sem cebola, ponto mal passado...)" rows="2">${mesa?.obs||''}</textarea>
-                <div class="cart-total"><span>Total:</span><span id="cart-tot">${R(totalCarrinho())}</span></div>
+            <div class="cat-itens">
+                ${[
+                    {nome:'Carne Artesanal', preco:8.00},
+                    {nome:'Geléia Premium',  preco:6.00},
+                    {nome:'Bacon',           preco:5.00},
+                    {nome:'Calabresa',       preco:4.00},
+                    {nome:'Abacaxi',         preco:4.00},
+                    {nome:'Queijo',          preco:3.00},
+                    {nome:'Ovo',             preco:3.00},
+                    {nome:'Creme de Cheddar',preco:3.00},
+                    {nome:'Cebola',          preco:3.00},
+                    {nome:'Presunto',        preco:2.00},
+                    {nome:'Salsicha',        preco:2.00},
+                    {nome:'Banana',          preco:2.00},
+                    {nome:'Morango',         preco:2.00},
+                    {nome:'Kiwi',            preco:2.00},
+                    {nome:'Uva',             preco:2.00},
+                    {nome:'Leite Condensado',preco:2.00},
+                    {nome:'Disquete',        preco:2.00},
+                    {nome:'Amendoim',        preco:2.00},
+                    {nome:'Leite em Pó',     preco:2.00},
+                    {nome:'Tapioca',         preco:2.00},
+                    {nome:'Granola',         preco:2.00},
+                ].map(item=>`
+                    <button class="item-btn" style="opacity:0.75;" onclick="addItem('+ ${item.nome.replace(/'/g,"\\'")}',${item.preco})">
+                        <span class="i-nome">+ ${item.nome}</span>
+                        <span class="i-preco">${R(item.preco)}</span>
+                    </button>`).join('')}
             </div>
-            <div style="margin-top:13px;">
-                <button style="width:100%;background:rgba(232,169,48,0.12);color:var(--gold);border:1px solid rgba(232,169,48,0.3);padding:13px;border-radius:10px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;font-size:0.85rem;" onclick="salvarPedido()">
-                    💾 SALVAR PEDIDO
-                </button>
-            </div>
-            ${mesa?`
-            <div style="margin-top:8px;">
-                <button onclick="cancelarMesa()" style="width:100%;background:rgba(231,76,60,0.08);color:#e74c3c;border:1px solid rgba(231,76,60,0.25);padding:11px;border-radius:10px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;font-size:0.8rem;">🗑️ CANCELAR MESA</button>
-            </div>`:''}`;
-    }
+        </div>
+
+        <div class="cart-box">
+            <div class="cart-title"><i class="fas fa-shopping-cart"></i> Carrinho</div>
+            <div id="cart-itens">${renderCartItens()}</div>
+            
+            <div class="cart-total"><span>Total:</span><span id="cart-tot">${R(totalCarrinho())}</span></div>
+        </div>
+        <div style="margin-top:13px;">
+            <button style="width:100%;background:rgba(232,169,48,0.12);color:var(--gold);border:1px solid rgba(232,169,48,0.3);padding:13px;border-radius:10px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;font-size:0.85rem;" onclick="salvarPedido()">
+                💾 SALVAR PEDIDO
+            </button>
+        </div>
+        ${mesa?`
+        <div style="margin-top:8px;">
+            <button onclick="cancelarMesa()" style="width:100%;background:rgba(231,76,60,0.08);color:#e74c3c;border:1px solid rgba(231,76,60,0.25);padding:11px;border-radius:10px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;font-size:0.8rem;">🗑️ CANCELAR MESA</button>
+        </div>`:''}`;
+}
 
     window.toggleCat = header => { header.classList.toggle('open'); header.nextElementSibling.classList.toggle('open'); };
 
     function renderCartItens() {
-        if (!carrinho.length) return '<p style="opacity:0.3;font-size:0.82rem;text-align:center;padding:8px 0;">Nenhum item ainda.</p>';
-        return carrinho.map((it,i)=>`
-            <div class="cart-item">
-                <span style="flex:1;margin-right:6px;">${it.nome}</span>
+    if (!carrinho.length) return '<p style="opacity:0.3;font-size:0.82rem;text-align:center;padding:8px 0;">Nenhum item ainda.</p>';
+    return carrinho.map((it,i)=>`
+        <div class="cart-item" style="flex-direction:column;align-items:stretch;gap:5px;">
+            <div style="display:flex;align-items:center;gap:6px;">
+                <span style="flex:1;margin-right:6px;font-size:0.85rem;">${it.nome}</span>
                 <div class="qtd-ctrl">
                     <button class="qtd-btn" onclick="chgQtd(${i},-1)">−</button>
                     <span>${it.qty}x</span>
                     <button class="qtd-btn" onclick="chgQtd(${i},1)">+</button>
                     <span style="color:var(--gold);min-width:55px;text-align:right;">${R(it.preco*it.qty)}</span>
                 </div>
-            </div>`).join('');
-    }
+            </div>
+            <input
+                type="text"
+                placeholder="obs deste item (ex: sem cebola)"
+                value="${(it.obs||'').replace(/"/g,'&quot;')}"
+                oninput="setObsItem(${i}, this.value)"
+                style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:5px 8px;color:#fff;font-size:0.75rem;font-family:'Outfit',sans-serif;width:100%;box-sizing:border-box;"
+            />
+        </div>`).join('');
+}
 
     const totalCarrinho = () => carrinho.reduce((s,i) => s+i.preco*i.qty, 0);
 
@@ -1460,7 +1566,9 @@ window.reimprimirNota = async (dadosJson) => {
         const tv = document.getElementById('cart-tot');
         if (tv) tv.textContent = R(totalCarrinho());
     }
-
+window.setObsItem = (idx, valor) => {
+    if (carrinho[idx]) carrinho[idx].obs = valor;
+};
     window.addItem = (nome, preco) => {
         const ex = carrinho.find(i=>i.nome===nome);
         if (ex) ex.qty++; else carrinho.push({ nome, preco, qty:1 });
@@ -1567,18 +1675,145 @@ window.reimprimirNota = async (dadosJson) => {
         }
     };
 
-    window.gerarPDF = () => {
-        const { jsPDF } = window.jspdf;
-        const p = new jsPDF();
-        p.setFontSize(13);
-        p.text("Relatório de Vendas — ESPETINHO DO KAKA", 14, 14);
-        const rows = [
-            ...pedidos.map(x => ['PDV/Delivery: '+x.cliente, normalizarPagamento(x.pagamento), R(parseTotal(x.total))]),
-            ...mesasFech.map(x => [`Mesa ${x.numero} (${x.garcom})`, normalizarPagamento(x.pagamento), R(x.total)])
-        ];
-        p.autoTable({ head:[['Cliente / Mesa','Pagamento','Total']], body:rows, startY:22 });
-        p.save('caixa_espetinho.pdf');
-    };
+   window.gerarPDF = () => {
+    const { jsPDF } = window.jspdf;
+    const p = new jsPDF();
+    const dataHoje = new Date().toLocaleDateString('pt-BR');
+
+    // ── CABEÇALHO ──
+    p.setFontSize(18);
+    p.setFont('helvetica', 'bold');
+    p.text("GC BURGUER", 105, 16, { align: 'center' });
+
+    p.setFontSize(11);
+    p.setFont('helvetica', 'normal');
+    p.text(`Relatório do Dia — ${dataHoje}`, 105, 24, { align: 'center' });
+
+    p.setDrawColor(200, 200, 200);
+    p.line(14, 28, 196, 28);
+
+    let y = 36;
+
+    // ── FUNÇÃO AUXILIAR DE SEÇÃO ──
+    function cabecalhoSecao(titulo) {
+        p.setFontSize(10);
+        p.setFont('helvetica', 'bold');
+        p.setFillColor(240, 240, 240);
+        p.rect(14, y, 182, 7, 'F');
+        p.text(titulo, 16, y + 5);
+        y += 10;
+    }
+
+    // ── LANCHES & COMBOS ──
+    const nomesBebidas = new Set([
+        ...CARDAPIO['bebidas'].map(x => x.nome),
+        ...CARDAPIO['açaí'].map(x => x.nome)
+    ]);
+
+    // Agrupa todos os itens
+    const mapa = {};
+    [...pedidos, ...mesasFech].forEach(doc => {
+        (doc.itens || []).forEach(i => {
+            const nome  = i.nome || '?';
+            const preco = parseFloat(i.preco) || 0;
+            const qty   = parseInt(i.qty) || 1;
+            if (!mapa[nome]) mapa[nome] = { qty: 0, total: 0 };
+            mapa[nome].qty   += qty;
+            mapa[nome].total += preco * qty;
+        });
+    });
+
+    const lanches = Object.entries(mapa).filter(([n]) => !nomesBebidas.has(n));
+    const bebidas = Object.entries(mapa).filter(([n]) =>  nomesBebidas.has(n));
+
+    // Tabela Lanches
+    cabecalhoSecao('  LANCHES & COMBOS');
+    p.autoTable({
+        head: [['Item', 'Qtd', 'Total']],
+        body: lanches.map(([nome, d]) => [nome, `${d.qty}x`, R(d.total)]),
+        startY: y,
+        margin: { left: 14, right: 14 },
+        headStyles: { fillColor: [232, 169, 48], textColor: 0, fontStyle: 'bold' },
+        styles: { fontSize: 9 },
+        columnStyles: { 1: { halign: 'center', cellWidth: 20 }, 2: { halign: 'right', cellWidth: 30 } },
+        didDrawPage: (data) => { y = data.cursor.y + 6; }
+    });
+    y = p.lastAutoTable.finalY + 8;
+
+    // Tabela Bebidas
+    cabecalhoSecao('  BEBIDAS & AÇAÍ');
+    p.autoTable({
+        head: [['Item', 'Qtd', 'Total']],
+        body: bebidas.map(([nome, d]) => [nome, `${d.qty}x`, R(d.total)]),
+        startY: y,
+        margin: { left: 14, right: 14 },
+        headStyles: { fillColor: [52, 152, 219], textColor: 255, fontStyle: 'bold' },
+        styles: { fontSize: 9 },
+        columnStyles: { 1: { halign: 'center', cellWidth: 20 }, 2: { halign: 'right', cellWidth: 30 } },
+    });
+    y = p.lastAutoTable.finalY + 12;
+
+    // ── FATURAMENTO TOTAL ──
+    let tPix = 0, tDin = 0, tCrd = 0;
+    pedidos.forEach(p => {
+        const v  = parseTotal(p.total);
+        const pg = normalizarPagamento(p.pagamento);
+        if (pg === 'PIX') tPix += v; else if (pg === 'Dinheiro') tDin += v; else tCrd += v;
+    });
+    mesasFech.forEach(m => {
+        const v  = parseFloat(m.total) || 0;
+        const pg = normalizarPagamento(m.pagamento);
+        if (pg === 'PIX') tPix += v; else if (pg === 'Dinheiro') tDin += v; else tCrd += v;
+    });
+    const tot = tPix + tDin + tCrd;
+
+    // Verifica se precisa de nova página
+    if (y > 230) { p.addPage(); y = 20; }
+
+    p.setFontSize(10);
+    p.setFont('helvetica', 'bold');
+    p.setFillColor(240, 240, 240);
+    p.rect(14, y, 182, 7, 'F');
+    p.text('FATURAMENTO TOTAL', 16, y + 5);
+    y += 12;
+
+    p.autoTable({
+        body: [
+            ['PIX',      R(tPix)],
+            ['Dinheiro', R(tDin)],
+            ['Cartão',   R(tCrd)],
+            ['TOTAL GERAL', R(tot)],
+        ],
+        startY: y,
+        margin: { left: 14, right: 14 },
+        styles: { fontSize: 10 },
+        columnStyles: { 1: { halign: 'right' } },
+        bodyStyles: { fontStyle: 'normal' },
+        didParseCell: (data) => {
+            // Linha do total em destaque
+            if (data.row.index === 3) {
+                data.cell.styles.fontStyle  = 'bold';
+                data.cell.styles.fillColor  = [232, 169, 48];
+                data.cell.styles.textColor  = 0;
+                data.cell.styles.fontSize   = 12;
+            }
+        }
+    });
+
+    // ── RODAPÉ ──
+    const totalPages = p.internal.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+        p.setPage(i);
+        p.setFontSize(8);
+        p.setFont('helvetica', 'normal');
+        p.setTextColor(150);
+        p.text(`GC BURGUER — Gerado em ${new Date().toLocaleString('pt-BR')}`, 14, 290);
+        p.text(`Página ${i}/${totalPages}`, 196, 290, { align: 'right' });
+        p.setTextColor(0);
+    }
+
+    p.save(`relatorio_gc_${dataHoje.replace(/\//g, '-')}.pdf`);
+};
 
     // ── PDV ──────────────────────────────────────────
     let carrinhoPDV = [];
@@ -2115,6 +2350,16 @@ window.imprimirMesaBT = async (dadosJson) => {
         if (ok) window.toast('Cupom impresso!');
     } catch (err) { console.error("Erro ao imprimir mesa:", err); }
 };
+
+ // Bloqueios de segurança
+  document.addEventListener('keydown', function (e) {
+    if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) { e.preventDefault(); }
+    if (e.key === 'F12') { e.preventDefault(); }
+  });
+  document.addEventListener('keydown', function (event) {
+    if (event.ctrlKey && event.shiftKey && event.key === 'I') { event.preventDefault(); }
+  });
+  document.addEventListener('contextmenu', function (event) { event.preventDefault(); });
 </script>
 
 </body>
