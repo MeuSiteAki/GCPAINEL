@@ -1171,8 +1171,8 @@ function renderPedidos() {
     }
     pedidosSaiu.add(pedidoId);
     renderPedidos();
-    const msg = `Boa Notícia! Seu pedido já saiu para entrega. Agradecemos a preferência e volte sempre! GC BURGUER.`;
-    window.open(`https://wa.me/55${tel.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`);
+    const msg = `Boa Notícia! Seu pedido já saiu para entrega🏍️🤩. Agradecemos a preferência e volte sempre! GC BURGUER.`;
+    window.location.href = `whatsapp://send?phone=55${tel.replace(/\D/g,'')}&text=${encodeURIComponent(msg)}`;
     window.toast('Pedido marcado como saiu!');
 };
 window.reimprimirNota = async (dadosJson) => {
@@ -1273,15 +1273,15 @@ window.reimprimirNota = async (dadosJson) => {
         </div>`;
 }
 
-   window.waStatus = (tel, tipo, cliente) => {
+  window.waStatus = (tel, tipo, cliente) => {
     if (!tel) {
         Swal.fire({ icon:'warning', title:'Sem telefone!', text:'Este pedido não tem número cadastrado.', background:'#111', color:'#fff', timer:2000, showConfirmButton:false });
         return;
     }
     const msg = tipo === 'recebido'
-        ? `Olá ${cliente}!  Recebemos seu pedido. Já estamos preparando! — GC BURGUER`
+        ? `Olá ${cliente}!  Recebemos seu pedido. Já estamos preparando!😋🤩  — GC BURGUER`
         : `Olá ${cliente}!  Seu pedido saiu para entrega! Em breve chegará. — GC BURGUER`;
-    window.open(`https://wa.me/55${tel}?text=${encodeURIComponent(msg)}`);
+    window.location.href = `whatsapp://send?phone=55${tel}&text=${encodeURIComponent(msg)}`;
 };
 
     // ── EXCLUIR COM SENHA ────────────────────────────
