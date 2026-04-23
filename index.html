@@ -1011,11 +1011,12 @@ function renderPedidos() {
             const totalNum = parseTotal(p.total);
             const saiu = pedidosSaiu.has(p.id);
 
-            let bairroTag = p.bairro || '';
-            if (p.origem === 'PDV' && !bairroTag) {
-                const parts = (p.endereco || '').split(' - ');
-                bairroTag = parts.length > 1 ? parts[parts.length - 1].trim() : '';
-            }
+           let bairroTag = p.bairro || '';
+if (p.origem === 'PDV' && !bairroTag) {
+    const parts = (p.endereco || '').split(' - ');
+    bairroTag = parts.length > 1 ? parts[parts.length - 1].trim() : '';
+}
+const isRetirada = bairroTag === 'Retirada no Balcão' || bairroTag === 'Retirada' || (p.endereco || '').includes('Retirada');
 
             let taxaHtml = '';
             const tv = TAXAS_BAIRRO[bairroTag];
@@ -1038,13 +1039,16 @@ function renderPedidos() {
                 total: totalNum
             });
 
-            html += `
+         html += `
             <div class="pedido-card${saiu ? ' saiu-entrega' : ''}" id="card-${p.id}">
                 <button class="btn-del" onclick="delPedido('${p.id}')">×</button>
                 <div style="display:flex; gap:5px; flex-wrap:wrap; margin-bottom:8px;">
-                    <span class="tag tag-delivery">${p.origem === 'PDV' ? '🏪 BALCÃO/PDV' : '🛵 DELIVERY'}</span>
-                    ${bairroTag && bairroTag !== 'Retirada' ? `<span class="tag" style="background:rgba(232,169,48,0.1); color:var(--gold); border:1px solid rgba(232,169,48,0.3);">📍 ${bairroTag.toUpperCase()}</span>` : ''}
-                </div>
+    ${isRetirada ?
+        `<span class="tag" style="background:rgba(232,169,48,0.1); color:var(--gold); border:1px solid rgba(232,169,48,0.3);">📍 RETIRADA NO LOCAL</span>` :
+        `<span class="tag tag-delivery">${p.origem === 'PDV' ? '🏪 BALCÃO/PDV' : '🛵 DELIVERY'}</span>
+        ${bairroTag ? `<span class="tag" style="background:rgba(232,169,48,0.1); color:var(--gold); border:1px solid rgba(232,169,48,0.3);">📍 ${bairroTag.toUpperCase()}</span>` : ''}`
+    }
+</div>
                 ${saiu ? '<div class="badge-saiu"><i class="fas fa-motorcycle"></i> SAIU PARA ENTREGA</div>' : ''}
                 <div style="margin-top:6px;"><strong>${p.cliente.toUpperCase()}</strong></div>
                 <div style="font-size:0.78rem;opacity:0.5;margin-bottom:2px;">Pagamento: ${normalizarPagamento(p.pagamento)}</div>
