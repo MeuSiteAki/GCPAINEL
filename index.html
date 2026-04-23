@@ -1148,7 +1148,7 @@ function renderPedidos() {
     };
 
     // ── MARCAR SAIU PARA ENTREGA ─────────────────────
-   window.marcarSaiu = async (pedidoId, tel, cliente) => {
+  window.marcarSaiu = async (pedidoId, tel, cliente) => {
     if (pedidosSaiu.has(pedidoId)) {
         pedidosSaiu.delete(pedidoId);
         renderPedidos();
@@ -1156,7 +1156,20 @@ function renderPedidos() {
     }
     pedidosSaiu.add(pedidoId);
     renderPedidos();
-    const msg = `Boa Notícia! Seu pedido já saiu para entrega🏍️🤩. Agradecemos a preferência e volte sempre! GC BURGUER.`;
+
+    // Verifica se é retirada no balcão
+    const pedido = pedidos.find(p => p.id === pedidoId);
+    const bairro = pedido?.bairro || '';
+    const endereco = pedido?.endereco || '';
+    const isRetirada = bairro === 'Retirada no Balcão' || endereco === 'Retirada' || endereco.includes('Retirada');
+
+    let msg;
+    if (isRetirada) {
+        msg = `Notícia boaaa 🤩\n${cliente}, seu pedido está pronto, é só vir buscar!`;
+    } else {
+        msg = `Boa Notícia! Seu pedido já saiu para entrega🏍️🤩. Agradecemos a preferência e volte sempre! GC BURGUER.`;
+    }
+
     window.location.href = `whatsapp://send?phone=55${tel.replace(/\D/g,'')}&text=${encodeURIComponent(msg)}`;
     window.toast('Pedido marcado como saiu!');
 };
