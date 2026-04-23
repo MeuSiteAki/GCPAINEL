@@ -599,6 +599,31 @@
             margin-left: 8px;
             font-weight: 700;
         }
+        /* ── MODO FECHADO ── */
+.btn-fechar-loja {
+    background: rgba(231,76,60,0.12);
+    color: #e74c3c;
+    border: 1px solid rgba(231,76,60,0.35);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Outfit', sans-serif;
+    transition: 0.18s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 8px;
+}
+.btn-fechar-loja.aberta {
+    background: rgba(46,204,113,0.12);
+    color: #2ecc71;
+    border-color: rgba(46,204,113,0.35);
+}
+.btn-fechar-loja:hover { filter: brightness(1.3); }
+/* ── INPUT SENHA COM OLHINHO ── */
+.swal2-input[type="password"] { padding-right: 44px !important; }
     </style>
 </head>
 <body>
@@ -614,6 +639,10 @@
             <div class="menu-extras" id="menu-extras">
                 <button class="tab-btn" onclick="switchTabProtegida('aba-estoque',this)"><i class="fas fa-box"></i> ESTOQUE</button>
                 <button class="tab-btn" onclick="switchTabProtegida('aba-caixa',this)"><i class="fas fa-wallet"></i> CAIXA</button>
+                <button id="btn-status-loja" class="btn-fechar-loja" onclick="toggleStatusLoja()">
+    <i class="fas fa-store-slash" id="loja-icon"></i>
+    <span id="loja-label">LOJA</span>
+</button>
             </div>
             <button id="btn-som" onclick="toggleSom()" title="Ativar/Desativar som" style="background:none;border:1px solid rgba(232,169,48,0.3);color:var(--gold);border-radius:8px;padding:8px 12px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:0.75rem;font-weight:700;display:flex;align-items:center;gap:6px;transition:0.2s;margin-left:8px;">
     <i class="fas fa-volume-mute" id="som-icon"></i> <span id="som-label">SOM</span>
@@ -724,11 +753,11 @@
 
     const CARDAPIO = {
     'hamburgueres': [
-        { nome: 'X-Tudo', preco: 11.99, img: 'x-tudo.jpg' },
-        { nome: 'Calabresa Prime', preco: 13.99, img: 'xcala.jpg' },
-        { nome: 'Bacon Prime', preco: 15.99, img: 'x-bacon.jpg' },
-        { nome: 'Cala-Bacon Prime', preco: 17.99, img: 'xcalas.jpg' },
-        { nome: 'Imperador Duplo', preco: 19.99, img: 'xtud.jpg' }
+        { nome: 'X-Tudo', preco: 12.00, img: 'x-tudo.jpg' },
+        { nome: 'Calabresa Prime', preco: 14.00, img: 'xcala.jpg' },
+        { nome: 'Bacon Prime', preco: 16.00, img: 'x-bacon.jpg' },
+        { nome: 'Cala-Bacon Prime', preco: 18.00, img: 'xcalas.jpg' },
+        { nome: 'Imperador Duplo', preco: 20.00, img: 'xtud.jpg' }
     ],
     'combos': [
         { nome: 'Barca Simples', preco: 30.00, img: 'c5.jpeg' },
@@ -974,49 +1003,6 @@ function renderPedidos() {
     if (!el) return;
     let html = '';
 
-    // ── MESAS ABERTAS (ocupadas) ──
-    const mesasOcupadas = Object.values(mesasAtivas);
-    if (mesasOcupadas.length) {
-        html += `<div class="section-label">🍽️ Mesas Abertas <span class="section-label-count">${mesasOcupadas.length}</span></div>`;
-        const visiveis = verMaisMesas ? mesasOcupadas : mesasOcupadas.slice(0, LIMITE_INICIAL_PEDIDOS);
-        visiveis.forEach(mesa => {
-            const val = mesa.itens.reduce((s, x) => s + x.preco * x.qty, 0);
-            const obsGeralHtml = mesa.obs
-                ? `<div class="obs-badge"><i class="fas fa-sticky-note"></i><span>${mesa.obs}</span></div>`
-                : '';
-            html += `
-            <div class="pedido-card" style="border-top-color:var(--orange);">
-                <span class="tag" style="background:rgba(230,126,34,0.12);color:var(--orange);border:1px solid rgba(230,126,34,0.35);">🍽️ MESA ${mesa.numero} — ABERTA</span>
-                <div><strong>🧑‍🍳 ${mesa.garcom}</strong></div>
-                <div style="font-size:0.76rem;opacity:0.45;margin-bottom:8px;">${mesa.itens.reduce((s, x) => s + x.qty, 0)} itens no pedido</div>
-                <div class="lista-itens-card">
-                    ${mesa.itens.map(i => `
-                        <div class="item-linha-wrapper" style="margin-bottom: 5px;">
-                            <div class="item-linha"><span>${i.qty}x ${i.nome}</span><b>${R(i.preco * i.qty)}</b></div>
-                            ${i.obs ? `<div style="font-size:0.72rem; color:var(--gold); margin-left:15px; opacity:0.8;">↳ ${i.obs.toUpperCase()}</div>` : ''}
-                        </div>
-                    `).join('')}
-                </div>
-                ${obsGeralHtml}
-                <div style="font-size:1.18rem;color:var(--orange);font-weight:700;">${R(val)}</div>
-                <div style="display:flex;gap:8px;margin-top:12px;">
-                    <button onclick="abrirMesa('${mesa.id}',${mesa.numero})" style="flex:1;background:rgba(232,169,48,0.12);color:var(--gold);border:1px solid rgba(232,169,48,0.3);padding:9px;border-radius:8px;cursor:pointer;font-weight:700;font-family:'Outfit',sans-serif;font-size:0.78rem;">
-                        <i class="fas fa-plus"></i> PEDIDO
-                    </button>
-                    <button onclick="abrirFechamentoDireto('${mesa.id}',${mesa.numero})" style="flex:1;background:rgba(46,204,113,0.1);color:var(--green);border:1px solid rgba(46,204,113,0.3);padding:9px;border-radius:8px;cursor:pointer;font-weight:700;font-family:'Outfit',sans-serif;font-size:0.78rem;">
-                        <i class="fas fa-check-circle"></i> FECHAR
-                    </button>
-                </div>
-            </div>`;
-        });
-        if (mesasOcupadas.length > LIMITE_INICIAL_PEDIDOS) {
-            html += `<button class="btn-ver-mais" onclick="toggleVerMais('mesas')">
-                <i class="fas fa-${verMaisMesas ? 'chevron-up' : 'chevron-down'}"></i>
-                ${verMaisMesas ? 'Ver menos' : `Ver mais (${mesasOcupadas.length - LIMITE_INICIAL_PEDIDOS} ocultos)`}
-            </button>`;
-        }
-    }
-
     // ── DELIVERY & BALCÃO ──
     if (pedidos.length) {
         html += `<div class="section-label">🛵 Delivery & Balcão <span class="section-label-count">${pedidos.length}</span></div>`;
@@ -1025,7 +1011,6 @@ function renderPedidos() {
             const totalNum = parseTotal(p.total);
             const saiu = pedidosSaiu.has(p.id);
 
-            // Detecção de Bairro para tag e taxa
             let bairroTag = p.bairro || '';
             if (p.origem === 'PDV' && !bairroTag) {
                 const parts = (p.endereco || '').split(' - ');
@@ -1061,14 +1046,14 @@ function renderPedidos() {
                     ${bairroTag && bairroTag !== 'Retirada' ? `<span class="tag" style="background:rgba(232,169,48,0.1); color:var(--gold); border:1px solid rgba(232,169,48,0.3);">📍 ${bairroTag.toUpperCase()}</span>` : ''}
                 </div>
                 ${saiu ? '<div class="badge-saiu"><i class="fas fa-motorcycle"></i> SAIU PARA ENTREGA</div>' : ''}
-               <div style="margin-top:6px;"><strong>${p.cliente.toUpperCase()}</strong></div>
-<div style="font-size:0.78rem;opacity:0.5;margin-bottom:2px;">Pagamento: ${normalizarPagamento(p.pagamento)}</div>
-<div style="font-size:0.78rem;margin-bottom:8px;">
-    ${p.telefone 
-        ? `<a href="https://wa.me/55${(p.telefone||'').replace(/\D/g,'')}" target="_blank" style="color:#25d366;text-decoration:none;"><i class="fab fa-whatsapp"></i> ${p.telefone}</a>` 
-        : '<span style="opacity:0.35;"><i class="fas fa-phone-slash"></i> Sem telefone</span>'
-    }
-</div>
+                <div style="margin-top:6px;"><strong>${p.cliente.toUpperCase()}</strong></div>
+                <div style="font-size:0.78rem;opacity:0.5;margin-bottom:2px;">Pagamento: ${normalizarPagamento(p.pagamento)}</div>
+                <div style="font-size:0.78rem;margin-bottom:8px;">
+                    ${p.telefone 
+                        ? `<a href="https://wa.me/55${(p.telefone||'').replace(/\D/g,'')}" target="_blank" style="color:#25d366;text-decoration:none;"><i class="fab fa-whatsapp"></i> ${p.telefone}</a>` 
+                        : '<span style="opacity:0.35;"><i class="fas fa-phone-slash"></i> Sem telefone</span>'
+                    }
+                </div>
                 <div class="lista-itens-card">
                     ${p.itens.map(i => {
                         const vUnit = parseFloat(i.preco) || parseFloat(i.precoTotal) || 0;
@@ -1085,15 +1070,15 @@ function renderPedidos() {
                 ${taxaHtml}
                 <div style="font-size:1.18rem;color:var(--gold);font-weight:700;">${R(totalNum)}</div>
                 <div class="status-actions">
-    <button class="btn-wa bg-blue" onclick="waStatus('${(p.telefone||'').replace(/\D/g,'')}','recebido','${p.cliente}')">RECEBIDO</button>
-    <button class="btn-wa bg-green${saiu ? ' btn-wa-ativo' : ''}" onclick="marcarSaiu('${p.id}','${(p.telefone||'').replace(/\D/g,'')}','${p.cliente}')">
-        ${saiu ? '✅ SAIU' : 'SAIU ENTREGA'}
-    </button>
-</div>
-             <button class="btn-imprimir-bt" onclick='reimprimirNota(${JSON.stringify(dadosBT)})'>
-    <i class="fas fa-print"></i> REIMPRIMIR NOTA
-</button>
-</div>`;
+                    <button class="btn-wa bg-blue" onclick="waStatus('${(p.telefone||'').replace(/\D/g,'')}','recebido','${p.cliente}')">RECEBIDO</button>
+                    <button class="btn-wa bg-green${saiu ? ' btn-wa-ativo' : ''}" onclick="marcarSaiu('${p.id}','${(p.telefone||'').replace(/\D/g,'')}','${p.cliente}')">
+                        ${saiu ? '✅ SAIU' : 'SAIU ENTREGA'}
+                    </button>
+                </div>
+                <button class="btn-imprimir-bt" onclick='reimprimirNota(${JSON.stringify(dadosBT)})'>
+                    <i class="fas fa-print"></i> REIMPRIMIR NOTA
+                </button>
+            </div>`;
         });
         if (pedidos.length > LIMITE_INICIAL_PEDIDOS) {
             html += `<button class="btn-ver-mais" onclick="toggleVerMais('delivery')">
@@ -2105,6 +2090,61 @@ window.setObsItem = (idx, valor) => {
         if (sug && e.target.id !== 'pdv-nome') sug.style.display = 'none';
     });
 
+// ── STATUS DA LOJA ───────────────────────────────
+let lojaAberta = true;
+
+async function carregarStatusLoja() {
+    try {
+        const snap = await getDoc(doc(db, 'config', 'loja'));
+        lojaAberta = snap.exists() ? (snap.data().aberta !== false) : true;
+        atualizarBtnLoja();
+    } catch(e) { console.error(e); }
+}
+
+function atualizarBtnLoja() {
+    const btn   = document.getElementById('btn-status-loja');
+    const icon  = document.getElementById('loja-icon');
+    const label = document.getElementById('loja-label');
+    if (!btn) return;
+    if (lojaAberta) {
+        btn.className = 'btn-fechar-loja aberta';
+        icon.className = 'fas fa-store';
+        label.textContent = 'LOJA ABERTA';
+    } else {
+        btn.className = 'btn-fechar-loja';
+        icon.className = 'fas fa-store-slash';
+        label.textContent = 'LOJA FECHADA';
+    }
+}
+
+window.toggleStatusLoja = async () => {
+    const novoStatus = !lojaAberta;
+    const msg = novoStatus
+        ? 'Abrir a loja para os clientes?'
+        : 'Fechar a loja? Os clientes verão uma tela de indisponível.';
+    const { isConfirmed } = await Swal.fire({
+        title: novoStatus ? '🟢 Abrir Loja?' : '🔴 Fechar Loja?',
+        text: msg,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: novoStatus ? 'Sim, abrir!' : 'Sim, fechar!',
+        confirmButtonColor: novoStatus ? '#27ae60' : '#e74c3c',
+        cancelButtonText: 'Cancelar',
+        background: '#111', color: '#fff',
+    });
+    if (!isConfirmed) return;
+    try {
+        await setDoc(doc(db, 'config', 'loja'), { aberta: novoStatus });
+        lojaAberta = novoStatus;
+        atualizarBtnLoja();
+        window.toast(novoStatus ? '✅ Loja aberta!' : '🔴 Loja fechada!');
+    } catch(e) {
+        Swal.fire({ icon:'error', title:'Erro!', text: e.message, background:'#111', color:'#fff' });
+    }
+};
+
+// Carrega status ao iniciar
+carregarStatusLoja();
 </script>
 
 <!-- ════════════════════════════════════════════
@@ -2388,6 +2428,43 @@ window.tocarSino = () => {
     const b = document.getElementById('bell');
     b.currentTime = 0;
     b.play().catch(e => console.warn('Áudio bloqueado:', e));
+};
+
+// ── OLHINHO NAS SENHAS DO SWAL ────────────────
+document.addEventListener('keydown', () => {}, true);
+document.addEventListener('swalOpened', () => {}, true);
+
+const _swalOrig = Swal.fire.bind(Swal);
+Swal.fire = function(opts, ...args) {
+    if (opts && opts.input === 'password') {
+        const _didOpen = opts.didOpen;
+        opts.didOpen = (popup) => {
+            if (_didOpen) _didOpen(popup);
+            const inp = popup.querySelector('.swal2-input');
+            if (!inp) return;
+            inp.style.paddingRight = '44px';
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.innerHTML = '<i class="fas fa-eye"></i>';
+            btn.style.cssText = `
+                position:absolute; right:60px; top:55%; transform:translateY(-50%);
+                background:none; border:none; color:rgba(255,255,255,0.4);
+                cursor:pointer; font-size:1rem; padding:4px; line-height:1;
+                transition: color 0.2s;
+            `;
+            btn.onmouseenter = () => btn.style.color = 'var(--gold)';
+            btn.onmouseleave = () => btn.style.color = 'rgba(255,255,255,0.4)';
+            btn.onclick = () => {
+                const visivel = inp.type === 'text';
+                inp.type = visivel ? 'password' : 'text';
+                btn.innerHTML = `<i class="fas fa-eye${visivel ? '' : '-slash'}"></i>`;
+                inp.focus();
+            };
+            inp.parentElement.style.position = 'relative';
+            inp.parentElement.appendChild(btn);
+        };
+    }
+    return _swalOrig(opts, ...args);
 };
  // Bloqueios de segurança
 //   document.addEventListener('keydown', function (e) {
