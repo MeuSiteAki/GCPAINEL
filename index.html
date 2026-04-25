@@ -839,14 +839,16 @@
         "Retirada no Balcão": 0.00
     };
 
-    function normalizarPagamento(pag) {
-        if (!pag) return 'Outros';
-        const p = pag.trim().toLowerCase();
-        if (p === 'pix') return 'PIX';
-        if (p === 'dinheiro') return 'Dinheiro';
-        if (p === 'cartão' || p === 'cartao' || p === 'credito' || p === 'crédito' || p === 'débito' || p === 'debito') return 'Cartão';
-        return pag;
-    }
+   function normalizarPagamento(pag) {
+    if (!pag) return 'Outros';
+    const p = pag.trim().toLowerCase();
+    if (p.includes('pix'))      return 'PIX';
+    if (p.includes('dinheiro')) return 'Dinheiro';
+    if (p.includes('cartão') || p.includes('cartao') || 
+        p.includes('credito')  || p.includes('crédito') || 
+        p.includes('débito')   || p.includes('debito'))  return 'Cartão';
+    return 'Outros';
+}
 
     const R = v => (typeof v === 'number' ? v : 0).toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
 
@@ -1409,37 +1411,139 @@ window.reimprimirNota = async (dadosJson) => {
         renderFechamento();
     };
 
-    function renderFechamento() {
-        const mesa = mesasAtivas[mesaAtual?.mesaId];
-        if (!mesa) return;
-        const tot = mesa.itens.reduce((s,i) => s + (i.preco * i.qty), 0);
-        pagAtual = '';
-        const obsHtml = mesa.obs
-            ? `<div class="obs-badge" style="margin-bottom:10px;"><i class="fas fa-sticky-note"></i><span>${mesa.obs}</span></div>`
-            : '';
-        document.getElementById('modal-body').innerHTML = `
-            <div style="text-align:center;margin-bottom:14px;">
-                <div style="font-size:1.5rem;">🧾</div>
-                <div style="color:var(--gold);font-weight:700;margin-top:4px;font-family:'Bebas Neue',sans-serif;letter-spacing:2px;font-size:1.2rem;">Mesa ${mesa.numero} — ${mesa.garcom}</div>
-            </div>
-            ${obsHtml}
-            ${mesa.itens.map(i => `
-                <div class="ticket-item">
-                    <span>${i.qty}x ${i.nome}</span>
-                    <span>${R(i.preco * i.qty)}</span>
+   function renderFechamento() {
+    const mesa = mesasAtivas[mesaAtual?.mesaId];
+    if (!mesa) return;
+    const tot = mesa.itens.reduce((s,i) => s + (i.preco * i.qty), 0);
+
+    if (!window._pagsMesa) window._pagsMesa = [];
+
+    const totalPago = window._pagsMesa.reduce((s,p) => s + p.valor, 0);
+    const restante  = Math.max(0, tot - totalPago);
+    const quitado   = restante <= 0.01;
+
+    const obsHtml = mesa.obs
+        ? `<div class="obs-badge" style="margin-bottom:10px;"><i class="fas fa-sticky-note"></i><span>${mesa.obs}</span></div>`
+        : '';
+
+    const listaPagementos = window._pagsMesa.length
+        ? `<div style="margin:10px 0;background:rgba(255,255,255,0.04);border-radius:8px;padding:10px;border:1px solid rgba(255,255,255,0.08);">
+            <div style="font-size:0.72rem;color:rgba(255,255,255,0.4);font-weight:700;letter-spacing:1px;margin-bottom:6px;">PAGAMENTOS REGISTRADOS:</div>
+            ${window._pagsMesa.map((p,i) => `
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:0.84rem;">
+                    <span>${p.metodo}</span>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <span style="color:var(--green);font-weight:700;">${R(p.valor)}</span>
+                        <button onclick="window._removePagMesa(${i})" style="background:rgba(231,76,60,0.15);border:1px solid rgba(231,76,60,0.3);color:#e74c3c;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:0.8rem;font-family:'Outfit',sans-serif;">✕</button>
+                    </div>
                 </div>`).join('')}
-            <div class="ticket-total"><span>TOTAL</span><span>${R(tot)}</span></div>
-            <p style="margin:15px 0 8px;font-size:0.82rem;opacity:0.5;">Forma de pagamento:</p>
-            <div class="pag-btns">
-                <button class="pag-btn" onclick="selPag('PIX',this)">💠 PIX</button>
-                <button class="pag-btn" onclick="selPag('Dinheiro',this)">💵 Dinheiro</button>
-                <button class="pag-btn" onclick="selPag('Cartão',this)">💳 Cartão</button>
+            <div style="display:flex;justify-content:space-between;padding-top:8px;font-size:0.82rem;">
+                <span style="opacity:0.5;">Pago:</span><span style="color:var(--green);font-weight:700;">${R(totalPago)}</span>
             </div>
-            <div class="act-row" style="margin-top:15px;">
-                <button style="background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.6);border:1px solid var(--border);" onclick="fecharModal()">← Cancelar</button>
-                <button style="background:#27ae60;color:white;" onclick="confirmarFechamento(${tot})">✅ CONFIRMAR</button>
-            </div>`;
+            ${!quitado ? `<div style="display:flex;justify-content:space-between;font-size:0.82rem;margin-top:3px;">
+                <span style="opacity:0.5;">Falta:</span><span style="color:#e74c3c;font-weight:700;">${R(restante)}</span>
+            </div>` : `<div style="color:var(--green);font-size:0.78rem;font-weight:700;margin-top:5px;text-align:center;">✅ VALOR QUITADO</div>`}
+          </div>`
+        : '';
+
+    document.getElementById('modal-body').innerHTML = `
+        <div style="text-align:center;margin-bottom:14px;">
+            <div style="font-size:1.5rem;">🧾</div>
+            <div style="color:var(--gold);font-weight:700;margin-top:4px;font-family:'Bebas Neue',sans-serif;letter-spacing:2px;font-size:1.2rem;">Mesa ${mesa.numero} — ${mesa.garcom}</div>
+        </div>
+        ${obsHtml}
+        ${mesa.itens.map(i => `
+            <div class="ticket-item">
+                <span>${i.qty}x ${i.nome}</span>
+                <span>${R(i.preco * i.qty)}</span>
+            </div>`).join('')}
+        <div class="ticket-total"><span>TOTAL</span><span>${R(tot)}</span></div>
+
+        ${listaPagementos}
+
+        <p style="margin:15px 0 8px;font-size:0.82rem;opacity:0.5;">
+            ${quitado ? 'Adicionar mais um pagamento (opcional):' : `Adicionar pagamento (restam ${R(restante)}):`}
+        </p>
+        <div class="pag-btns">
+            <button class="pag-btn" onclick="window._addPagMesa('PIX', ${restante}, ${tot})">💠 PIX</button>
+            <button class="pag-btn" onclick="window._addPagMesa('Dinheiro', ${restante}, ${tot})">💵 Dinheiro</button>
+            <button class="pag-btn" onclick="window._addPagMesa('Cartão', ${restante}, ${tot})">💳 Cartão</button>
+        </div>
+
+        <div class="act-row" style="margin-top:15px;">
+            <button style="background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.6);border:1px solid var(--border);" onclick="fecharModal()">← Cancelar</button>
+            <button style="background:${quitado ? '#27ae60' : '#555'};color:white;cursor:${quitado ? 'pointer' : 'not-allowed'};" 
+                    onclick="${quitado ? `confirmarFechamento(${tot})` : 'window._avisoFaltaPag()'}">
+                ✅ CONFIRMAR
+            </button>
+        </div>`;
+};
+
+window._addPagMesa = async (metodo, restante, tot) => {
+    if (!window._pagsMesa) window._pagsMesa = [];
+    const jaPago = window._pagsMesa.reduce((s,p) => s + p.valor, 0);
+    const falta  = Math.max(0, tot - jaPago);
+
+    if (falta <= 0.01) {
+        Swal.fire({ icon:'info', title:'Já quitado!', text:'O valor total já foi atingido.', background:'#111', color:'#fff', timer:1800, showConfirmButton:false });
+        return;
     }
+
+    const { value: valorStr } = await Swal.fire({
+        title: `Pagar com ${metodo}`,
+        text: `Restam: ${R(falta)}`,
+        input: 'number',
+        inputValue: falta.toFixed(2),
+        inputAttributes: { step: '0.01', min: '0.01' },
+        showCancelButton: true,
+        confirmButtonColor: '#e8a930',
+        cancelButtonText: 'Cancelar',
+        background: '#111', color: '#fff',
+        inputValidator: (v) => {
+            if (!v || parseFloat(v) <= 0) return 'Digite um valor válido!';
+            if (parseFloat(v) > falta + 0.05) return `Valor maior que o restante (${R(falta)})!`;
+        }
+    });
+
+    if (!valorStr) return;
+
+    const valor = parseFloat(valorStr);
+    window._pagsMesa.push({ metodo, valor });
+
+    if (metodo === 'Dinheiro') {
+        const { value: trocoPara } = await Swal.fire({
+            title: '💵 Troco',
+            text: `Pago: ${R(valor)}. Troco para quanto?`,
+            input: 'number',
+            inputValue: valor.toFixed(2),
+            inputAttributes: { step: '0.01', min: valor.toFixed(2) },
+            showCancelButton: true,
+            confirmButtonColor: '#e8a930',
+            cancelButtonText: 'Sem troco',
+            background: '#111', color: '#fff',
+        });
+        if (trocoPara) {
+            const troco = parseFloat(trocoPara) - valor;
+            if (troco > 0) {
+                Swal.fire({ icon:'info', title:'Troco', html:`Troco de <b>${R(troco)}</b>`, background:'#111', color:'#fff', timer:2500, showConfirmButton:false });
+            }
+        }
+    }
+
+    renderFechamento();
+};
+
+window._removePagMesa = (idx) => {
+    if (window._pagsMesa) window._pagsMesa.splice(idx, 1);
+    renderFechamento();
+};
+
+window._avisoFaltaPag = () => {
+    const falta = window._pagsMesa
+        ? Math.max(0, (mesasAtivas[mesaAtual?.mesaId]?.itens?.reduce((s,i)=>s+i.preco*i.qty,0)||0) - window._pagsMesa.reduce((s,p)=>s+p.valor,0))
+        : 0;
+    Swal.fire({ icon:'warning', title:'Pagamento incompleto!', text:`Faltam ${R(falta)} para quitar o total.`, background:'#111', color:'#fff', confirmButtonColor:'#e8a930' });
+};
 
     window.abrirMesa = (mesaId, numero) => {
         mesaAtual   = { mesaId, numero };
@@ -1633,17 +1737,22 @@ window.setObsItem = (idx, valor) => {
         el.classList.add('sel');
     };
 
-    window.confirmarFechamento = async tot => {
-        if (!pagAtual) { Swal.fire({ icon:'warning', title:'Selecione o pagamento!', background:'#111', color:'#fff' }); return; }
-        const mesa = mesasAtivas[mesaAtual.mesaId];
-        await addDoc(collection(db,'mesas_historico'), {
-            numero: mesa.numero, garcom: mesa.garcom, itens: mesa.itens,
-            obs: mesa.obs||'', pagamento: pagAtual, total: tot, fechadoEm: new Date()
-        });
-        await deleteDoc(doc(db,'mesas',mesaAtual.mesaId));
-        fecharModal();
-        Swal.fire({ icon:'success', title:'🎉 Mesa Fechada!', html:`Total: <b>${R(tot)}</b><br>Pagamento: ${pagAtual}`, background:'#111', color:'#fff', timer:2500, showConfirmButton:false });
-    };
+   window.confirmarFechamento = async tot => {
+    const mesa = mesasAtivas[mesaAtual.mesaId];
+    const pagamentos = window._pagsMesa || [];
+    const resumoPag = pagamentos.length
+        ? pagamentos.map(p => `${p.metodo} (${R(p.valor)})`).join(' + ')
+        : pagAtual || 'Não informado';
+
+    await addDoc(collection(db,'mesas_historico'), {
+        numero: mesa.numero, garcom: mesa.garcom, itens: mesa.itens,
+        obs: mesa.obs||'', pagamento: resumoPag, total: tot, fechadoEm: new Date()
+    });
+    await deleteDoc(doc(db,'mesas',mesaAtual.mesaId));
+    window._pagsMesa = [];
+    fecharModal();
+    Swal.fire({ icon:'success', title:'🎉 Mesa Fechada!', html:`Total: <b>${R(tot)}</b><br>Pagamento: ${resumoPag}`, background:'#111', color:'#fff', timer:2500, showConfirmButton:false });
+};
 
     window.cancelarMesa = async () => {
         const r = await Swal.fire({ title:'Cancelar mesa?', text:'Todos os itens serão removidos.', icon:'warning', showCancelButton:true, confirmButtonColor:'#c0392b', confirmButtonText:'Cancelar mesa', background:'#111', color:'#fff' });
