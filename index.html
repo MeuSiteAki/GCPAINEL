@@ -2438,7 +2438,12 @@ if (met) met.innerHTML = `
             else { garcomAtual = mesa.garcom; carrinho = mesa.itens.map(x => ({ ...x })); renderCardapio(); }
             document.getElementById('modal').classList.add('open');
         };
+
+        // descontos
 window.aplicarDesconto = async (pedidoId, totalAtual) => {
+    const pedido = pedidos.find(p => p.id === pedidoId);
+    const descontoAnterior = parseFloat(pedido?.desconto) || 0;
+
     const { value: pct } = await Swal.fire({
         title: '🏷️ Aplicar Desconto',
         html: `<div style="font-size:0.85rem;opacity:0.6;margin-bottom:8px;">Total atual: <b style="color:#2ecc71;">${R(totalAtual)}</b></div>`,
@@ -2471,10 +2476,10 @@ window.aplicarDesconto = async (pedidoId, totalAtual) => {
     });
     if (!isConfirmed) return;
     try {
-       await updateDoc(doc(db, 'pedidos', pedidoId), { 
-    total: novoTotal,
-    desconto: desconto  // ← adiciona isso
-});
+        await updateDoc(doc(db, 'pedidos', pedidoId), {
+            total: novoTotal,
+            desconto: descontoAnterior + desconto
+        });
         toast(`Desconto de ${pct}% aplicado!`);
     } catch (e) {
         Swal.fire({ icon: 'error', title: 'Erro!', text: e.message, background: '#111', color: '#fff' });
@@ -2482,6 +2487,9 @@ window.aplicarDesconto = async (pedidoId, totalAtual) => {
 };
 
 window.aplicarDescontoMesa = async (mesaId, totalAtual) => {
+    const mesa = mesasFech.find(m => m.id === mesaId);
+    const descontoAnterior = parseFloat(mesa?.desconto) || 0;
+
     const { value: pct } = await Swal.fire({
         title: '🏷️ Aplicar Desconto',
         html: `<div style="font-size:0.85rem;opacity:0.6;margin-bottom:8px;">Total atual: <b style="color:#2ecc71;">${R(totalAtual)}</b></div>`,
@@ -2514,15 +2522,17 @@ window.aplicarDescontoMesa = async (mesaId, totalAtual) => {
     });
     if (!isConfirmed) return;
     try {
-        await updateDoc(doc(db, 'mesas_historico', mesaId), { 
-    total: novoTotal,
-    desconto: desconto  // ← adiciona isso
-});
+        await updateDoc(doc(db, 'mesas_historico', mesaId), {
+            total: novoTotal,
+            desconto: descontoAnterior + desconto
+        });
         toast(`Desconto de ${pct}% aplicado!`);
     } catch (e) {
         Swal.fire({ icon: 'error', title: 'Erro!', text: e.message, background: '#111', color: '#fff' });
     }
 };
+
+// fechar 
         window.fecharModal = () => {
             document.getElementById('modal').classList.remove('open');
             mesaAtual = null; carrinho = [];
