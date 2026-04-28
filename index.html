@@ -1,1192 +1,3022 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GC BURGUER</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <title>GC BURGUER — PAINEL</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <style>
         :root {
-            --dark: #0f0f0f;
-            --rustic: #2d1e14;
-            --gold: #e67e22;
-            --white: #f4f4f4;
-            --green: #25d366;
-            --gray: #333;
+            --gold: #e8a930;
+            --gold-dim: rgba(232, 169, 48, 0.15);
+            --dark: #080808;
+            --card: #111111;
+            --card2: #161616;
+            --border: rgba(255, 255, 255, 0.07);
+            --green: #2ecc71;
+            --red: #e74c3c;
+            --orange: #e67e22;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        * {
+            box-sizing: border-box;
+        }
 
         body {
-            background-color: var(--dark);
-            background-image: url('https://www.transparenttextures.com/patterns/dark-wood.png');
-            color: var(--white);
-            overflow-x: hidden;
+            background: var(--dark);
+            background-image: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(232, 169, 48, 0.07), transparent);
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
         }
 
-        header { 
-            text-align: center; 
-            padding: 40px 20px; 
-            background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.6));
-            border-bottom: 3px solid var(--gold);
+        .topbar {
+            background: rgba(10, 10, 10, 0.97);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
-        header h1 { font-size: 1.8rem; letter-spacing: 2px; color: var(--gold); }
 
-        .tabs { 
-            display: flex; justify-content: center; gap: 15px; 
-            position: sticky; top: 0; z-index: 100; 
-            background: rgba(15, 15, 15, 0.95); padding: 15px;
-            backdrop-filter: blur(5px);
+        .topbar-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
         }
+
+        .brand {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.3rem;
+            letter-spacing: 3px;
+            color: var(--gold);
+            padding: 12px 16px;
+            border-right: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        .tabs-menu {
+            display: flex;
+            flex: 1;
+            align-items: center;
+            overflow: visible;
+            position: relative;
+        }
+
         .tab-btn {
-            padding: 10px 25px; border: 2px solid var(--gold); background: transparent;
-            color: var(--gold); border-radius: 25px; cursor: pointer; font-weight: 800;
-            transition: 0.3s; display: flex; align-items: center; gap: 8px;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.4);
+            padding: 16px 14px;
+            cursor: pointer;
+            font-weight: 600;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            font-family: 'Outfit', sans-serif;
+            transition: 0.2s;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
         }
-        .tab-btn.active { background: var(--gold); color: white; box-shadow: 0 0 15px rgba(230, 126, 34, 0.4); }
 
-        .container {
-            display: grid; grid-template-columns: repeat(2, 1fr); 
-            gap: 15px; padding: 15px; max-width: 1100px; margin: auto;
+        .tab-btn::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 14px;
+            right: 14px;
+            height: 2px;
+            background: var(--gold);
+            transform: scaleX(0);
+            transition: transform 0.2s;
         }
-        @media (min-width: 768px) { .container { grid-template-columns: repeat(3, 1fr); } }
 
-        .card { 
-            background: var(--rustic); border-radius: 15px; overflow: hidden; 
-            display: flex; flex-direction: column; border: 1px solid #444;
+        .tab-btn.active::after {
+            transform: scaleX(1);
         }
-        .card img { width: 100%; height: 140px; object-fit: cover; border-bottom: 2px solid var(--gold); }
-        .card-info { padding: 12px; flex-grow: 1; text-align: center; }
-        .card-title { font-size: 0.95rem; font-weight: 600; margin-bottom: 4px; height: 40px; overflow: hidden; }
-        /* NOVO: descrição do item no card */
-        .card-desc { font-size: 0.7rem; color: #aaa; margin-bottom: 8px; font-style: italic; line-height: 1.3; }
-        .card-price { color: var(--gold); font-weight: 800; font-size: 1.1rem; }
-        .btn-add { 
-            background: var(--gold); border: none; color: white; width: 100%; 
-            padding: 12px; font-weight: bold; cursor: pointer; transition: 0.2s;
-        }
-        .btn-add:active { transform: scale(0.95); }
 
-        .cart-sidebar {
-            position: fixed; top: 0; right: -100%; width: 100%; max-width: 400px; height: 100%;
-            background: #151515; z-index: 1000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex; flex-direction: column;
+        .tab-btn:hover {
+            color: rgba(255, 255, 255, 0.75);
+            background: rgba(255, 255, 255, 0.03);
         }
-        .cart-sidebar.open { right: 0; }
-        .cart-header { padding: 20px; background: var(--rustic); display: flex; justify-content: space-between; align-items: center; }
-        
-        #cart-items { flex: 1; overflow-y: auto; padding: 20px; }
-        .cart-item { 
-            background: #222; padding: 12px; border-radius: 10px; margin-bottom: 10px;
-            border-left: 4px solid var(--gold); position: relative;
-        }
-        .cart-item-header { display: flex; justify-content: space-between; font-weight: bold; }
-        .cart-item-detail { font-size: 0.8rem; color: #aaa; margin-top: 5px; font-style: italic; }
-        /* NOVO: controles de quantidade no carrinho */
-        .cart-item-qty {
-            display: flex; align-items: center; gap: 8px; margin-top: 8px;
-        }
-        .qty-btn {
-            background: var(--gold); border: none; color: white; width: 28px; height: 28px;
-            border-radius: 50%; cursor: pointer; font-size: 1rem; font-weight: bold;
-            display: flex; align-items: center; justify-content: center; transition: 0.2s;
-        }
-        .qty-btn:active { transform: scale(0.9); }
-        .qty-num { font-weight: bold; font-size: 0.95rem; min-width: 20px; text-align: center; }
 
-        .cart-footer { padding: 10px 14px; background: #1a1a1a; border-top: 2px solid var(--gold); }
-       .campo { margin-bottom: 5px; }
-.campo label { font-size: 0.75rem; color: var(--gold); font-weight: bold; text-transform: uppercase; margin-left: 5px; }
-.campo input, .campo select { 
-    width: 100%; padding: 7px 10px; border-radius: 8px; border: 1px solid #444; 
-    background: #000; color: white; margin-top: 2px; font-size: 0.85rem;
-}
-
-        /* NOVO: radio entrega/retirada */
-       .entrega-opcoes {
-    display: flex; gap: 8px; margin-bottom: 6px;
-}
-.entrega-opcao {
-    flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
-    padding: 7px; border: 2px solid #444; border-radius: 10px; cursor: pointer;
-    transition: 0.2s; font-size: 0.8rem; font-weight: bold;
-}
-        .entrega-opcao input[type="radio"] { accent-color: var(--gold); width: 16px; height: 16px; }
-        .entrega-opcao.selecionada { border-color: var(--gold); color: var(--gold); background: rgba(230,126,34,0.1); }
-
-        .btn-float {
-            position: fixed; bottom: 30px; right: 20px;
-            background: var(--gold); width: 65px; height: 65px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; z-index: 99; 
-            cursor: pointer; box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        .tab-btn.active {
+            color: var(--gold);
+            background: rgba(232, 169, 48, 0.07);
         }
-        #cart-count {
-            position: absolute; top: 0; right: 0; background: #e74c3c;
-            color: white; border-radius: 50%; padding: 4px 8px; font-size: 0.8rem; font-weight: bold;
+
+        .tab-btn i {
+            font-size: 0.85rem;
+        }
+
+        .btn-mais {
+            display: none !important;
+        }
+
+        .menu-extras {
+            display: flex;
+        }
+
+        @media (max-width: 700px) {
+            .topbar-inner {
+                flex-wrap: wrap;
+            }
+
+            .brand {
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                width: 100%;
+                padding: 10px 14px;
+                font-size: 1.1rem;
+            }
+
+            .tabs-menu {
+                width: 100%;
+                gap: 4px;
+                padding: 6px 8px;
+                flex-wrap: nowrap;
+            }
+
+            .tab-btn:not(.btn-mais) {
+                flex: 1;
+                padding: 10px 6px;
+                font-size: 0.68rem;
+                letter-spacing: 0.5px;
+            }
+
+            .tab-btn::after {
+                display: none;
+            }
+
+            .tab-btn.active {
+                border-radius: 8px;
+                background: rgba(232, 169, 48, 0.15);
+            }
+
+            .btn-mais {
+                display: flex !important;
+                flex: 0 0 40px;
+                align-items: center;
+                justify-content: center;
+                background: transparent !important;
+                border: 1px solid rgba(255, 215, 0, 0.3) !important;
+                color: var(--gold) !important;
+                height: 38px;
+                border-radius: 8px;
+                cursor: pointer;
+                padding: 0 10px;
+                font-size: 0.9rem;
+            }
+
+            .menu-extras {
+                display: none;
+                flex-direction: column;
+                position: absolute;
+                top: calc(100% + 4px);
+                right: 8px;
+                width: 200px;
+                background: #111;
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                z-index: 9999;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9);
+                overflow: hidden;
+            }
+
+            .menu-extras.show {
+                display: flex;
+                animation: fadeIn 0.18s ease-out;
+            }
+
+            .menu-extras .tab-btn {
+                width: 100%;
+                justify-content: flex-start;
+                padding: 14px 16px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                border-radius: 0;
+                font-size: 0.82rem;
+            }
+
+            .menu-extras .tab-btn::after {
+                display: none;
+            }
+
+            .menu-extras .tab-btn:last-child {
+                border-bottom: none;
+            }
+        }
+
+        @media (min-width: 701px) and (max-width: 960px) {
+            .tab-btn {
+                padding: 14px 10px;
+                font-size: 0.72rem;
+                letter-spacing: 1px;
+            }
+
+            .tab-btn::after {
+                left: 10px;
+                right: 10px;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .content-section {
+            display: none;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 16px 12px;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .mesas-header {
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .mesas-header h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.8rem;
+            letter-spacing: 3px;
+            color: var(--gold);
+            margin: 0;
+        }
+
+        .mesas-stats {
+            display: flex;
+            gap: 10px;
+        }
+
+        .stat-pill {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 5px 14px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-pill.ocp {
+            border-color: rgba(230, 126, 34, 0.4);
+            color: var(--orange);
+            background: rgba(230, 126, 34, 0.07);
+        }
+
+        .stat-pill.liv {
+            border-color: rgba(46, 204, 113, 0.4);
+            color: var(--green);
+            background: rgba(46, 204, 113, 0.07);
+        }
+
+        .mesas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 14px;
+        }
+
+        @media(max-width: 520px) {
+            .mesas-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .mesa-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 18px 16px;
+            cursor: pointer;
+            transition: all 0.22s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mesa-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--border);
+            transition: 0.22s;
+        }
+
+        .mesa-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(232, 169, 48, 0.3);
+        }
+
+        .mesa-card:hover::before {
+            background: var(--gold);
+        }
+
+        .mesa-card.ocupada {
+            border-color: rgba(230, 126, 34, 0.3);
+            background: linear-gradient(135deg, #141008, #0f0f0f);
+        }
+
+        .mesa-card.ocupada::before {
+            background: var(--orange);
+        }
+
+        .mesa-card.livre::before {
+            background: var(--green);
+        }
+
+        .mesa-card-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .mesa-num {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2rem;
+            letter-spacing: 2px;
+            line-height: 1;
+            color: white;
+        }
+
+        .mesa-status-badge {
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            padding: 3px 9px;
+            border-radius: 20px;
+        }
+
+        .badge-livre {
+            background: rgba(46, 204, 113, 0.12);
+            color: var(--green);
+            border: 1px solid rgba(46, 204, 113, 0.3);
+        }
+
+        .badge-ocupada {
+            background: rgba(230, 126, 34, 0.12);
+            color: var(--orange);
+            border: 1px solid rgba(230, 126, 34, 0.3);
+        }
+
+        .mesa-garcom-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 12px;
+        }
+
+        .mesa-garcom-row span {
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        .mesa-itens-lista {
+            background: rgba(0, 0, 0, 0.35);
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .mesa-item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.78rem;
+            padding: 3px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .mesa-item-row:last-child {
+            border-bottom: none;
+        }
+
+        .mesa-item-nome {
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        .mesa-item-preco {
+            color: var(--gold);
+            font-weight: 600;
+            white-space: nowrap;
+            margin-left: 8px;
+        }
+
+        .mesa-total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .mesa-total-label {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.4);
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .mesa-total-val {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--green);
+        }
+
+        .mesa-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .mesa-act-btn {
+            padding: 10px 6px;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            font-family: 'Outfit', sans-serif;
+            transition: 0.18s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .mesa-act-btn.btn-pedido {
+            background: rgba(232, 169, 48, 0.15);
+            color: var(--gold);
+            border: 1px solid rgba(232, 169, 48, 0.35);
+        }
+
+        .mesa-act-btn.btn-pedido:hover {
+            background: rgba(232, 169, 48, 0.28);
+        }
+
+        .mesa-act-btn.btn-cozinha {
+            background: rgba(230, 126, 34, 0.15);
+            color: var(--orange);
+            border: 1px solid rgba(230, 126, 34, 0.35);
+        }
+
+        .mesa-act-btn.btn-cozinha:hover {
+            background: rgba(230, 126, 34, 0.28);
+        }
+
+        .mesa-act-btn.btn-cozinha-ok {
+            background: rgba(46, 204, 113, 0.08);
+            color: rgba(46, 204, 113, 0.5);
+            border: 1px solid rgba(46, 204, 113, 0.2);
+            cursor: default;
+        }
+
+        .mesa-act-btn.btn-fechar {
+            background: rgba(46, 204, 113, 0.15);
+            color: var(--green);
+            border: 1px solid rgba(46, 204, 113, 0.35);
+        }
+
+        .mesa-act-btn.btn-fechar:hover {
+            background: rgba(46, 204, 113, 0.28);
+        }
+
+        .mesa-livre-inner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 0;
+            gap: 8px;
+        }
+
+        .mesa-livre-icon {
+            font-size: 2.2rem;
+            opacity: 0.35;
+        }
+
+        .mesa-livre-text {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.3);
+            font-weight: 500;
+        }
+
+        .btn-abrir-mesa {
+            width: 100%;
+            padding: 12px;
+            background: rgba(46, 204, 113, 0.1);
+            color: var(--green);
+            border: 1px solid rgba(46, 204, 113, 0.3);
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.8rem;
+            font-family: 'Outfit', sans-serif;
+            letter-spacing: 1px;
+            transition: 0.18s;
+        }
+
+        .btn-abrir-mesa:hover {
+            background: rgba(46, 204, 113, 0.22);
+        }
+
+        .pedidos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 16px;
+        }
+
+        @media(max-width: 640px) {
+            .pedidos-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .pedido-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 16px;
+            position: relative;
+            border-top: 3px solid var(--gold);
+            transition: all 0.3s;
+        }
+
+        .pedido-card.mesa-card-closed {
+            border-top-color: var(--green);
+        }
+
+        .pedido-card.saiu-entrega {
+            border-color: rgba(52, 152, 219, 0.6);
+            border-top-color: #3498db;
+            background: linear-gradient(135deg, #050d14, #0a0a0a);
+            box-shadow: 0 0 18px rgba(52, 152, 219, 0.15);
+        }
+
+        .badge-saiu {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(52, 152, 219, 0.15);
+            color: #3498db;
+            border: 1px solid rgba(52, 152, 219, 0.4);
+            border-radius: 20px;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 3px 10px;
+            margin-top: 8px;
+        }
+
+        .btn-del {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #ff4d4d;
+            font-size: 20px;
+            cursor: pointer;
+            opacity: 0.55;
+            line-height: 1;
+            transition: opacity 0.18s;
+        }
+
+        .btn-del:hover {
+            opacity: 1;
+        }
+
+        .lista-itens-card {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 8px 0;
+            font-size: 0.88rem;
+        }
+
+        .item-linha {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 4px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .status-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .btn-wa {
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.78rem;
+            font-family: 'Outfit', sans-serif;
+            transition: 0.2s;
+        }
+
+        .bg-blue {
+            background: #2980b9;
+        }
+
+        .bg-blue:hover {
+            background: #3498db;
+        }
+
+        .bg-green {
+            background: #27ae60;
+        }
+
+        .bg-green:hover {
+            background: #2ecc71;
+        }
+
+        .btn-wa-ativo {
+            background: linear-gradient(135deg, #1a4a72, #1e6091) !important;
+            border: 1px solid #3498db !important;
+        }
+
+        .tag {
+            display: inline-block;
+            border-radius: 6px;
+            font-size: 0.68rem;
+            padding: 2px 9px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .tag-delivery {
+            background: rgba(232, 169, 48, 0.15);
+            color: var(--gold);
+            border: 1px solid rgba(232, 169, 48, 0.4);
+        }
+
+        .tag-mesa {
+            background: rgba(46, 204, 113, 0.12);
+            color: var(--green);
+            border: 1px solid rgba(46, 204, 113, 0.35);
+        }
+
+        .section-label {
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin: 24px 0 12px;
+            grid-column: 1 / -1;
+            padding-left: 10px;
+            border-left: 3px solid var(--gold);
+        }
+
+        .btn-ver-mais {
+            grid-column: 1 / -1;
+            background: rgba(232, 169, 48, 0.08);
+            color: var(--gold);
+            border: 1px solid rgba(232, 169, 48, 0.25);
+            border-radius: 10px;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.8rem;
+            font-family: 'Outfit', sans-serif;
+            letter-spacing: 1px;
+            transition: 0.18s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .btn-ver-mais:hover {
+            background: rgba(232, 169, 48, 0.18);
+        }
+
+        .obs-badge {
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+            background: rgba(232, 169, 48, 0.06);
+            border: 1px solid rgba(232, 169, 48, 0.18);
+            border-radius: 8px;
+            padding: 7px 10px;
+            margin: 8px 0;
+            font-size: 0.77rem;
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.4;
+        }
+
+        .obs-badge i {
+            color: var(--gold);
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .taxa-entrega-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            color: #3498db;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .estoque-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        @media(min-width: 500px) {
+            .estoque-grid {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            }
+        }
+
+        .item-estoque {
+            background: var(--card);
+            padding: 16px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--border);
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 46px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #333;
+            transition: .3s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 17px;
+            width: 17px;
+            left: 3.5px;
+            bottom: 3.5px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--gold);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(22px);
+        }
+
+        .caixa-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        @media(min-width: 900px) {
+            .caixa-container {
+                display: grid;
+                grid-template-columns: 1fr 340px;
+            }
+        }
+
+        .caixa-sidebar {
+            background: var(--card);
+            padding: 25px;
+            border-radius: 20px;
+            border: 1px solid rgba(232, 169, 48, 0.25);
+            text-align: center;
+            height: fit-content;
+        }
+
+        .valor-total {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 3rem;
+            color: var(--gold);
+            letter-spacing: 3px;
+            margin: 12px 0;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.92);
+            z-index: 1000;
+            justify-content: center;
+            align-items: flex-start;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal-box {
+            background: #0f0f0f;
+            border: 1px solid rgba(232, 169, 48, 0.3);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 540px;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #150f00, #1a1400);
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(232, 169, 48, 0.15);
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: var(--gold);
+            font-family: 'Bebas Neue', sans-serif;
+            letter-spacing: 2px;
+            font-size: 1.2rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            line-height: 1;
+            opacity: 0.6;
+            transition: 0.15s;
+        }
+
+        .modal-close:hover {
+            opacity: 1;
+        }
+
+        .modal-body {
+            padding: 16px 18px;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .garcons-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .garcom-btn {
+            background: var(--card2);
+            border: 1px solid var(--border);
+            color: white;
+            padding: 16px 8px;
+            border-radius: 12px;
+            cursor: pointer;
+            text-align: center;
+            transition: 0.2s;
+            font-size: 0.88rem;
+            font-weight: 500;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .garcom-btn:hover,
+        .garcom-btn.sel {
+            background: var(--gold-dim);
+            color: var(--gold);
+            border-color: rgba(232, 169, 48, 0.5);
+            font-weight: 700;
+        }
+
+        .garcom-icon {
+            font-size: 1.8rem;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .cat-bloco {
+            margin-bottom: 7px;
+            border-radius: 11px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .cat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 12px 15px;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.18s;
+        }
+
+        .cat-header:hover {
+            background: var(--gold-dim);
+        }
+
+        .cat-header .cat-name {
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .cat-header .chev {
+            font-size: 0.72rem;
+            opacity: 0.5;
+            transition: transform 0.22s;
+        }
+
+        .cat-header.open .chev {
+            transform: rotate(180deg);
+        }
+
+        .cat-itens {
+            display: none;
+            padding: 6px 8px 8px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .cat-itens.open {
+            display: block;
+        }
+
+        .item-btn {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            color: white;
+            padding: 10px 13px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 5px;
+            transition: 0.15s;
+            text-align: left;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .item-btn:hover {
+            background: var(--gold-dim);
+            border-color: rgba(232, 169, 48, 0.4);
+        }
+
+        .item-btn .i-nome {
+            font-size: 0.86rem;
+        }
+
+        .item-btn .i-preco {
+            color: var(--gold);
+            font-weight: 700;
+            font-size: 0.86rem;
+            white-space: nowrap;
+            margin-left: 10px;
+        }
+
+        .cart-box {
+            background: rgba(0, 0, 0, 0.38);
+            border-radius: 12px;
+            padding: 14px;
+            margin-top: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .cart-title {
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: 9px;
+            font-size: 0.88rem;
+            letter-spacing: 1px;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 7px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.84rem;
+        }
+
+        .qtd-ctrl {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            flex-shrink: 0;
+        }
+
+        .qtd-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.15s;
+        }
+
+        .qtd-btn:hover {
+            background: var(--gold);
+            color: black;
+        }
+
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .cart-total span:last-child {
+            color: var(--green);
+        }
+
+        .act-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 13px;
+        }
+
+        .act-row button {
+            padding: 13px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.82rem;
+            transition: 0.18s;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .ticket-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 7px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            font-size: 0.86rem;
+        }
+
+        .ticket-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.18rem;
+            font-weight: 700;
+            margin-top: 12px;
+            color: var(--green);
+        }
+
+        .pag-btns {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .pag-btn {
+            padding: 12px 5px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.03);
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.79rem;
+            font-weight: 700;
+            transition: 0.18s;
+            text-align: center;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .pag-btn:hover,
+        .pag-btn.sel {
+            border-color: var(--gold);
+            background: var(--gold-dim);
+            color: var(--gold);
+        }
+
+        .pdv-grid-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            gap: 16px;
+            padding: 10px 0;
+        }
+
+        @media(max-width: 800px) {
+            .pdv-grid-wrapper {
+                grid-template-columns: 1fr;
+            }
+
+            .pdv-resumo-col {
+                order: -1;
+            }
         }
 
         #toast {
-            position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
-            background: var(--green); color: white; padding: 12px 25px; border-radius: 50px;
-            z-index: 2000; display: none; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(70px);
+            background: #0a2010;
+            border: 1px solid var(--green);
+            color: var(--green);
+            padding: 10px 24px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            z-index: 9999;
+            opacity: 0;
+            white-space: nowrap;
+            transition: transform 0.28s cubic-bezier(.34, 1.56, .64, 1), opacity 0.28s;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.7);
+            pointer-events: none;
+            font-family: 'Outfit', sans-serif;
+            max-width: 90vw;
+            text-align: center;
         }
 
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1500; align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: #222; padding: 25px; border-radius: 20px; width: 100%; max-width: 450px; border: 1px solid var(--gold); }
-        .btn-confirm { background: var(--green); color: white; border: none; width: 100%; padding: 15px; border-radius: 10px; font-weight: bold; margin-top: 15px; cursor: pointer; }
-
-        #pix-copia { word-break: break-all; height: 80px; resize: none; font-size: 0.8rem; }
-
-        footer { padding: 40px 20px; text-align: center; background: #000; margin-top: 50px; }
-        .social-links { display: flex; justify-content: center; gap: 20px; margin-bottom: 15px; }
-        .social-links a { color: var(--gold); font-size: 1.5rem; transition: 0.3s; }
-        .social-links a:hover { color: white; transform: translateY(-3px); }
-
-        .hidden { display: none; }
-
-        /* NOVO: botões de quantidade nos adicionais */
-        .extra-row {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 8px 0; border-bottom: 1px solid #1a1a1a;
+        #toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
         }
-        .extra-row:last-child { border-bottom: none; }
-        .extra-nome { font-size: 0.85rem; flex: 1; }
-        .extra-preco { font-size: 0.8rem; color: #aaa; margin: 0 10px; }
-        .extra-controle { display: flex; align-items: center; gap: 8px; }
-        .extra-qty-btn {
-            background: var(--gold); border: none; color: white; width: 26px; height: 26px;
-            border-radius: 50%; cursor: pointer; font-size: 1rem; font-weight: bold;
-            display: flex; align-items: center; justify-content: center; transition: 0.2s;
-        }
-        .extra-qty-btn.minus { background: #444; }
-        .extra-qty-btn:active { transform: scale(0.9); }
-        .extra-qty-num { font-weight: bold; font-size: 0.9rem; min-width: 18px; text-align: center; }
 
-        .tabs-grid {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            padding: 15px;
-            flex-wrap: nowrap;
-        }
-        @media (max-width: 600px) {
-            .tabs-grid {
-                display: grid;
-                grid-template-columns: repeat(3, 1fr);
-                gap: 8px;
-                padding: 10px;
+        @media print {
+            body>*:not(#print-area) {
+                display: none !important;
             }
-            .tab-btn {
-                width: 100%;
-                font-size: 0.7rem;
-                padding: 10px 5px;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 5px;
+
+            #print-area {
+                display: block !important;
             }
-            .tab-btn i { font-size: 1.1rem; }
         }
-        .status-aberto {
-            color: #6dffaa;
-            text-shadow: 0 0 5px #2ecc71, 0 0 10px #2ecc71;
-            animation: neon-green 1.5s ease-in-out infinite alternate;
+
+        #print-area {
+            display: none;
         }
-        .status-fechado {
+
+        .inp-pdv {
+            width: 100%;
+            padding: 11px 12px;
+            background: #000;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            transition: border-color 0.2s;
+        }
+
+        .inp-pdv:focus {
+            border-color: rgba(232, 169, 48, 0.5);
+            outline: none;
+        }
+
+        .inp-pdv::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .section-label-count {
+            background: rgba(232, 169, 48, 0.12);
+            color: var(--gold);
+            border: 1px solid rgba(232, 169, 48, 0.3);
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-size: 0.65rem;
+            margin-left: 8px;
+            font-weight: 700;
+        }
+
+        .btn-fechar-loja {
+            background: rgba(231, 76, 60, 0.12);
             color: #e74c3c;
-            text-shadow: 0 0 5px #e74c3c, 0 0 10px #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.35);
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            transition: 0.18s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-left: 8px;
         }
-        @keyframes neon-green {
-            from { opacity: 0.8; }
-            to { opacity: 1; text-shadow: 0 0 10px #2ecc71, 0 0 20px #2ecc71; }
+
+        .btn-fechar-loja.aberta {
+            background: rgba(46, 204, 113, 0.12);
+            color: #2ecc71;
+            border-color: rgba(46, 204, 113, 0.35);
         }
-        .logo-animada {
-            width: 200px;
-            border-radius: 100px;
-            animation: pulsa-brasa 5s infinite ease-in-out;
+
+        .btn-fechar-loja:hover {
+            filter: brightness(1.3);
         }
-        @keyframes pulsa-brasa {
-            0%, 100% { transform: scale(1); box-shadow: 0 0 5px rgba(201, 151, 58, 0.2); }
-            50% { transform: scale(1.05); box-shadow: 0 0 25px rgba(201, 151, 58, 0.6); }
+
+        /* Pagamentos parciais */
+        .pags-lista {
+            margin: 10px 0;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 8px;
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .pag-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.84rem;
+        }
+
+        .pag-row:last-child {
+            border-bottom: none;
+        }
+
+        .btn-rem-pag {
+            background: rgba(231, 76, 60, 0.15);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+            color: #e74c3c;
+            border-radius: 6px;
+            padding: 2px 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* Botão adicionar item ao pedido delivery */
+        .btn-add-item-pedido {
+            width: 100%;
+            margin-top: 8px;
+            background: rgba(232, 169, 48, 0.1);
+            color: var(--gold);
+            border: 1px solid rgba(232, 169, 48, 0.3);
+            border-radius: 8px;
+            padding: 9px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            transition: 0.18s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-add-item-pedido:hover {
+            background: rgba(232, 169, 48, 0.2);
+        }
+
+        .btn-imprimir-bt {
+            background: rgba(232, 169, 48, 0.1);
+            color: var(--gold);
+            border: 1px solid rgba(232, 169, 48, 0.28);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.74rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            transition: 0.18s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+            margin-top: 8px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-imprimir-bt:hover {
+            background: rgba(232, 169, 48, 0.22);
         }
     </style>
 </head>
+
 <body>
+    <audio id="bell" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
-<div id="toast"><i class="fas fa-check-circle"></i> Adicionado com sucesso!</div>
-
-<header>
-    <img class="logo-animada" src="GC BURGUER.png" alt="Logo GC Burguer">
-</header>
-<div id="status-loja" style="margin-top: 10px; font-weight: bold; letter-spacing: 1px; text-align: center;"></div>
-
-<script>
-// ⏰ CONFIGURAÇÃO DE HORÁRIO — edite aqui facilmente
-const HORARIO_ABERTURA = 18;  // 18 = 18:00
-const HORARIO_FECHAMENTO = 23; // 23 = até 23:59
-
-function verificarStatusLoja() {
-    const agora = new Date();
-    const hora = agora.getHours();
-    const statusDiv = document.getElementById('status-loja');
-    const estaAberto = hora >= HORARIO_ABERTURA && hora <= HORARIO_FECHAMENTO;
-
-    if (estaAberto) {
-        statusDiv.innerHTML = '<span class="status-aberto">● ABERTO AGORA</span>';
-    } else {
-        statusDiv.innerHTML = `<span class="status-fechado">● FECHADO (Abre às ${HORARIO_ABERTURA}:00)</span>`;
-    }
-    return estaAberto;
-}
-verificarStatusLoja();
-setInterval(verificarStatusLoja, 60000);
-</script>
-<!-- TELA DE LOJA FECHADA -->
-<div id="tela-fechada" style="display:none;position:fixed;inset:0;background:#080808;z-index:99999;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;font-family:'Outfit',sans-serif;">
-    <div style="font-size:4rem;margin-bottom:16px;">🍔</div>
-    <h1 style="font-family:'Bebas Neue',sans-serif;color:#e8a930;font-size:2.5rem;letter-spacing:4px;margin:0 0 10px;">GC BURGUER</h1>
-    <p style="color:rgba(255,255,255,0.5);font-size:1.1rem;margin:0 0 8px;">Estamos fechados no momento.</p>
-    <p style="color:rgba(255,255,255,0.3);font-size:0.9rem;">Em breve voltamos! 🙏</p>
-</div>
-<div style="padding: 10px 15px;">
-    <div style="position: relative; background: #111; border-radius: 25px; padding: 5px 15px; border: 1px solid #333;">
-        <i class="fas fa-search" style="color: var(--gold); margin-right: 10px;"></i>
-        <input type="text" id="input-busca" placeholder="O que vamos comer hoje?" 
-               onkeyup="buscarProdutos()"
-               style="background: transparent; border: none; color: white; width: 85%; padding: 8px; outline: none;">
-    </div>
-</div>
-
-<div class="tabs tabs-grid" id="menu-tabs">
-    <button class="tab-btn active" onclick="filterMenu('hamburgueres')">BURGERS</button>
-    <button class="tab-btn" onclick="filterMenu('combos')">COMBOS</button>
-    <button class="tab-btn" onclick="filterMenu('pastéis')">PASTÉIS</button>
-    <button class="tab-btn" onclick="filterMenu('batatas')">BATATAS</button>
-    <button class="tab-btn" onclick="filterMenu('bebidas')">BEBIDAS</button>
-    <button class="tab-btn" onclick="filterMenu('açaí')">AÇAÍ</button>
-</div>
-<i style="font-size: 10px;">*Imagens meramente ilustrativas</i>
-<div class="container" id="menu-container"></div>
-
-<div class="btn-float" onclick="toggleCart()">
-    <i class="fas fa-shopping-basket" style="color: white; font-size: 1.8rem;"></i>
-    <span id="cart-count">0</span>
-</div>
-
-<!-- MODAL PRODUTO -->
-<div class="modal" id="modal-produto">
-    <div class="modal-content">
-        <h3 id="modal-nome" style="color:var(--gold); margin-bottom:5px;">Nome do Produto</h3>
-        <p id="modal-desc" style="font-size:0.8rem; color:#aaa; font-style:italic; margin-bottom:15px;"></p>
-        
-        <button onclick="toggleExtras()" style="background:none; border: 1px dashed var(--gold); color:var(--gold); padding:12px; width:100%; cursor:pointer; border-radius:8px;">
-            <i class="fas fa-plus-circle"></i> ADICIONAIS:
-        </button>
-        
-        <div id="extras-section" class="hidden" style="margin-top:15px; background: #111; padding: 10px; border-radius: 8px; max-height: 250px; overflow-y: auto;">
-    
-            <div id="extras-lanches">
-                <p style="color:var(--gold); font-size:0.75rem; font-weight:bold; margin-bottom:10px; border-bottom:1px solid #333; padding-bottom:5px;">ADICIONAIS SALGADOS:</p>
-                <!-- NOVO: cada adicional com botão + e - -->
-                <div class="extra-row"><span class="extra-nome">Carne Artesanal</span><span class="extra-preco">+R$8,00</span><div class="extra-controle"><button class="extra-qty-btn minus" onclick="alterarExtra(this,-1)">−</button><span class="extra-qty-num">0</span><button class="extra-qty-btn" onclick="alterarExtra(this,1)" data-price="8.00" data-name="Carne Artesanal">+</button></div></div>
-                <div class="extra-row"><span class="extra-nome">Geléia Premium</span><span class="extra-preco">+R$6,00</span><div class="extra-controle"><button class="extra-qty-btn minus" onclick="alterarExtra(this,-1)">−</button><span class="extra-qty-num">0</span><button class="extra-qty-btn" onclick="alterarExtra(this,1)" data-price="6.00" data-name="Geléia Premium">+</button></div></div>
-                <div class="extra-row"><span class="extra-nome">Bacon</span><span class="extra-preco">+R$5,00</span><div class="extra-controle"><button class="extra-qty-btn minus" onclick="alterarExtra(this,-1)">−</button><span class="extra-qty-num">0</span><button class="extra-qty-btn" onclick="alterarExtra(this,1)" data-price="5.00" data-name="Bacon">+</button></div></div>
-                <div class="extra-row"><span class="extra-nome">Calabresa</span><span class="extra-preco">+R$4,00</span><div class="extra-controle"><button class="extra-qty-btn minus" onclick="alterarExtra(this,-1)">−</button><span class="extra-qty-num">0</span><button class="extra-qty-btn" onclick="alterarExtra(this,1)" data-price="4.00" data-name="Calabresa">+</button></div></div>
-                <div class="extra-row"><span class="extra-nome">Abacaxi</span><span class="extra-preco">+R$4,00</span><div class="extra-controle"><button class="extra-qty-btn minus" onclick="alterarExtra(this,-1)">−</button><span class="extra-qty-num">0</span><button class="extra-qty-btn" onclick="alterarExtra(this,1)" data-price="4.00" data-name="Abacaxi">+</button></div></div>
-                <div class="extra-row"><span class="extra-nome">Queijo</span><span class="extra-preco">+R$3,00</span><div class="extra-controle"><button class="extra-qty-btn minus" onclick="alterarExtra(this,-1)">−</button><span class="extra-qty-num">0</span><button class="extra-qty-btn" onclick="alterarExtra(this,1)" data-price="3.00" data-name="Queijo">+</button></div></div>
-                <div class="extra-row"><span class="extra-nome">Ovo</span><span class="extra-preco">+R$3,00</span><div class="extra-controle"><button class="extra-qty-btn minus" onclick="alterarExtra(this,-1)">−</button><span class="extra-qty-num">0</span><button class="extra-qty-btn" onclick="alterarExtra(this,1)" data-price="3.00" data-name="Ovo">+</button></div></div>
-                <div class="extra-row"><span class="extra-nome">Creme de Cheddar</span><span class="extra-preco">+R$3,00</span><div class="extra-controle"><button class="extra-qty-btn minus" onclick="alterarExtra(this,-1)">−</button><span class="extra-qty-num">0</span><button class="extra-qty-btn" onclick="alterarExtra(this,1)" data-price="3.00" data-name="Creme de Cheddar">+</button></div></div>
-                <div class="extra-row"><span class="extra-nome">Cebola</span><span class="extra-preco">+R$3,00</span><div class="extra-controle"><button class="extra-qty-btn minus" onclick="alterarExtra(this,-1)">−</button><span class="extra-qty-num">0</span><button class="extra-qty-btn" onclick="alterarExtra(this,1)" data-price="3.00" data-name="Cebola">+</button></div></div>
-                <div class="extra-row"><span class="extra-nome">Presunto</span><span class="extra-preco">+R$2,00</span><div class="extra-controle"><button class="extra-qty-btn minus" onclick="alterarExtra(this,-1)">−</button><span class="extra-qty-num">0</span><button class="extra-qty-btn" onclick="alterarExtra(this,1)" data-price="2.00" data-name="Presunto">+</button></div></div>
-                <div class="extra-row"><span class="extra-nome">Salsicha</span><span class="extra-preco">+R$2,00</span><div class="extra-controle"><button class="extra-qty-btn minus" onclick="alterarExtra(this,-1)">−</button><span class="extra-qty-num">0</span><button class="extra-qty-btn" onclick="alterarExtra(this,1)" data-price="2.00" data-name="Salsicha">+</button></div></div>
-            </div>
-
-            <div id="extras-acai" class="hidden">
-                <p style="color:var(--gold); font-size:0.75rem; font-weight:bold; margin-bottom:10px; border-bottom:1px solid #333; padding-bottom:5px;">FRUTAS E COMPLEMENTOS (R$ 2,00 cada):</p>
-                <div class="extra-row"><span class="extra-nome">Banana</span><span class="extra-preco">+R$2,00</span><div class="extra-controle"><button class="extra-qty-btn minus" onclick="alterarExtra(this,-1)">−</button><span class="extra-qty-num">0</span><button class="extra-qty-btn" onclick="alterarExtra(this,1)" data-price="2.00" data-name="Banana">+</button></div></div>
-                <div class="extra-row"><span class="extra-nome">Morango</span><span class="extra-preco">+R$2,00</span><div class="extra-controle"><button class="extra-qty-btn minus" onclick="alterarExtra(this,-1)">−</button><span class="extra-qty-num">0</span><button class="extra-qty-btn" onclick="alterarExtra(this,1)" data-price="2.00" data-name="Morango">+</button></div></div>
-                <div class="extra-row"><span class="extra-nome">Kiwi</span><span class="extra-preco">+R$2,00</span><div class="extra-controle"><button class="extra-qty-btn minus" onclick="alterarExtra(this,-1)">−</button><span class="extra-qty-num">0</span><button class="extra-qty-btn" onclick="alterarExtra(this,1)" data-price="2.00" data-name="Kiwi">+</button></div></div>
-                <div class="extra-row"><span class="extra-nome">Uva</span><span class="extra-preco">+R$2,00</span><div class="extra-controle"><button class="extra-qty-btn minus" onclick="alterarExtra(this,-1)">−</button><span class="extra-qty-num">0</span><button class="extra-qty-btn" onclick="alterarExtra(this,1)" data-price="2.00" data-name="Uva">+</button></div></div>
-                <div class="extra-row"><span class="extra-nome">Leite Condensado</span><span class="extra-preco">+R$2,00</span><div class="extra-controle"><button class="extra-qty-btn minus" onclick="alterarExtra(this,-1)">−</button><span class="extra-qty-num">0</span><button class="extra-qty-btn" onclick="alterarExtra(this,1)" data-price="2.00" data-name="Leite Condensado">+</button></div></div>
-                <div class="extra-row"><span class="extra-nome">Disquete</span><span class="extra-preco">+R$2,00</span><div class="extra-controle"><button class="extra-qty-btn minus" onclick="alterarExtra(this,-1)">−</button><span class="extra-qty-num">0</span><button class="extra-qty-btn" onclick="alterarExtra(this,1)" data-price="2.00" data-name="Disquete">+</button></div></div>
-                <div class="extra-row"><span class="extra-nome">Amendoim</span><span class="extra-preco">+R$2,00</span><div class="extra-controle"><button class="extra-qty-btn minus" onclick="alterarExtra(this,-1)">−</button><span class="extra-qty-num">0</span><button class="extra-qty-btn" onclick="alterarExtra(this,1)" data-price="2.00" data-name="Amendoim">+</button></div></div>
-                <div class="extra-row"><span class="extra-nome">Leite em Pó</span><span class="extra-preco">+R$2,00</span><div class="extra-controle"><button class="extra-qty-btn minus" onclick="alterarExtra(this,-1)">−</button><span class="extra-qty-num">0</span><button class="extra-qty-btn" onclick="alterarExtra(this,1)" data-price="2.00" data-name="Leite em Pó">+</button></div></div>
-                <div class="extra-row"><span class="extra-nome">Tapioca</span><span class="extra-preco">+R$2,00</span><div class="extra-controle"><button class="extra-qty-btn minus" onclick="alterarExtra(this,-1)">−</button><span class="extra-qty-num">0</span><button class="extra-qty-btn" onclick="alterarExtra(this,1)" data-price="2.00" data-name="Tapioca">+</button></div></div>
-                <div class="extra-row"><span class="extra-nome">Granola</span><span class="extra-preco">+R$2,00</span><div class="extra-controle"><button class="extra-qty-btn minus" onclick="alterarExtra(this,-1)">−</button><span class="extra-qty-num">0</span><button class="extra-qty-btn" onclick="alterarExtra(this,1)" data-price="2.00" data-name="Granola">+</button></div></div>
+    <div class="topbar">
+        <div class="topbar-inner">
+            <div class="brand">GC BURGUER</div>
+            <div class="tabs-menu">
+                <button class="tab-btn active" onclick="switchTab('aba-pedidos',this)"><i class="fas fa-fire"></i>
+                    PEDIDOS</button>
+                <button class="tab-btn" onclick="switchTab('aba-mesas',this)"><i class="fas fa-utensils"></i>
+                    MESAS</button>
+                <div class="menu-extras" id="menu-extras">
+                    <button class="tab-btn" onclick="switchTabProtegida('aba-estoque',this)"><i class="fas fa-box"></i>
+                        ESTOQUE</button>
+                    <button class="tab-btn" onclick="switchTabProtegida('aba-caixa',this)"><i class="fas fa-wallet"></i>
+                        CAIXA</button>
+                    <button id="btn-status-loja" class="btn-fechar-loja" onclick="toggleStatusLoja()">
+                        <i class="fas fa-store-slash" id="loja-icon"></i>
+                        <span id="loja-label">LOJA</span>
+                    </button>
+                </div>
+                <button id="btn-som" onclick="toggleSom()"
+                    style="background:none;border:1px solid rgba(232,169,48,0.3);color:var(--gold);border-radius:8px;padding:8px 12px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:0.75rem;font-weight:700;display:flex;align-items:center;gap:6px;transition:0.2s;margin-left:8px;">
+                    <i class="fas fa-volume-mute" id="som-icon"></i> <span id="som-label">SOM</span>
+                </button>
+                <button class="tab-btn btn-mais" onclick="toggleMenuMobile(event)"><i class="fas fa-bars"></i></button>
             </div>
         </div>
-<div id="extras-acai" class="hidden">
-   </div>
-
-<div id="extras-bebidas" class="hidden" style="margin-top: 15px; border-top: 1px solid #444; padding-top: 10px;">
-    <p id="titulo-sabores" style="color:var(--gold); font-weight:bold; margin-bottom:10px;">Escolha o sabor:</p>
-    
-    <div id="container-opcoes-sabores" style="display: flex; flex-direction: column; gap: 10px;">
     </div>
-</div>
-        <div class="campo" style="margin-top:20px;">
-            <label><i class="fas fa-comment-dots"></i> Observação / O que retirar?</label>
-            <input type="text" id="modal-obs" placeholder="Ex: Tirar cebola, ponto da carne...">
-        </div>
 
-        <button class="btn-confirm" onclick="confirmarAdicao()">ADICIONAR AO PEDIDO</button>
-        <button onclick="fecharModal()" style="width:100%; background:none; border:none; color:gray; margin-top:15px; cursor:pointer;">Voltar</button>
+    <div id="aba-pedidos" class="content-section active">
+        <div class="pedidos-grid" id="lista-pedidos"></div>
     </div>
-</div>
 
-<!-- MODAL PIX -->
-<div class="modal" id="modal-pix">
-  <div class="modal-content">
-    <h3 style="color:var(--gold); margin-bottom:15px; text-align:center;">Pagamento via PIX</h3>
-    <div id="pix-qrcode" style="text-align:center; margin-bottom:15px; background: white; padding: 10px; display: inline-block; width: 100%;"></div>
-    <p style="font-size:0.8rem; color:var(--gold); margin-bottom:5px;">Código Copia e Cola:</p>
-    <textarea id="pix-copia" readonly></textarea>
-    <p style="margin-top:10px; font-size:0.9rem; color:#ccc;">
-      Valor Total: <span id="pix-valor" style="font-weight:bold; color:white;"></span><br>
-      Chave: 5599992166621<br>
-      Favorecido: Gabriel Costa Gomes    99992247546
-    </p>
-    <button onclick="fecharPix()" style="margin-top:15px; width:100%; background:var(--gold); color:white; border:none; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer;">CONTINUE O PEDIDO:</button>
-  </div>
-</div>
-
-<!-- CARRINHO -->
-<div class="cart-sidebar" id="cart-sidebar">
-    <div class="cart-header">
-        <h3><i class="fas fa-shopping-cart"></i> Meu Carrinho</h3>
-        <i class="fas fa-times" onclick="toggleCart()" style="font-size: 1.5rem; cursor:pointer"></i>
-    </div>
-    
-    <div id="cart-items"></div>
-
-    <div class="cart-footer">
-        <!-- NOVO: Radio Entrega / Retirada -->
-        <div class="entrega-opcoes">
-            <label class="entrega-opcao selecionada" id="label-entrega">
-                <input type="radio" name="tipo-pedido" value="entrega" checked onchange="alternarTipoPedido('entrega')">
-                <i class="fas fa-motorcycle"></i> ENTREGA
-            </label>
-            <label class="entrega-opcao" id="label-retirada">
-                <input type="radio" name="tipo-pedido" value="retirada" onchange="alternarTipoPedido('retirada')">
-                <i class="fas fa-store"></i> RETIRADA
-            </label>
-        </div>
-        <!-- formulario -->
-       <div class="campo">
-    <input type="text" id="nome" placeholder="Seu nome:">
-</div>
-<div class="campo">
-    <input type="tel" id="telefone" placeholder="Seu WhatsApp: (99) 99999-9999">
-</div>
-
-        <div id="campos-entrega">
-            <div class="campo">
-               <select id="bairro" onchange="atualizarInterface()">
-    <option value="" data-fee="0">Selecione seu Bairro *</option>
-    <option value="Ana Julia" data-fee="9">Ana Julia (R$ 9,00)</option>
-    <option value="Baixão" data-fee="8">Baixão (R$ 8,00)</option>
-    <option value="Barra Azul" data-fee="10">Barra Azul (R$ 10,00)</option>
-    <option value="Bela Vista" data-fee="9">Bela Vista (R$ 9,00)</option>
-    <option value="Boa Vista" data-fee="6">Boa Vista (R$ 6,00)</option>
-    <option value="Bom Jardim" data-fee="7">Bom Jardim (R$ 7,00)</option>
-    <option value="Bom Jardim de baixo" data-fee="8">Bom Jardim de baixo (R$ 8,00)</option>
-    <option value="Brasil Novo" data-fee="8">Brasil Novo (R$ 8,00)</option>
-    <option value="Capeloza" data-fee="7">Capeloza (R$ 7,00)</option>
-    <option value="Centro" data-fee="6">Centro (R$ 6,00)</option>
-    <option value="Cikel" data-fee="6">Cikel (R$ 6,00)</option>
-    <option value="Colinas Parque" data-fee="9">Colinas Parque (R$ 9,00)</option>
-    <option value="Dr. Gilson" data-fee="8">Dr. Gilson (R$ 8,00)</option>
-    <option value="Flavio Dino" data-fee="10">Flavio Dino (R$ 10,00)</option>
-    <option value="Gastão Vieira" data-fee="4">Gastão Vieira (R$ 4,00)</option>
-    <option value="Jacu" data-fee="7">Jacu (R$ 7,00)</option>
-    <option value="Jardim America" data-fee="7">Jardim America (R$ 7,00)</option>
-    <option value="Jardim Aulidia" data-fee="10">Jardim Aulidia (R$ 10,00)</option>
-    <option value="Jardim de Alah" data-fee="4">Jardim de Alah (R$ 4,00)</option>
-    <option value="Jardim Gloria" data-fee="5">Jardim Gloria (R$ 5,00)</option>
-    <option value="Jardim Gloria 2" data-fee="6">Jardim Gloria 2 (R$ 6,00)</option>
-    <option value="Jardim Gloria 3" data-fee="6">Jardim Gloria 3 (R$ 6,00)</option>
-    <option value="Jardim Gloria City" data-fee="6">Jardim Gloria City (R$ 6,00)</option>
-    <option value="João Paulo" data-fee="7">João Paulo (R$ 7,00)</option>
-    <option value="Juscelino" data-fee="9">Juscelino (R$ 9,00)</option>
-    <option value="Laranjeiras" data-fee="7">Laranjeiras (R$ 7,00)</option>
-    <option value="Monte Sinai" data-fee="8">Monte Sinai (R$ 8,00)</option>
-    <option value="Morante Imperial" data-fee="14">Morante Imperial (R$ 14,00)</option>
-    <option value="Nova Açailândia" data-fee="7">Nova Açailândia (R$ 7,00)</option>
-    <option value="Nova Açailândia 2" data-fee="7">Nova Açailândia 2 (R$ 7,00)</option>
-    <option value="Novo Horizonte" data-fee="16">Novo Horizonte (R$ 16,00)</option>
-    <option value="Ouro verde" data-fee="6">Ouro verde (R$ 6,00)</option>
-    <option value="Parque da Lagoa" data-fee="6">Parque da Lagoa (R$ 6,00)</option>
-    <option value="Parque das Nações" data-fee="9">Parque das Nações (R$ 9,00)</option>
-    <option value="Parque Jardins" data-fee="15">Parque Jardins (R$ 15,00)</option>
-    <option value="Parque Planalto" data-fee="6">Parque Planalto (R$ 6,00)</option>
-    <option value="Pequia" data-fee="25">Pequia (R$ 25,00)</option>
-    <option value="Plano da Serra" data-fee="19">Plano da Serra (R$ 19,00)</option>
-    <option value="Porto Belo" data-fee="12">Porto Belo (R$ 12,00)</option>
-    <option value="Porto Seguro" data-fee="10">Porto Seguro (R$ 10,00)</option>
-    <option value="Residencial Tropical" data-fee="8">Residencial Tropical (R$ 8,00)</option>
-    <option value="Sarney Filho" data-fee="4">Sarney Filho (R$ 4,00)</option>
-    <option value="Sunil" data-fee="8">Sunil (R$ 8,00)</option>
-    <option value="Tancredo" data-fee="6">Tancredo (R$ 6,00)</option>
-    <option value="Valle do Açai" data-fee="14">Valle do Açai (R$ 14,00)</option>
-    <option value="Vila Ildemar" data-fee="8">Vila Ildemar (R$ 8,00)</option>
-    <option value="Vila Ipiranga" data-fee="7">Vila Ipiranga (R$ 7,00)</option>
-    <option value="Vila Maranhão" data-fee="7">Vila Maranhão (R$ 7,00)</option>
-    <option value="Vila Progresso 2" data-fee="6">Vila Progresso 2 (R$ 6,00)</option>
-    <option value="Vila São Francisco" data-fee="7">Vila São Francisco (R$ 7,00)</option>
-    <option value="Vila Sucuri" data-fee="8">Vila Sucuri (R$ 8,00)</option>
-</select>
-            </div>
-            <div class="campo">
-                <input type="text" id="endereco" placeholder="Rua, número e referência">
+    <div id="aba-mesas" class="content-section">
+        <div class="mesas-header">
+            <h2><i class="fas fa-utensils" style="margin-right:8px;font-size:1.4rem;"></i>MESAS</h2>
+            <div class="mesas-stats">
+                <div class="stat-pill ocp" id="stat-ocp">0 ocupadas</div>
+                <div class="stat-pill liv" id="stat-liv">0 livres</div>
             </div>
         </div>
+        <div class="mesas-grid" id="mesas-grid"></div>
+    </div>
 
-        <div class="campo">
-            <b style="font-size: 12px;">Escolha até 2 formas de pagar:</b>
-    <select id="pagamento" onchange="handlePagamento(this.value)">
-        <option value="Forma de Pagamento:">Forma de Pagamento:</option>
-        <option value="PIX">PIX (envie o comprovante)</option>
-        <option value="Cartão">Cartão (Levamos a maquininha)</option>
-        <option value="Dinheiro">Dinheiro</option>
-    </select>
-</div>
+    <div id="aba-estoque" class="content-section">
+        <div id="estoque-conteudo"></div>
+    </div>
 
-<div id="lista-pagamentos-carrinho" style="margin-bottom: 10px;"></div>
+    <div id="aba-caixa" class="content-section">
+        <div id="caixa-conteudo"></div>
+    </div>
 
-<div class="campo hidden" id="campo-troco">
-    <input type="number" id="troco" placeholder="Troco para quanto?">
-</div>
-
-        <div style="background:#000; padding:10px; border-radius:8px; margin: 10px 0;">
-            <div style="display:flex; justify-content:space-between; font-size:0.9rem; color:#888;">
-                <span>Taxa de Entrega:</span>
-                <span id="taxa-entrega">R$ 0,00</span>
+    <!-- MODAL PRINCIPAL (mesas + editar pedido) -->
+    <div class="modal-overlay" id="modal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 id="modal-titulo">Mesa</h3>
+                <button class="modal-close" onclick="fecharModal()">Fechar ❌</button>
             </div>
-            <div style="display:flex; justify-content:space-between; font-size:1.2rem; font-weight:800; color:var(--gold); margin-top:5px;">
-                <span>TOTAL:</span>
-                <span id="total-cart">R$ 0,00</span>
-            </div>
+            <div class="modal-body" id="modal-body"></div>
         </div>
-
-        <button onclick="processarPedido()" style="background:var(--green); color:white; border:none; width:100%; padding:15px; border-radius:12px; font-weight:800; font-size:1rem; cursor:pointer;">
-            <i class="fab fa-whatsapp"></i> ENVIAR PEDIDO
-        </button>
     </div>
-</div>
 
-<footer>
-    <div style="background: linear-gradient(135deg, #1a0f00, #2d1e14); border: 2px solid var(--gold); border-radius: 16px; padding: 20px; margin: 0 15px 25px; text-align: center;">
-        <p style="font-size: 1.3rem; font-weight: 900; color: var(--gold); letter-spacing: 1px;">🏆 CLUBE DE FIDELIDADE GC</p>
-        <p style="font-size: 0.85rem; color: #ccc; margin: 8px 0 4px;">A cada <strong style="color:var(--gold)">10 pedidos</strong>, você ganha um <strong style="color:white">lanche grátis!</strong></p>
-        <p style="font-size: 0.8rem; color: #aaa; margin-bottom: 12px;">Promoções exclusivas, sorteios e muito mais pra quem é cliente fiel 🔥</p>
-        <!-- <a href="https://wa.me/559992247546?text=Quero%20participar%20do%20Clube%20de%20Fidelidade%20GC!" 
-           style="background: var(--gold); color: white; padding: 10px 22px; border-radius: 25px; font-weight: 800; font-size: 0.85rem; text-decoration: none; display: inline-block;">
-            <i class="fab fa-whatsapp"></i> QUERO PARTICIPAR!
-        </a> -->
+    <!-- MODAL EDITAR PEDIDO DELIVERY -->
+    <div class="modal-overlay" id="modal-editar-pedido">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 id="modal-editar-titulo">Editar Pedido</h3>
+                <button class="modal-close" onclick="fecharModalEditar()">Fechar ❌</button>
+            </div>
+            <div class="modal-body" id="modal-editar-body"></div>
+        </div>
     </div>
-    <div class="social-links">
-        <a href="https://www.instagram.com/gc_burguer?igsh=MTkybXhnNXlpYXFhdA=="><i class="fab fa-instagram"></i></a>
-        <a href="https://wa.me/5599991154876"><i class="fab fa-whatsapp"></i></a>
-    </div>
-    <p style="font-size:0.8rem; color:#666;">© 2026 GC Burguer. Desenvolvido por Carlos Rocha. <a href="https://wa.me/5599992247546"><i class="fab fa-whatsapp"></i></a></p>
-</footer>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, getDocs, addDoc, serverTimestamp, onSnapshot, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    <div id="toast"></div>
+    <div id="print-area"></div>
 
-const firebaseConfig = {
-    apiKey: "AIzaSyBBQTI4ziKYQn9OLA8cjLAwcal7gdBy8mk",
-    authDomain: "catalogo-c7700.firebaseapp.com",
-    projectId: "catalogo-c7700",
-    storageBucket: "catalogo-c7700.firebasestorage.app",
-    messagingSenderId: "668924901739",
-    appId: "1:668924901739:web:035c64ea31ac3d9da3742e"
-};
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, query, orderBy, deleteDoc, doc, getDocs, updateDoc, setDoc, addDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+        const fb = initializeApp({
+            apiKey: "AIzaSyBBQTI4ziKYQn9OLA8cjLAwcal7gdBy8mk",
+            authDomain: "catalogo-c7700.firebaseapp.com",
+            projectId: "catalogo-c7700",
+            storageBucket: "catalogo-c7700.firebasestorage.app",
+            messagingSenderId: "668924901739",
+            appId: "1:668924901739:web:035c64ea31ac3d9da3742e"
+        });
+        const db = getFirestore(fb);
 
-let cacheProdutos = [];
-let carrinho = [];
-let itemSelecionado = null;
-let statusEstoque = {};
+        const TOTAL_MESAS = 10;
+        const SENHA_HASH = "9754f15d9ed62a1dc6ae8f7c457515f562ff3830af3bbdd528c347b40ff87b9d";
+        const SENHA_EXCLUIR_HASH = "9754f15d9ed62a1dc6ae8f7c457515f562ff3830af3bbdd528c347b40ff87b9d";
+        const LIMITE_INICIAL_PEDIDOS = 3;
 
-// NOVO: Descrições dos produtos | Usa o nome do item como um ID
-const descricoes = {
-    'Misto': 'Pão de forma, queijo e presunto',
-    'X-Tudo': 'Carne artesanal 100g, queijo, ovo, presunto, salsicha, tomate, alface, molho, milho e batata palha',
-    'Calabresa Prime': 'Carne artesanal 120g, calabresa, queijo, presunto, tomate, alface, molho especial',
-    'Bacon Prime': 'Carne artesanal 120g, bacon crocante, queijo, presunto, tomate, alface e molho especial',
-    'Cala-Bacon Prime': 'Carne artesanal 120g, calabresa, bacon crocante, queijo, tomate, alface e molho especial',
-    'Imperador Duplo': '2 carnes artesanais 120g, queijo, presunto, ovo, tomate, alface e molho da casa',
-    'Barca Simples': 'X-Tudo + Batata P c/ bacon e cheddar + Mini pasteis + Calabresa + Refri Lata.',
-    'Combo Classico': 'Bacon prime + Batata P + Refri Lata.',
-    'Super Combo': 'X-Tudo + Batata 200g + Refri Lata.',
-    'Combo Casal': '2 X-Tudo + Batata G + Refri 1L',
-    'Super Barca GC': '2 X-Tudo + Batata G com bacon e cheddar + Mini Pasteis, Porção de calabreza + Refri 1L',
-    'Batata Simples P': 'Batata frita crocante  — porção pequena',
-    'Batata Simples G': 'Batata frita crocante  — porção grande',
-    'Batata c/ Bacon e Cheddar P': 'Batata frita com bacon crocante e cheddar — porção pequena',
-    'Batata c/ Bacon e Cheddar G': 'Batata frita com bacon crocante e cheddar — porção grande',
-    'Pastel de Carne': 'Massa crocante recheada com carne moída temperada',
-    'Pastel de Pizza': 'Massa crocante sabor pizza',
-    'Pastel de Frango': 'Massa crocante recheada com frango desfiado',
-    'Pastel Frango c/ Catupiry': 'Frango desfiado com catupiry cremoso',
-    'Pastel Frango c/ Queijo': 'Frango desfiado com queijo derretido',
-    'Pastel Calabresa c/ Queijo': 'Calabresa suculenta com queijo derretido',
-    'Pastel Carne c/ Queijo': 'Carne moída temperada com queijo derretido',
-    'Pastel de Queijo': 'Recheio generoso de queijo cremoso',
-    'Pastel Tudão': 'Carne, frango, calabresa, queijo — o completo!',
-    'Pastel Romeu e Julieta': 'Queijo com goiabada — o clássico brasileiro',
-    'Açaí 300ml': 'Açaí 300ml. Leite condensado, leite em pó, granola e tapioca',
-    'Açaí 400ml': 'Açaí 400ml. Leite condensado, leite em pó, granola e tapioca',
-    'Açaí 500ml': 'Açaí 500ml. Leite condensado, leite em pó, granola e tapioca',
-};
+        const GARCONS = [
+            { nome: 'Wania Brasil', icon: '👨‍🍳' },
+            { nome: 'Gabriel Costa', icon: '👩‍🍳' },
+            { nome: 'Emanuelle Brasil', icon: '👨‍🍳' },
+        ];
 
-// NOVO: alternar entrega/retirada
-window.alternarTipoPedido = (tipo) => {
-    const camposEntrega = document.getElementById('campos-entrega');
-    const labelEntrega = document.getElementById('label-entrega');
-    const labelRetirada = document.getElementById('label-retirada');
-    if (tipo === 'retirada') {
-        camposEntrega.classList.add('hidden');
-        labelEntrega.classList.remove('selecionada');
-        labelRetirada.classList.add('selecionada');
-    } else {
-        camposEntrega.classList.remove('hidden');
-        labelEntrega.classList.add('selecionada');
-        labelRetirada.classList.remove('selecionada');
-    }
-    atualizarInterface();
-};
+        const CARDAPIO = {
+            'hamburgueres': [
+                { nome: 'X-Tudo', preco: 12.00 },
+                { nome: 'Calabresa Prime', preco: 14.00 },
+                { nome: 'Bacon Prime', preco: 16.00 },
+                { nome: 'Cala-Bacon Prime', preco: 18.00 },
+                { nome: 'Imperador Duplo', preco: 20.00 }
+            ],
+            'combos': [
+                { nome: 'Barca Simples', preco: 30.00 },
+                { nome: 'Super Combo', preco: 22.00 },
+                { nome: 'Combo Classico', preco: 26.00 },
+                { nome: 'Combo Casal', preco: 45.00 },
+                { nome: 'Super Barca GC', preco: 60.00 }
+            ],
+            'batatas': [
+                { nome: 'Batata Simples P', preco: 10.00 },
+                { nome: 'Batata Simples G', preco: 20.00 },
+                { nome: 'Batata c/ Bacon e Cheddar P', preco: 13.00 },
+                { nome: 'Batata c/ Bacon e Cheddar G', preco: 23.00 }
+            ],
+            'pastéis': [
+                { nome: 'Pastel de Carne', preco: 8.00 },
+                { nome: 'Pastel de Pizza', preco: 8.00 },
+                { nome: 'Pastel de Frango', preco: 8.00 },
+                { nome: 'Pastel Frango c/ Catupiry', preco: 9.00 },
+                { nome: 'Pastel Frango c/ Queijo', preco: 9.00 },
+                { nome: 'Pastel Calabresa c/ Queijo', preco: 9.00 },
+                { nome: 'Pastel Carne c/ Queijo', preco: 9.00 },
+                { nome: 'Pastel de Queijo', preco: 11.00 },
+                { nome: 'Pastel Tudão', preco: 12.00 },
+                { nome: 'Pastel Romeu e Julieta', preco: 10.00 }
+            ],
+            'bebidas': [
+                { nome: 'Refri 220ml', preco: 4.00 },
+                { nome: 'Refri 350ml', preco: 6.00 },
+                { nome: 'Refri 1 litro', preco: 10.00 },
+                { nome: 'Refri 2 litros', preco: 15.00 },
+                { nome: 'Agua sem gás', preco: 3.00 },
+                { nome: 'Agua com gás', preco: 4.00 },
+                { nome: 'Suco 300ml', preco: 8.00 },
+                { nome: 'Suco 500ml', preco: 10.00 },
+                { nome: 'Vitamina 300ml', preco: 11.00 },
+                { nome: 'Vitamina 500ml', preco: 13.00 },
+                { nome: 'Jarra de Suco', preco: 20.00 },
+                { nome: 'Jarra de Vitamina', preco: 25.00 }
+            ],
+            'açaí': [
+                { nome: 'Açaí 300ml', preco: 11.00 },
+                { nome: 'Açaí 400ml', preco: 13.00 },
+                { nome: 'Açaí 500ml', preco: 15.00 }
+            ]
+        };
 
-// NOVO: função para alterar qtd dos adicionais com botões +/-
-window.alterarExtra = (btn, delta) => {
-    const controle = btn.parentElement;
-    const numSpan = controle.querySelector('.extra-qty-num');
-    let qty = parseInt(numSpan.innerText) + delta;
-    if (qty < 0) qty = 0;
-    numSpan.innerText = qty;
-};
+        const ADICIONAIS = [
+            { nome: 'Carne Artesanal', preco: 8.00 }, { nome: 'Geléia Premium', preco: 6.00 },
+            { nome: 'Bacon', preco: 5.00 }, { nome: 'Calabresa', preco: 4.00 },
+            { nome: 'Abacaxi', preco: 4.00 }, { nome: 'Queijo', preco: 3.00 },
+            { nome: 'Ovo', preco: 3.00 }, { nome: 'Creme de Cheddar', preco: 3.00 },
+            { nome: 'Cebola', preco: 3.00 }, { nome: 'Presunto', preco: 2.00 },
+            { nome: 'Salsicha', preco: 2.00 }, { nome: 'Banana', preco: 2.00 },
+            { nome: 'Morango', preco: 2.00 }, { nome: 'Kiwi', preco: 2.00 },
+            { nome: 'Uva', preco: 2.00 }, { nome: 'Leite Condensado', preco: 2.00 },
+            { nome: 'Disquete', preco: 2.00 }, { nome: 'Amendoim', preco: 2.00 },
+            { nome: 'Leite em Pó', preco: 2.00 }, { nome: 'Tapioca', preco: 2.00 },
+            { nome: 'Granola', preco: 2.00 },
+        ];
 
-function vigiarEstoque() {
-    onSnapshot(doc(db, "estoque", "disponibilidade"), (snapshot) => {
-        if (snapshot.exists()) {
-            statusEstoque = snapshot.data();
-            const btnAtivo = document.querySelector('.tab-btn.active');
-            const filtro = btnAtivo ? btnAtivo.getAttribute('onclick').match(/'([^']+)'/)[1] : 'hamburgueres';
-            renderMenu(filtro);
+        const ESTOQUE_ITENS = [
+            "Misto", "X-Tudo", "Calabresa Prime", "Bacon Prime", "Cala-Bacon Prime", "Imperador Duplo",
+            "Barca Simples", "Super Combo", "Combo Casal", "Super Barca GC",
+            "Batata Simples P", "Batata Simples G", "Batata com Bacon e Cheddar P", "Batata com Bacon e Cheddar G",
+            "Pastel de Carne", "Pastel de Pizza", "Pastel de Frango", "Pastel Frango com Catupiry",
+            "Pastel Frango com Queijo", "Pastel Calabresa com Queijo", "Pastel Carne com Queijo",
+            "Pastel de Queijo", "Pastel Tudão", "Pastel Romeu e Julieta",
+            "Refrigerante lata 220ml", "Refrigerante lata 350ml", "Refrigerante 1 litro",
+            "Refrigerante 2 litros", "Agua sem gás", "Agua com gás",
+            "Suco 300ml", "Suco 500ml", "Vitamina 300ml", "Vitamina 500ml",
+            "Açaí 300ml", "Açaí 400ml", "Açaí 500ml",
+        ];
+
+        // ── HELPERS ──────────────────────────────────────────────────────────────────
+
+        function normalizarPagamento(pag) {
+            if (!pag) return 'Outros';
+            const p = pag.trim().toLowerCase();
+            if (p.includes('pix')) return 'PIX';
+            if (p.includes('dinheiro')) return 'Dinheiro';
+            if (p.includes('cartão') || p.includes('cartao') ||
+                p.includes('credito') || p.includes('crédito') ||
+                p.includes('débito') || p.includes('debito')) return 'Cartão';
+            return 'Outros';
         }
-    });
-}
 
-async function inicializarApp() {
-    try {
-        const querySnapshot = await getDocs(collection(db, "produtos"));
-        querySnapshot.forEach(doc => cacheProdutos.push(doc.data()));
-        
-        if(cacheProdutos.length === 0) {
-            cacheProdutos = [
-                { categoria: 'hamburgueres', nome: 'Misto', preco: 5.00, img: 'mist.jpg' },
-                { categoria: 'hamburgueres', nome: 'X-Tudo', preco: 12.00, img: 'x-tudo.jpg' },
-                { categoria: 'hamburgueres', nome: 'Calabresa Prime', preco: 14.00, img: 'xcala.jpg' },
-                { categoria: 'hamburgueres', nome: 'Bacon Prime', preco: 16.00, img: 'x-bacon.jpg' },
-                { categoria: 'hamburgueres', nome: 'Cala-Bacon Prime', preco: 18.00, img: 'xcalas.jpg' },
-                { categoria: 'hamburgueres', nome: 'Imperador Duplo', preco: 20.00, img: 'xtud.jpg' },
-                { categoria: 'combos', nome: 'Barca Simples', preco: 30.00, img: 'c5.jpeg' },
-                { categoria: 'combos', nome: 'Super Combo', preco: 22.00, img: 'c1.jpeg' },
-                { categoria: 'combos', nome: 'Combo Classico', preco: 26.00, img: 'c2.jpeg' },
-                { categoria: 'combos', nome: 'Combo Casal', preco: 45.00, img: 'c3.jpeg' },
-                { categoria: 'combos', nome: 'Super Barca GC', preco: 60.00, img: 'c4.jpeg' },
-                { categoria: 'batatas', nome: 'Batata Simples P', preco: 10.00, img: 'batata.jpg' },
-                { categoria: 'batatas', nome: 'Batata Simples G', preco: 20.00, img: 'batata.jpg' },
-                { categoria: 'batatas', nome: 'Batata com Bacon e Cheddar P', preco: 13.00, img: 'batataq.jpg' },
-                { categoria: 'batatas', nome: 'Batata com Bacon e Cheddar G', preco: 23.00, img: 'batataq.jpg' },
-                { categoria: 'pastéis', nome: 'Pastel de Carne', preco: 8.00, img: 'pascar.webp' },
-                { categoria: 'pastéis', nome: 'Pastel de Pizza', preco: 8.00, img: 'paspiz.jpg' },
-                { categoria: 'pastéis', nome: 'Pastel de Frango', preco: 8.00, img: 'pasfr.webp' },
-                { categoria: 'pastéis', nome: 'Pastel Frango com Catupiry', preco: 9.00, img: 'pasfra.webp' },
-                { categoria: 'pastéis', nome: 'Pastel Frango com Queijo', preco: 9.00, img: 'pasfrq.webp' },
-                { categoria: 'pastéis', nome: 'Pastel Calabresa com Queijo', preco: 9.00, img: 'pascala.jpg' },
-                { categoria: 'pastéis', nome: 'Pastel Carne com Queijo', preco: 9.00, img: 'pascarq.jpg' },
-                { categoria: 'pastéis', nome: 'Pastel de Queijo', preco: 11.00, img: 'pasq.jpg' },
-                { categoria: 'pastéis', nome: 'Pastel Tudão', preco: 12.00, img: 'past.jpg' },
-                { categoria: 'pastéis', nome: 'Pastel Romeu e Julieta', preco: 10.00, img: 'pasro.jpg' },
-                { categoria: 'bebidas', nome: 'Refrigerante lata 220ml', preco: 4.00, img: 'refri220.jpg' },
-                { categoria: 'bebidas', nome: 'Refrigerante lata 350ml', preco: 6.00, img: 'refri350.jpg' },
-                { categoria: 'bebidas', nome: 'Refrigerante 1 litro', preco: 10.00, img: 'refri1.jpg' },
-                { categoria: 'bebidas', nome: 'Refrigerante 2 litros', preco: 15.00, img: 'refri2.jpg' },
-                { categoria: 'bebidas', nome: 'Agua sem gás', preco: 3.00, img: 'https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=400' },
-                { categoria: 'bebidas', nome: 'Agua com gás', preco: 4.00, img: 'https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=400' },
-                { categoria: 'bebidas', nome: 'Suco 300ml', preco: 8.00, img: 'suc.jpg' },
-                { categoria: 'bebidas', nome: 'Suco 500ml', preco: 10.00, img: 'suc.jpg' },
-                { categoria: 'bebidas', nome: 'Vitamina 300ml', preco: 11.00, img: 'vit.webp' },
-                { categoria: 'bebidas', nome: 'Vitamina 500ml', preco: 13.00, img: 'vit.webp' },
-                { categoria: 'bebidas', nome: 'Jarra de Suco', preco: 20.00, img: 'jarra.jpg' },
-                { categoria: 'bebidas', nome: 'Jarra de Vitamina', preco: 25.00, img: 'jarra.jpg' },
-                { categoria: 'açaí', nome: 'Açaí 300ml', preco: 11.00, img: 'acai.jpg' },
-                { categoria: 'açaí', nome: 'Açaí 400ml', preco: 13.00, img: 'acai.jpg' },
-                { categoria: 'açaí', nome: 'Açaí 500ml', preco: 15.00, img: 'acai.jpg' },
-            ];
+        // Extrai todos os metodos+valores de uma string de pagamento composta
+        // Ex: "PIX (R$ 50,00) + Dinheiro (R$ 50,00)" => [{metodo:'PIX',valor:50},{metodo:'Dinheiro',valor:50}]
+        function parsePagamentos(pagStr) {
+            if (!pagStr) return [];
+            const partes = pagStr.split('+').map(s => s.trim());
+            return partes.map(parte => {
+                const metodo = normalizarPagamento(parte);
+                const match = parte.match(/R\$\s*([\d.,]+)/);
+                let valor = 0;
+                if (match) {
+                    valor = parseFloat(match[1].replace('.', '').replace(',', '.')) || 0;
+                }
+                return { metodo, valor };
+            });
         }
-       
-        vigiarEstoque(); 
-        renderMenu('hamburgueres');
-    } catch (e) {
-        console.error("Erro:", e);
-    }
-}
 
-const gerarHTMLProduto = (p) => {
-    const idProduto = p.nome.toLowerCase().replace(/\s/g, '_');
-    const esgotado = statusEstoque[idProduto] === false;
-    const desc = descricoes[p.nome] || '';
-    
-    return `
-        <div class="card" style="${esgotado ? 'opacity: 0.6; filter: grayscale(0.8);' : ''}">
-            <img src="${p.img}">
-            <div class="card-info">
-                <p class="card-title">${p.nome} ${esgotado ? '<span style="color:#ff4d4d; font-size:0.7rem; display:block;">(ESGOTADO)</span>' : ''}</p>
-                ${desc ? `<p class="card-desc">${desc}</p>` : ''}
-                <p class="card-price">R$ ${p.preco.toFixed(2).replace('.', ',')}</p>
-            </div>
-            <button class="btn-add" 
-                ${esgotado ? 'disabled style="background: #444; cursor: not-allowed;"' : ''} 
-                onclick='abrirModal(${JSON.stringify(p)})'>
-                <i class="fas fa-plus"></i> ${esgotado ? 'ESGOTADO' : 'ADICIONAR'}
-            </button>
-        </div>
-    `;
-};
+        const R = v => (typeof v === 'number' ? v : 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-window.renderMenu = (filtro) => {
-    const container = document.getElementById('menu-container');
-    const produtosFiltrados = cacheProdutos.filter(p => p.categoria === filtro);
-    container.innerHTML = produtosFiltrados.map(p => gerarHTMLProduto(p)).join('');
-};
-
-window.filterMenu = (cat) => {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    event.currentTarget.classList.add('active');
-    renderMenu(cat);
-};
-
-window.buscarProdutos = () => {
-    const termo = document.getElementById('input-busca').value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    const container = document.getElementById('menu-container');
-    if (termo === "") {
-        const btnAtivo = document.querySelector('.tab-btn.active');
-        const cat = btnAtivo.getAttribute('onclick').match(/'([^']+)'/)[1];
-        renderMenu(cat);
-        return;
-    }
-    const resultados = cacheProdutos.filter(p => {
-        const nomeNorm = p.nome.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        const catNorm = p.categoria.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        return nomeNorm.includes(termo) || catNorm.includes(termo);
-    });
-    container.innerHTML = resultados.length > 0 
-        ? resultados.map(p => gerarHTMLProduto(p)).join('') 
-        : '<p style="color:gray; text-align:center; padding:20px; grid-column: 1/-1;">Nenhum produto encontrado...</p>';
-};
-
-window.abrirModal = (prod) => {
-    itemSelecionado = prod;
-    document.getElementById('modal-nome').innerText = prod.nome;
-    document.getElementById('modal-desc').innerText = descricoes[prod.nome] || '';
-    document.getElementById('modal-produto').style.display = 'flex';
-    document.getElementById('modal-obs').value = '';
-    
-    document.querySelectorAll('.extra-qty-num').forEach(n => n.innerText = '0');
-
-    const lanches = document.getElementById('extras-lanches');
-    const acai = document.getElementById('extras-acai');
-    const bebidas = document.getElementById('extras-bebidas');
-    const secaoExtras = document.getElementById('extras-section');
-    const containerSabores = document.getElementById('container-opcoes-sabores');
-    const tituloSabores = document.getElementById('titulo-sabores');
-
-    if (prod.categoria === 'bebidas') {
-        lanches.classList.add('hidden');
-        acai.classList.add('hidden');
-        bebidas.classList.remove('hidden');
-        secaoExtras.classList.remove('hidden');
-
-        let opcoesHTML = "";
-        const nomeProd = prod.nome.toLowerCase();
-
-        // Lógica de Sabores Dinâmicos
-        if (nomeProd.includes('suco') || nomeProd.includes('vitamina')) {
-            tituloSabores.innerText = "Escolha a fruta:";
-            const frutas = ["Acerola", "Goiaba", "Cajá", "Maracujá"];
-            opcoesHTML = frutas.map((f, i) => `
-                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-                    <input type="radio" name="sabor-bebida" value="${f}" ${i === 0 ? 'checked' : ''}> ${f}
-                </label>
-            `).join('');
-        } else if (nomeProd.includes('refrigerante')) {
-            tituloSabores.innerText = "Escolha o sabor:";
-            const refris = ["Coca-Cola", "Coca-Cola Zero", "Guaraná Antártica", "Fanta Laranja"];
-            opcoesHTML = refris.map((r, i) => `
-                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-                    <input type="radio" name="sabor-bebida" value="${r}" ${i === 0 ? 'checked' : ''}> ${r}
-                </label>
-            `).join('');
-        } else {
-            // Para água ou itens sem sabor específico, esconde a seção
-            bebidas.classList.add('hidden');
-        }
-        
-        containerSabores.innerHTML = opcoesHTML;
-
-    } else if (prod.categoria === 'açaí') {
-        lanches.classList.add('hidden');
-        acai.classList.remove('hidden');
-        bebidas.classList.add('hidden');
-    } else {
-        lanches.classList.remove('hidden');
-        acai.classList.add('hidden');
-        bebidas.classList.add('hidden');
-    }
-};
-
-window.fecharModal = () => document.getElementById('modal-produto').style.display = 'none';
-window.toggleExtras = () => document.getElementById('extras-section').classList.toggle('hidden');
-
-window.confirmarAdicao = () => {
-    let valorExtras = 0;
-    let extrasNomes = [];
-    let saborEscolhido = "";
-
-    // 1. CAPTURA DE DADOS POR CATEGORIA
-    if (itemSelecionado.categoria === 'bebidas') {
-        const inputSabor = document.querySelector('input[name="sabor-bebida"]:checked');
-        if (inputSabor) {
-            saborEscolhido = inputSabor.value;
-            // IMPORTANTE: Não damos push no extrasNomes aqui para não duplicar no visual do carrinho
-        }
-    } else {
-        // Se NÃO for bebida, faz a leitura normal dos contadores +/- (Lanches/Açaí)
-        document.querySelectorAll('.extra-row').forEach(row => {
-            const numSpan = row.querySelector('.extra-qty-num');
-            const btnPlus = row.querySelector('.extra-qty-btn:not(.minus)');
-            if (!numSpan || !btnPlus) return;
-            const qty = parseInt(numSpan.innerText);
-            if (qty > 0) {
-                const price = parseFloat(btnPlus.dataset.price);
-                const name = btnPlus.dataset.name;
-                valorExtras += price * qty;
-                extrasNomes.push(qty > 1 ? `${name} x${qty}` : name);
+        function parseTotal(v) {
+            if (typeof v === 'number') return v;
+            if (typeof v === 'string') {
+                const s = v.includes(',') ? v.replace(/[^\d,]/g, '').replace(',', '.') : v.replace(/[^\d.]/g, '');
+                return parseFloat(s) || 0;
             }
-        });
-    }
+            return 0;
+        }
 
-    // 2. CRIAÇÃO DA CHAVE ÚNICA (Para agrupar itens iguais corretamente)
-    const observacaoManual = document.getElementById('modal-obs').value.trim();
-    // A chave precisa do sabor para não misturar uma Coca com uma Fanta no carrinho
-    const chave = itemSelecionado.nome + '|' + saborEscolhido + '|' + extrasNomes.join(',') + '|' + observacaoManual;
-    
-    // 3. MONTAGEM DA OBSERVAÇÃO (O que o servidor lê para imprimir)
-    let listaParaImpressao = [];
-    if (saborEscolhido) listaParaImpressao.push("Sabor: " + saborEscolhido);
-    if (observacaoManual) listaParaImpressao.push("Obs: " + observacaoManual);
-    
-    const obsFinalFormatada = listaParaImpressao.join(' | ');
+        async function hashSenha(s) {
+            const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+            return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
 
-    // 4. LÓGICA DE AGRUPAMENTO NO CARRINHO
-    const existente = carrinho.find(i => i.chave === chave);
-    if (existente) {
-        existente.qty += 1;
-        existente.precoTotal = existente.qty * existente.precoUnitario;
-    } else {
-        carrinho.push({
-            chave,
-            nome: itemSelecionado.nome,
-            precoUnitario: itemSelecionado.preco + valorExtras,
-            precoTotal: itemSelecionado.preco + valorExtras,
-            qty: 1,
-            obs: obsFinalFormatada,        // Servidor lê aqui (Sabor: Coca | Obs: Sem gelo)
-            extras: extrasNomes.join(', ') // Carrinho mostra aqui (Bacon, Queijo)
-        });
-    }
+        let toastTimer;
+        window.toast = (msg) => {
+            const el = document.getElementById('toast');
+            el.textContent = '✅ ' + msg;
+            el.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => el.classList.remove('show'), 2000);
+        };
 
-    // 5. FINALIZAÇÃO E LIMPEZA
-    atualizarInterface();
-    fecharModal();
+        // ── STATE ─────────────────────────────────────────────────────────────────────
+        let pedidos = [];
+        let mesasFech = [];
+        let mesasAtivas = {};
+        let mesaAtual = null;
+        let carrinho = [];
+        let garcomAtual = '';
+        let pagAtual = '';
+        let abasLiberadas = { 'aba-estoque': false, 'aba-caixa': false };
+        let verMaisDelivery = false;
+        let pedidosSaiu = new Set();
 
-    // Feedback visual (Toast)
-    const t = document.getElementById('toast');
-    if(t) { 
-        t.style.display = 'block'; 
-        setTimeout(() => t.style.display = 'none', 2000); 
-    }
+        // State pagamentos parciais de MESAS
+        let _pagsMesa = [];
 
-    // Resetar campos do modal
-    document.querySelectorAll('.extra-qty-num').forEach(n => n.innerText = '0');
-    const radioPadrao = document.querySelector('input[name="sabor-bebida"][value="Coca-Cola"]');
-    if(radioPadrao) radioPadrao.checked = true;
-};
+        // State edição de pedido delivery
+        let _pedidoEditando = null; // objeto completo do pedido
+        let _carrinhoEditar = [];   // cópia dos itens para edição
 
-window.atualizarInterface = () => {
-    const list = document.getElementById('cart-items');
-    const tipoSelecionado = document.querySelector('input[name="tipo-pedido"]:checked')?.value || 'entrega';
-    const bairroSelect = document.getElementById('bairro');
-    const taxaEntrega = tipoSelecionado === 'retirada' ? 0 : parseFloat(bairroSelect.options[bairroSelect.selectedIndex].dataset.fee || 0);
+        // ── TABS ──────────────────────────────────────────────────────────────────────
+        window.switchTab = (id, el) => {
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            const target = document.getElementById(id);
+            if (target) target.classList.add('active');
+            if (el) el.classList.add('active');
+            document.getElementById('menu-extras').classList.remove('show');
+        };
 
-    list.innerHTML = '';
-    let subtotal = 0;
+        window.switchTabProtegida = async (id, el) => {
+            if (abasLiberadas[id]) { switchTab(id, el); return; }
+            const { value: senha } = await Swal.fire({
+                title: '🔒 Acesso Restrito', input: 'password',
+                inputLabel: 'Senha de acesso', inputPlaceholder: 'Digite a senha...',
+                confirmButtonText: 'Entrar', confirmButtonColor: '#e8a930',
+                background: '#111', color: '#fff',
+            });
+            if (!senha) return;
+            const h = await hashSenha(senha);
+            if (h === SENHA_HASH) {
+                abasLiberadas[id] = true;
+                switchTab(id, el);
+                if (id === 'aba-estoque') renderEstoqueConteudo();
+                if (id === 'aba-caixa') renderCaixaConteudo();
+            } else {
+                Swal.fire({ icon: 'error', title: 'Senha incorreta!', background: '#111', color: '#fff', timer: 1500, showConfirmButton: false });
+            }
+        };
 
-    carrinho.forEach((item, index) => {
-        // NOVO: precoTotal é unitario * qty
-        item.precoTotal = item.precoUnitario * item.qty;
-        subtotal += item.precoTotal;
-        list.innerHTML += `
-            <div class="cart-item">
-                <div class="cart-item-header">
-                    <span>${item.nome}</span>
-                    <span>R$ ${item.precoTotal.toFixed(2).replace('.', ',')}</span>
-                </div>
-                ${item.extras ? `<div class="cart-item-detail">+ ${item.extras}</div>` : ''}
-                ${item.obs ? `<div class="cart-item-detail" style="color:#c9973a">Obs: ${item.obs}</div>` : ''}
-                <!-- NOVO: controles de qty no carrinho -->
-                <div class="cart-item-qty">
-                    <button class="qty-btn" onclick="alterarQtyCarrinho(${index}, -1)">−</button>
-                    <span class="qty-num">${item.qty}</span>
-                    <button class="qty-btn" onclick="alterarQtyCarrinho(${index}, 1)">+</button>
-                    <span style="font-size:0.75rem; color:#888; margin-left:4px;">× R$ ${item.precoUnitario.toFixed(2).replace('.', ',')}</span>
+        function renderEstoqueConteudo() {
+            document.getElementById('estoque-conteudo').innerHTML = `
+        <h2 style="font-family:'Bebas Neue',sans-serif;letter-spacing:3px;color:var(--gold);margin-top:0;">DISPONIBILIDADE</h2>
+        <p style="opacity:0.5;font-size:0.88rem;margin-bottom:18px;">Itens desativados aparecerão como ESGOTADO no site.</p>
+        <div class="estoque-grid" id="lista-estoque"></div>`;
+            iniciarEstoque();
+        }
+
+        function renderCaixaConteudo() {
+            document.getElementById('caixa-conteudo').innerHTML = `
+        <div class="caixa-container">
+            <div style="background:var(--card);padding:20px;border-radius:15px;border:1px solid var(--border);">
+                <h3 style="font-family:'Bebas Neue',sans-serif;letter-spacing:3px;color:var(--gold);margin-top:0;font-size:1.4rem;">RELATÓRIO DO DIA</h3>
+                <div id="caixa-detalhe"></div>
+            </div>
+            <div class="caixa-sidebar">
+                <p style="margin:0;opacity:0.55;letter-spacing:2px;font-size:0.75rem;font-weight:600;">FATURAMENTO TOTAL</p>
+                <div class="valor-total" id="c-total">R$ 0,00</div>
+                <hr style="opacity:0.08;margin:16px 0;">
+                <div id="c-metodos"></div>
+                <div style="margin-top:22px;display:flex;flex-direction:column;gap:10px;">
+                    <button onclick="gerarPDF()" style="background:#27ae60;color:white;border:none;padding:14px;border-radius:10px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;"><i class="fas fa-file-pdf"></i> BAIXAR RELATÓRIO</button>
+                    <button onclick="zerarDia()" style="background:#c0392b;color:white;border:none;padding:14px;border-radius:10px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;"><i class="fas fa-trash"></i> ZERAR DIA</button>
                 </div>
             </div>
-        `;
-    });
-
-    document.getElementById('cart-count').innerText = carrinho.reduce((s, i) => s + i.qty, 0);
-    const taxaTexto = document.getElementById('taxa-entrega');
-    if(taxaTexto) taxaTexto.innerText = (tipoSelecionado === 'retirada') ? 'GRÁTIS (Retirada)' : (taxaEntrega === 0 ? "GRÁTIS" : `R$ ${taxaEntrega.toFixed(2)}`);
-    document.getElementById('total-cart').innerText = `R$ ${(subtotal + taxaEntrega).toFixed(2).replace('.', ',')}`;
-};
-
-// NOVO: alterar quantidade diretamente no carrinho
-window.alterarQtyCarrinho = (index, delta) => {
-    carrinho[index].qty += delta;
-    if (carrinho[index].qty <= 0) carrinho.splice(index, 1);
-    atualizarInterface();
-};
-
-// MANTIDO: remover item (compatibilidade)
-window.removerItem = (index) => {
-    carrinho.splice(index, 1);
-    atualizarInterface();
-};
-
-function buildPixBRCode(key, name, city, amount) {
-    // AJUSTE AQUI: Se a chave começar com +, mantemos o +, senão limpamos tudo
-    const cleanKey = key.startsWith('+') ? '+' + key.replace(/\D/g, '') : key.replace(/\D/g, ''); 
-    
-    const valorFormatado = Number(amount).toFixed(2);
-    const f = (id, val) => { const value = String(val); return id + value.length.toString().padStart(2, '0') + value; };
-    const lim = (t, n) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^A-Za-z0-9 ]/g, "").toUpperCase().substring(0, n);
-    
-    const gui = f("00", "BR.GOV.BCB.PIX");
-    const keyTlv = f("01", cleanKey); 
-    
-    let payload = "";
-    payload += f("00", "01"); 
-    payload += f("26", gui + keyTlv); 
-    payload += f("52", "0000"); 
-    payload += f("53", "986");  
-    payload += f("54", valorFormatado);
-    payload += f("58", "BR");
-    payload += f("59", lim(name, 25)); 
-    payload += f("60", lim(city, 15)); 
-    payload += f("62", f("05", "***")); 
-    payload += "6304"; 
-    
-    let crc = 0xFFFF;
-    for (let i = 0; i < payload.length; i++) {
-        crc ^= payload.charCodeAt(i) << 8;
-        for (let j = 0; j < 8; j++) {
-            if ((crc & 0x8000) !== 0) crc = (crc << 1) ^ 0x1021;
-            else crc <<= 1;
-            crc &= 0xFFFF;
+        </div>`;
+            renderCaixa();
         }
-    }
-    return payload + crc.toString(16).toUpperCase().padStart(4, "0");
-}
-// Variável global para armazenar os pagamentos parciais
-let pagamentosRealizados = [];
 
-window.handlePagamento = async (valor) => {
-    const campoTroco = document.getElementById('campo-troco');
-    const inputTroco = document.getElementById('troco');
-    const selectPagamento = document.getElementById('pagamento');
-    
-    if (valor === 'Forma de Pagamento:' || !valor) return;
+        // ── FIREBASE LISTENERS ─────────────────────────────────────────────────────────
+        let primeiroSnapPedidos = true;
+        onSnapshot(query(collection(db, 'pedidos'), orderBy('data', 'desc')), snap => {
+            pedidos = snap.docs.map(d => ({ id: d.id, tipo: 'delivery', ...d.data() }));
+            renderPedidos();
+            renderCaixa();
+            if (primeiroSnapPedidos) { primeiroSnapPedidos = false; return; }
+            window.tocarSino?.();
+        });
 
-    // Calcular quanto ainda falta pagar
-    const subtotal = carrinho.reduce((acc, item) => acc + item.precoUnitario * item.qty, 0);
-    const tipoSelecionado = document.querySelector('input[name="tipo-pedido"]:checked')?.value || 'entrega';
-    const bairroSelect = document.getElementById('bairro');
-    const taxaEntrega = tipoSelecionado === 'retirada' ? 0 : parseFloat(bairroSelect.options[bairroSelect.selectedIndex]?.dataset.fee || 0);
-    const totalPedido = subtotal + taxaEntrega;
-    
-    const jaPago = pagamentosRealizados.reduce((acc, p) => acc + p.valor, 0);
-    const restante = totalPedido - jaPago;
+        onSnapshot(collection(db, 'mesas'), snap => {
+            mesasAtivas = {};
+            snap.docs.forEach(d => { mesasAtivas[d.id] = { id: d.id, ...d.data() }; });
+            renderMesasGrid();
+            renderPedidos();
+        });
 
-    if (totalPedido <= 0) {
-        Swal.fire({ icon: 'warning', title: 'Carrinho Vazio', text: 'Adicione itens antes de selecionar o pagamento.', background: '#111', color: '#fff' });
-        if(selectPagamento) selectPagamento.value = 'Forma de Pagamento:';
-        return;
-    }
+        let primeiroSnapMesas = true;
+        onSnapshot(query(collection(db, 'mesas_historico'), orderBy('fechadoEm', 'desc')), snap => {
+            mesasFech = snap.docs.map(d => ({ id: d.id, tipo: 'mesa', ...d.data() }));
+            renderPedidos();
+            renderCaixa();
+            if (primeiroSnapMesas) { primeiroSnapMesas = false; return; }
+            window.tocarSino?.();
+        });
 
-    if (restante <= 0.01) {
-        Swal.fire({ icon: 'info', title: 'Pedido Quitado', text: 'O valor total já foi atingido.', background: '#111', color: '#fff' });
-        if(selectPagamento) selectPagamento.value = 'Forma de Pagamento:';
-        return;
-    }
+        // ── SENHA EXCLUIR ──────────────────────────────────────────────────────────────
+        async function confirmarSenhaExcluir() {
+            const { value: senha } = await Swal.fire({
+                title: '🔒 Confirmar exclusão', input: 'password',
+                inputLabel: 'Digite a senha para excluir', inputPlaceholder: '••••••',
+                confirmButtonText: 'Confirmar', confirmButtonColor: '#e74c3c',
+                showCancelButton: true, cancelButtonText: 'Cancelar',
+                background: '#111', color: '#fff',
+            });
+            if (!senha) return false;
+            const h = await hashSenha(senha);
+            if (h === SENHA_EXCLUIR_HASH) return true;
+            Swal.fire({ icon: 'error', title: 'Senha incorreta!', background: '#111', color: '#fff', timer: 1500, showConfirmButton: false });
+            return false;
+        }
 
-    if (valor === 'Dinheiro') {
-        const { value: valorEntregue } = await Swal.fire({
-            title: 'Pagamento em Dinheiro',
-            text: `O valor a pagar é R$ ${restante.toFixed(2).replace('.', ',')}. Quanto você vai entregar?`,
-            input: 'number',
-            inputAttributes: { step: '0.01', min: restante.toFixed(2) },
-            showCancelButton: true,
-            confirmButtonColor: '#c9973a',
-            cancelButtonText: 'Cancelar',
-            background: '#111',
-            color: '#fff',
-            inputValidator: (value) => {
-                if (!value || parseFloat(value) < restante - 0.01) {
-                    return 'O valor deve ser igual ou maior que o total!';
+        // ── RENDER PEDIDOS ─────────────────────────────────────────────────────────────
+        function renderPedidos() {
+            const el = document.getElementById('lista-pedidos');
+            if (!el) return;
+            let html = '';
+
+            if (pedidos.length) {
+                html += `<div class="section-label">🛵 Delivery & Balcão <span class="section-label-count">${pedidos.length}</span></div>`;
+                const visiveis = verMaisDelivery ? pedidos : pedidos.slice(0, LIMITE_INICIAL_PEDIDOS);
+                visiveis.forEach(p => {
+                    const totalNum = parseTotal(p.total);
+                    const saiu = pedidosSaiu.has(p.id);
+                    const bairroTag = p.bairro || '';
+                    const isRetirada = bairroTag === 'Retirada no Balcão' || bairroTag === 'Retirada' || (p.endereco || '').includes('Retirada');
+
+                    // ── Exibe pagamentos parciais no card ──
+                    const pagsArr = parsePagamentos(p.pagamento || '');
+                    let pagHtml = '';
+                    if (pagsArr.length > 1) {
+                        pagHtml = `<div style="margin:6px 0;font-size:0.78rem;">
+                    ${pagsArr.map(pg => `<span style="display:inline-block;margin-right:6px;margin-bottom:4px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:2px 8px;">${pg.metodo}: <b style="color:var(--green);">${R(pg.valor)}</b></span>`).join('')}
+                </div>`;
+                    } else {
+                        pagHtml = `<div style="font-size:0.78rem;opacity:0.5;margin-bottom:2px;">Pagamento: ${normalizarPagamento(p.pagamento)}</div>`;
+                    }
+
+                    const obsGeralHtml = p.obs ? `<div class="obs-badge"><i class="fas fa-sticky-note"></i><span>${p.obs}</span></div>` : '';
+                    const dadosBT = JSON.stringify({ cliente: p.cliente, endereco: p.endereco || '', bairro: bairroTag, pagamento: p.pagamento, itens: p.itens, total: totalNum, desconto: p.desconto || 0 });
+
+                    html += `
+            <div class="pedido-card${saiu ? ' saiu-entrega' : ''}" id="card-${p.id}">
+                <button class="btn-del" onclick="delPedido('${p.id}')">×</button>
+                <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;">
+                    ${isRetirada
+                            ? `<span class="tag" style="background:rgba(232,169,48,0.1);color:var(--gold);border:1px solid rgba(232,169,48,0.3);">📍 RETIRADA NO LOCAL</span>`
+                            : `<span class="tag tag-delivery">${p.origem === 'PDV' ? '🏪 BALCÃO/PDV' : '🛵 DELIVERY'}</span>
+                           ${bairroTag ? `<span class="tag" style="background:rgba(232,169,48,0.1);color:var(--gold);border:1px solid rgba(232,169,48,0.3);">📍 ${bairroTag.toUpperCase()}</span>` : ''}`
+                        }
+                </div>
+                ${saiu ? '<div class="badge-saiu"><i class="fas fa-motorcycle"></i> SAIU PARA ENTREGA</div>' : ''}
+                <div style="margin-top:6px;"><strong>${p.cliente.toUpperCase()}</strong></div>
+                ${pagHtml}
+                <div style="font-size:0.78rem;margin-bottom:8px;">
+                    ${p.telefone
+                            ? `<a href="https://wa.me/55${(p.telefone || '').replace(/\D/g, '')}" target="_blank" style="color:#25d366;text-decoration:none;"><i class="fab fa-whatsapp"></i> ${p.telefone}</a>`
+                            : '<span style="opacity:0.35;"><i class="fas fa-phone-slash"></i> Sem telefone</span>'
+                        }
+                </div>
+                <div class="lista-itens-card">
+                    ${(p.itens || []).map(i => {
+                            const vUnit = parseFloat(i.preco) || parseFloat(i.precoTotal) || 0;
+                            const qtd = parseInt(i.qty) || 1;
+                            return `<div class="item-linha-wrapper" style="margin-bottom:5px;">
+                            <div class="item-linha"><span>${qtd}x ${i.nome}</span><b>${R(vUnit * qtd)}</b></div>
+                            ${i.obs ? `<div style="font-size:0.72rem;color:#aaa;margin-left:15px;opacity:0.8;">↳ ${i.obs}</div>` : ''}
+                        </div>`;
+                        }).join('')}
+                </div>
+                ${obsGeralHtml}
+                <div style="font-size:0.78rem;margin-bottom:5px;opacity:0.6;"><i class="fas fa-map-marker-alt"></i> ${p.endereco || 'Não informado'}</div>
+                <div style="font-size:1.18rem;color:var(--gold);font-weight:700;">${R(totalNum)}</div>
+                <div class="status-actions">
+                    <button class="btn-wa bg-blue" onclick="waStatus('${(p.telefone || '').replace(/\D/g, '')}','recebido','${p.cliente}')">RECEBIDO</button>
+                    <button class="btn-wa bg-green${saiu ? ' btn-wa-ativo' : ''}" onclick="marcarSaiu('${p.id}','${(p.telefone || '').replace(/\D/g, '')}','${p.cliente}')">
+                        ${saiu ? '✅ SAIU' : 'SAIU ENTREGA'}
+                    </button>
+                </div>
+                <button class="btn-add-item-pedido" onclick="abrirEditarPedido('${p.id}')">
+                    <i class="fas fa-plus-circle"></i> ADICIONAR ITEM AO PEDIDO
+                </button>
+                <button class="btn-imprimir-bt" onclick='reimprimirNota(${JSON.stringify(dadosBT)})'>
+                    <i class="fas fa-print"></i> REIMPRIMIR NOTA
+                </button>
+                <button class="btn-imprimir-bt" style="background:rgba(46,204,113,0.1);color:var(--green);border-color:rgba(46,204,113,0.28);" onclick="aplicarDesconto('${p.id}',${totalNum})">
+    <i class="fas fa-tag"></i> APLICAR DESCONTO
+</button>
+            </div>`;
+                });
+                if (pedidos.length > LIMITE_INICIAL_PEDIDOS) {
+                    html += `<button class="btn-ver-mais" onclick="toggleVerMais()">
+                <i class="fas fa-${verMaisDelivery ? 'chevron-up' : 'chevron-down'}"></i>
+                ${verMaisDelivery ? 'Ver menos' : `Ver mais (${pedidos.length - LIMITE_INICIAL_PEDIDOS} ocultos)`}
+            </button>`;
                 }
             }
-        });
 
-        if (valorEntregue) {
-            const valorNumEntregue = parseFloat(valorEntregue);
-            
-            // Adiciona o pagamento fixado no valor que faltava
-            pagamentosRealizados.push({ 
-                metodo: 'Dinheiro', 
-                valor: restante, 
-                entregue: valorNumEntregue 
-            });
+            if (mesasFech.length) {
+                html += `<div class="section-label">✅ Mesas Fechadas <span class="section-label-count">${mesasFech.length}</span></div>`;
+                mesasFech.forEach(m => {
+                    const val = parseFloat(m.total) || 0;
+                    const hora = m.fechadoEm?.toDate
+                        ? new Date(m.fechadoEm.toDate()).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+                        : '--:--';
+                    const obsGeralHtml = m.obs ? `<div class="obs-badge"><i class="fas fa-sticky-note"></i><span>${m.obs}</span></div>` : '';
+                    const dadosMesaBT = JSON.stringify({ numero: m.numero, garcom: m.garcom, itens: m.itens, pagamento: m.pagamento, obs: m.obs || '', total: val });
 
-            // Se houver troco, preenche o campo e avisa o usuário
-            if (valorNumEntregue > restante) {
-                const valorTroco = valorNumEntregue - restante;
-                if(inputTroco) inputTroco.value = valorNumEntregue.toFixed(2);
-                if(campoTroco) campoTroco.classList.remove('hidden');
-                
-                Swal.fire({
-                    icon: 'info',
-                    title: 'Troco Calculado',
-                    text: `Troco de R$ ${valorTroco.toFixed(2).replace('.', ',')}`,
-                    background: '#111',
-                    color: '#fff',
-                    confirmButtonColor: '#c9973a'
+                    // Pagamentos parciais mesas fechadas
+                    const pagsArr = parsePagamentos(m.pagamento || '');
+                    let pagHtml = '';
+                    if (pagsArr.length > 1) {
+                        pagHtml = `<div style="margin:4px 0;font-size:0.78rem;">
+                    ${pagsArr.map(pg => `<span style="display:inline-block;margin-right:6px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:2px 8px;">${pg.metodo}: <b style="color:var(--green);">${R(pg.valor)}</b></span>`).join('')}
+                </div>`;
+                    } else {
+                        pagHtml = `<div style="font-size:0.76rem;opacity:0.45;margin-bottom:8px;">Fechado às ${hora} · ${normalizarPagamento(m.pagamento)}</div>`;
+                    }
+
+                    html += `
+            <div class="pedido-card mesa-card-closed">
+                <button class="btn-del" onclick="delMesaFech('${m.id}',${val})">×</button>
+                <span class="tag tag-mesa">🍽️ MESA ${m.numero}</span>
+                <div><strong>🧑‍🍳 ${m.garcom}</strong></div>
+                ${pagHtml}
+                <div class="lista-itens-card">
+                    ${(m.itens || []).map(i => {
+                        const vUnit = parseFloat(i.preco) || 0;
+                        const q = parseInt(i.qty) || 1;
+                        return `<div class="item-linha-wrapper" style="margin-bottom:5px;">
+                            <div class="item-linha"><span>${q}x ${i.nome}</span><b>${R(vUnit * q)}</b></div>
+                            ${i.obs ? `<div style="font-size:0.72rem;color:var(--green);margin-left:15px;opacity:0.8;">↳ ${i.obs.toUpperCase()}</div>` : ''}
+                        </div>`;
+                    }).join('')}
+                </div>
+                ${obsGeralHtml}
+                <div style="font-size:1.18rem;color:var(--green);font-weight:700;">${R(val)}</div>
+                <button class="btn-imprimir-bt" onclick='imprimirMesaBT(${JSON.stringify(dadosMesaBT)})'>
+                    <i class="fas fa-print"></i> REIMPRIMIR FECHAMENTO
+                </button>
+                <button class="btn-imprimir-bt" style="background:rgba(46,204,113,0.1);color:var(--green);border-color:rgba(46,204,113,0.28);" onclick="aplicarDescontoMesa('${m.id}',${val})">
+    <i class="fas fa-tag"></i> APLICAR DESCONTO
+</button>
+            </div>`;
                 });
             }
+
+            if (!html) html = '<p style="opacity:0.3;text-align:center;margin-top:60px;grid-column:1/-1;font-size:0.9rem;">Nenhum pedido no momento.</p>';
+            el.innerHTML = html;
         }
-    } else {
-        // Lógica para PIX e Cartão (Valor Exato)
-        const { value: valorInformado } = await Swal.fire({
-            title: `Pagar com ${valor}`,
-            text: `Valor: R$ ${restante.toFixed(2).replace('.', ',')}`,
-            input: 'number',
-            inputValue: restante.toFixed(2),
-            inputAttributes: { step: '0.01', min: '0.01' },
-            showCancelButton: true,
-            confirmButtonColor: '#c9973a',
-            cancelButtonText: 'Cancelar',
-            background: '#111',
-            color: '#fff'
+
+        window.toggleVerMais = () => { verMaisDelivery = !verMaisDelivery; renderPedidos(); };
+
+        // ── EDITAR PEDIDO DELIVERY ─────────────────────────────────────────────────────
+        window.abrirEditarPedido = (pedidoId) => {
+            const p = pedidos.find(x => x.id === pedidoId);
+            if (!p) return;
+            _pedidoEditando = p;
+            _carrinhoEditar = (p.itens || []).map(i => ({ ...i }));
+            document.getElementById('modal-editar-titulo').textContent = `➕ Adicionar ao pedido de ${p.cliente}`;
+            document.getElementById('modal-editar-pedido').classList.add('open');
+            renderEditarPedidoBody();
+        };
+
+        window.fecharModalEditar = () => {
+            document.getElementById('modal-editar-pedido').classList.remove('open');
+            _pedidoEditando = null;
+            _carrinhoEditar = [];
+        };
+
+        function renderEditarPedidoBody() {
+            const totAtual = _carrinhoEditar.reduce((s, i) => s + (parseFloat(i.preco) || 0) * (parseInt(i.qty) || 1), 0);
+
+            let cardapioHtml = Object.entries(CARDAPIO).map(([cat, itens]) => `
+        <div class="cat-bloco">
+            <div class="cat-header" onclick="toggleCat(this)">
+                <span class="cat-name">${cat}</span>
+                <i class="fas fa-chevron-down chev"></i>
+            </div>
+            <div class="cat-itens">
+                ${itens.map(item => `
+                    <button class="item-btn" onclick="addItemEditar('${item.nome.replace(/'/g, "\\'")}',${item.preco})">
+                        <span class="i-nome">${item.nome}</span>
+                        <span class="i-preco">${R(item.preco)}</span>
+                    </button>`).join('')}
+            </div>
+        </div>`).join('');
+
+            // Adicionais
+            cardapioHtml += `
+        <div class="cat-bloco">
+            <div class="cat-header" onclick="toggleCat(this)">
+                <span class="cat-name">➕ Adicionais / Extras</span>
+                <i class="fas fa-chevron-down chev"></i>
+            </div>
+            <div class="cat-itens">
+                ${ADICIONAIS.map(item => `
+                    <button class="item-btn" onclick="addItemEditar('+ ${item.nome.replace(/'/g, "\\'")}',${item.preco})">
+                        <span class="i-nome">+ ${item.nome}</span>
+                        <span class="i-preco">${R(item.preco)}</span>
+                    </button>`).join('')}
+            </div>
+        </div>`;
+
+            // Carrinho atual (só os itens novos são editáveis, os originais são só exibição)
+            const itensOriginaisHtml = (_pedidoEditando.itens || []).map(i => {
+                const v = (parseFloat(i.preco) || 0) * (parseInt(i.qty) || 1);
+                return `<div style="display:flex;justify-content:space-between;font-size:0.82rem;padding:4px 0;opacity:0.55;">
+            <span>${parseInt(i.qty) || 1}x ${i.nome}</span><span>${R(v)}</span>
+        </div>`;
+            }).join('');
+
+            // Itens novos adicionados
+            const itensNovos = _carrinhoEditar.filter(i => i._novo);
+            const itensNovosHtml = itensNovos.length
+                ? itensNovos.map((it, idx) => {
+                    const globalIdx = _carrinhoEditar.findIndex(x => x === it);
+                    return `<div style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:0.84rem;">
+                <span style="flex:1;">${it.nome}</span>
+                <div class="qtd-ctrl">
+                    <button class="qtd-btn" onclick="chgQtdEditar(${globalIdx},-1)">−</button>
+                    <span>${it.qty}x</span>
+                    <button class="qtd-btn" onclick="chgQtdEditar(${globalIdx},1)">+</button>
+                    <span style="color:var(--gold);min-width:55px;text-align:right;">${R((parseFloat(it.preco) || 0) * it.qty)}</span>
+                </div>
+            </div>`;
+                }).join('')
+                : '<p style="opacity:0.3;font-size:0.8rem;text-align:center;padding:8px 0;">Nenhum item novo ainda.</p>';
+
+            const totalNovos = itensNovos.reduce((s, i) => s + (parseFloat(i.preco) || 0) * i.qty, 0);
+
+            document.getElementById('modal-editar-body').innerHTML = `
+        <div style="background:rgba(0,0,0,0.4);border-radius:10px;padding:10px;margin-bottom:12px;border:1px solid var(--border);">
+            <div style="font-size:0.72rem;color:rgba(255,255,255,0.4);font-weight:700;letter-spacing:1px;margin-bottom:6px;">ITENS ORIGINAIS DO PEDIDO:</div>
+            ${itensOriginaisHtml}
+            <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:0.88rem;font-weight:700;">
+                <span>Subtotal original:</span><span style="color:var(--gold);">${R(parseTotal(_pedidoEditando.total))}</span>
+            </div>
+        </div>
+
+        ${cardapioHtml}
+
+        <div class="cart-box" style="margin-top:12px;">
+            <div class="cart-title">🆕 Itens sendo adicionados</div>
+            <div id="editar-itens-novos">${itensNovosHtml}</div>
+            ${totalNovos > 0 ? `
+            <div style="display:flex;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.08);font-weight:700;">
+                <span>Acréscimo:</span><span style="color:var(--green);">+ ${R(totalNovos)}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:4px;font-weight:700;font-size:1rem;">
+                <span>NOVO TOTAL:</span><span style="color:var(--gold);">${R(parseTotal(_pedidoEditando.total) + totalNovos)}</span>
+            </div>` : ''}
+        </div>
+
+        ${totalNovos > 0 ? `
+        <button onclick="salvarEdicaoPedido()" style="width:100%;margin-top:12px;background:#27ae60;color:white;border:none;padding:14px;border-radius:10px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;font-size:0.9rem;">
+            💾 SALVAR E ATUALIZAR PEDIDO
+        </button>` : ''}
+        <button onclick="fecharModalEditar()" style="width:100%;margin-top:8px;background:none;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);padding:11px;border-radius:10px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;">
+            Cancelar
+        </button>`;
+        }
+
+        window.addItemEditar = (nome, preco) => {
+            const ex = _carrinhoEditar.find(i => i.nome === nome && i._novo);
+            if (ex) ex.qty++;
+            else _carrinhoEditar.push({ nome, preco: parseFloat(preco), qty: 1, _novo: true });
+            renderEditarPedidoBody();
+            toast(`${nome} adicionado!`);
+        };
+
+        window.chgQtdEditar = (idx, d) => {
+            _carrinhoEditar[idx].qty += d;
+            if (_carrinhoEditar[idx].qty <= 0) _carrinhoEditar.splice(idx, 1);
+            renderEditarPedidoBody();
+        };
+
+        window.salvarEdicaoPedido = async () => {
+            if (!_pedidoEditando) return;
+            const itensNovos = _carrinhoEditar.filter(i => i._novo).map(i => ({ nome: i.nome, preco: i.preco, qty: i.qty }));
+            if (!itensNovos.length) return;
+
+            // Junta itens originais + novos (agrupando se o mesmo nome já existia)
+            const itensAtualizados = [...(_pedidoEditando.itens || [])];
+            itensNovos.forEach(novo => {
+                const ex = itensAtualizados.find(i => i.nome === novo.nome);
+                if (ex) ex.qty = (parseInt(ex.qty) || 1) + novo.qty;
+                else itensAtualizados.push({ nome: novo.nome, preco: novo.preco, qty: novo.qty });
+            });
+
+            const acrescimo = itensNovos.reduce((s, i) => s + (i.preco * i.qty), 0);
+            const novoTotal = parseTotal(_pedidoEditando.total) + acrescimo;
+
+            try {
+                await updateDoc(doc(db, 'pedidos', _pedidoEditando.id), {
+                    itens: itensAtualizados,
+                    total: novoTotal,
+                });
+                fecharModalEditar();
+                Swal.fire({ icon: 'success', title: 'Pedido atualizado!', html: `Acréscimo: <b>${R(acrescimo)}</b><br>Novo total: <b>${R(novoTotal)}</b>`, background: '#111', color: '#fff', timer: 2500, showConfirmButton: false });
+            } catch (e) {
+                Swal.fire({ icon: 'error', title: 'Erro!', text: e.message, background: '#111', color: '#fff' });
+            }
+        };
+
+        // ── MARCAR SAIU ────────────────────────────────────────────────────────────────
+        window.marcarSaiu = async (pedidoId, tel, cliente) => {
+            if (pedidosSaiu.has(pedidoId)) { pedidosSaiu.delete(pedidoId); renderPedidos(); return; }
+            pedidosSaiu.add(pedidoId);
+            renderPedidos();
+            const pedido = pedidos.find(p => p.id === pedidoId);
+            const isRetirada = (pedido?.bairro || '').includes('Retirada') || (pedido?.endereco || '').includes('Retirada');
+            const msg = isRetirada
+                ? `Notícia boaaa 🤩\n${cliente}, seu pedido está pronto, é só vir buscar!`
+                : `Boa Notícia! Seu pedido já saiu para entrega🏍️🤩. Agradecemos a preferência e volte sempre! GC BURGUER.`;
+            window.location.href = `whatsapp://send?phone=55${tel.replace(/\D/g, '')}&text=${encodeURIComponent(msg)}`;
+            window.toast('Pedido marcado como saiu!');
+        };
+
+        window.reimprimirNota = async (dadosJson) => {
+    try {
+        const p = typeof dadosJson === 'string' ? JSON.parse(dadosJson) : dadosJson;
+        const docRef = await addDoc(collection(db, 'reimpressoes'), {
+            cliente: p.cliente, endereco: p.endereco || '', bairro: p.bairro || '',
+            pagamento: p.pagamento || '', itens: p.itens || [], total: p.total || 0,
+            desconto: p.desconto || 0,                          // ← NOVO
+            data: new Date(), tipo: 'FINALIZADO'
         });
-
-        if (valorInformado) {
-            const valorNum = parseFloat(valorInformado);
-            if (valorNum <= 0 || isNaN(valorNum)) return;
-
-            if (valorNum > (restante + 0.05)) {
-                Swal.fire({ icon: 'error', title: 'Valor Excedido', text: 'O valor informado é maior que o restante.', background: '#111', color: '#fff' });
-                return;
+                setTimeout(async () => { try { await deleteDoc(docRef); } catch (e) { } }, 10000);
+                window.toast('Nota enviada para impressão!');
+            } catch (e) {
+                Swal.fire({ icon: 'error', title: 'Erro!', text: e.message, background: '#111', color: '#fff' });
             }
+        };
 
-            pagamentosRealizados.push({ metodo: valor, valor: valorNum });
+        // ── CAIXA ──────────────────────────────────────────────────────────────────────
+       function renderCaixa() {
+    if (!abasLiberadas['aba-caixa']) return;
 
-            if (valor === 'PIX') {
-                abrirModalPixMisto(valorNum);
+    let tPix = 0, tDin = 0, tCrd = 0, tSemPag = 0;
+    let tDesconto = 0;
+    const todosItens = [];
+
+    pedidos.forEach(p => {
+        const pagsArr = parsePagamentos(p.pagamento || '');
+        if (pagsArr.length > 0) {
+            const somaPags = pagsArr.reduce((s, pg) => s + pg.valor, 0);
+            const totalReal = parseTotal(p.total);
+            // Se a soma dos pagamentos parciais bate com o total, usa parciais
+            // Se não (pedido em aberto sem pagamento registrado), usa o total no método informado
+            if (Math.abs(somaPags - totalReal) < 0.05 || somaPags > 0) {
+                pagsArr.forEach(pg => {
+                    if (pg.metodo === 'PIX') tPix += pg.valor;
+                    else if (pg.metodo === 'Dinheiro') tDin += pg.valor;
+                    else tCrd += pg.valor;
+                });
+                // Se o total real é maior que a soma dos pagamentos (item adicionado depois),
+                // a diferença entra como "sem pagamento definido" mas somamos no total geral
+                const diff = totalReal - somaPags;
+                if (diff > 0.05) tSemPag += diff;
+            } else {
+                const v = parseTotal(p.total);
+                const m = normalizarPagamento(p.pagamento);
+                if (m === 'PIX') tPix += v;
+                else if (m === 'Dinheiro') tDin += v;
+                else tCrd += v;
             }
+        } else {
+            // Pedido sem pagamento registrado: soma o total no método informado (ou sem método)
+            const v = parseTotal(p.total);
+            const m = normalizarPagamento(p.pagamento);
+            if (m === 'PIX') tPix += v;
+            else if (m === 'Dinheiro') tDin += v;
+            else if (m === 'Cartão') tCrd += v;
+            else tSemPag += v;
         }
+        (p.itens || []).forEach(i => todosItens.push({ ...i }));
+    });
+
+    mesasFech.forEach(m => {
+        const pagsArr = parsePagamentos(m.pagamento || '');
+        if (pagsArr.length > 0) {
+            pagsArr.forEach(pg => {
+                if (pg.metodo === 'PIX') tPix += pg.valor;
+                else if (pg.metodo === 'Dinheiro') tDin += pg.valor;
+                else tCrd += pg.valor;
+            });
+        } else {
+            const v = parseFloat(m.total) || 0;
+            const pg = normalizarPagamento(m.pagamento);
+            if (pg === 'PIX') tPix += v;
+            else if (pg === 'Dinheiro') tDin += v;
+            else tCrd += v;
+        }
+        (m.itens || []).forEach(i => todosItens.push({ ...i }));
+    });
+    pedidos.forEach(p => { tDesconto += parseFloat(p.desconto) || 0; });
+    mesasFech.forEach(m => { tDesconto += parseFloat(m.desconto) || 0; });
+
+    const tot = tPix + tDin + tCrd + tSemPag;
+
+    const nomesBebidas = new Set([
+        ...CARDAPIO['bebidas'].map(x => x.nome),
+        ...CARDAPIO['açaí'].map(x => x.nome)
+    ]);
+    const mapa = {};
+    todosItens.forEach(i => {
+        const nome = i.nome || '?';
+        const preco = parseFloat(i.preco) || 0;
+        const qty = parseInt(i.qty) || 1;
+        if (!mapa[nome]) mapa[nome] = { qty: 0, total: 0 };
+        mapa[nome].qty += qty;
+        mapa[nome].total += preco * qty;
+    });
+    const lanches = Object.entries(mapa).filter(([n]) => !nomesBebidas.has(n));
+    const bebidas = Object.entries(mapa).filter(([n]) => nomesBebidas.has(n));
+
+    function renderGrupo(lista) {
+        if (!lista.length) return '<div style="opacity:0.3;font-size:0.82rem;">Nenhum item.</div>';
+        return lista.map(([nome, d]) => `
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:0.88rem;">
+                <span>${d.qty}x ${nome}</span>
+                <b style="color:var(--gold);">${R(d.total)}</b>
+            </div>`).join('');
     }
 
-    // Atualiza visibilidade do campo de troco
-    const temDinheiro = pagamentosRealizados.some(p => p.metodo === 'Dinheiro');
-    if(campoTroco) campoTroco.classList.toggle('hidden', !temDinheiro);
+    const cel = document.getElementById('c-total');
+    const met = document.getElementById('c-metodos');
+    const det = document.getElementById('caixa-detalhe');
 
-    if(typeof atualizarInterface === 'function') atualizarInterface();
-    if(selectPagamento) selectPagamento.value = 'Forma de Pagamento:';
-};
-
-function abrirModalPixMisto(valor) {
-    document.getElementById('modal-pix').style.display = 'flex';
-    document.getElementById('pix-valor').innerText = `R$ ${valor.toFixed(2).replace('.', ',')}`;
-    setTimeout(() => {
-        const qrContainer = document.getElementById('pix-qrcode');
-        if (qrContainer) {
-            qrContainer.innerHTML = ""; 
-            const pixCode = buildPixBRCode("+5599992166621", "GABRIEL COSTA GOMES", "SANTANDER", valor);
-            document.getElementById('pix-copia').value = pixCode;
-            new QRCode(qrContainer, { text: pixCode, width: 220, height: 220, correctLevel: QRCode.CorrectLevel.M });
-        }
-    }, 300);
+    if (cel) cel.textContent = R(tot);
+if (met) met.innerHTML = `
+    <div style="display:flex;justify-content:space-between;margin-bottom:10px;font-size:0.88rem;"><span style="opacity:0.6;">PIX</span><b>${R(tPix)}</b></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:10px;font-size:0.88rem;"><span style="opacity:0.6;">Dinheiro</span><b>${R(tDin)}</b></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:10px;font-size:0.88rem;"><span style="opacity:0.6;">Cartão</span><b>${R(tCrd)}</b></div>
+    ${tSemPag > 0 ? `<div style="display:flex;justify-content:space-between;font-size:0.88rem;margin-bottom:10px;"><span style="opacity:0.6;">A receber</span><b style="color:var(--orange);">${R(tSemPag)}</b></div>` : ''}
+    ${tDesconto > 0 ? `
+    <hr style="opacity:0.08;margin:10px 0;">
+    <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.88rem;background:rgba(231,76,60,0.07);border:1px solid rgba(231,76,60,0.25);border-radius:8px;padding:8px 10px;">
+        <span style="display:flex;align-items:center;gap:6px;color:#e74c3c;"><i class="fas fa-tag"></i> Descontos</span>
+        <b style="color:#e74c3c;">- ${R(tDesconto)}</b>
+    </div>` : ''}`;
+    if (det) det.innerHTML = `
+        <div style="margin-bottom:18px;">
+            <div style="font-size:0.75rem;letter-spacing:2px;opacity:0.4;font-weight:600;margin-bottom:8px;">🍔 LANCHES & COMBOS</div>
+            ${renderGrupo(lanches)}
+        </div>
+        <div style="margin-bottom:18px;">
+            <div style="font-size:0.75rem;letter-spacing:2px;opacity:0.4;font-weight:600;margin-bottom:8px;">🥤 BEBIDAS & AÇAÍ</div>
+            ${renderGrupo(bebidas)}
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:2px solid rgba(255,255,255,0.1);font-weight:700;font-size:1rem;">
+            <span>TOTAL GERAL</span>
+            <span style="color:var(--gold);font-size:1.2rem;">${R(tot)}</span>
+        </div>`;
 }
 
-window.processarPedido = async () => {
-    const nome = document.getElementById('nome').value.trim();
-    const telefone = document.getElementById('telefone')?.value?.trim() || '';
-    const tipoSelecionado = document.querySelector('input[name="tipo-pedido"]:checked')?.value || 'entrega';
-    const bairroSelect = document.getElementById('bairro');
-    const bairro = tipoSelecionado === 'retirada' ? 'Retirada no local' : bairroSelect.value;
-    const endereco = tipoSelecionado === 'retirada' ? 'Retirada no local' : document.getElementById('endereco').value.trim();
-    const troco = document.getElementById('troco')?.value || "";
+        window.waStatus = (tel, tipo, cliente) => {
+            if (!tel) { Swal.fire({ icon: 'warning', title: 'Sem telefone!', background: '#111', color: '#fff', timer: 2000, showConfirmButton: false }); return; }
+            const msg = tipo === 'recebido'
+                ? `Olá ${cliente}! Recebemos seu pedido. Já estamos preparando!😋🤩 — GC BURGUER`
+                : `Olá ${cliente}! Seu pedido saiu para entrega! Em breve chegará. — GC BURGUER`;
+            window.location.href = `whatsapp://send?phone=55${tel}&text=${encodeURIComponent(msg)}`;
+        };
 
-    const taxaEntrega = tipoSelecionado === 'retirada' ? 0 : parseFloat(bairroSelect.options[bairroSelect.selectedIndex].dataset.fee || 0);
-    const subtotal = carrinho.reduce((s, i) => s + i.precoUnitario * i.qty, 0);
-    const totalNumerico = subtotal + taxaEntrega;
-    const totalPago = pagamentosRealizados.reduce((acc, p) => acc + p.valor, 0);
+        window.delPedido = async id => {
+            const ok = await confirmarSenhaExcluir();
+            if (!ok) return;
+            await deleteDoc(doc(db, 'pedidos', id));
+            toast('Pedido excluído!');
+        };
 
-    if(!nome || !telefone) return Swal.fire({ icon:'warning', title:'Atenção!', text:'Nome e WhatsApp são obrigatórios!', background:'#111', color:'#fff', confirmButtonColor:'#c9973a' });
-    if(carrinho.length === 0) return Swal.fire({ icon:'warning', title:'Atenção!', text:'Seu carrinho está vazio!', background:'#111', color:'#fff', confirmButtonColor:'#c9973a' });
-    if(tipoSelecionado === 'entrega' && !bairro) return Swal.fire({ icon:'warning', title:'Atenção!', text:'Selecione seu bairro para calcular a taxa de entrega!', background:'#111', color:'#fff', confirmButtonColor:'#c9973a' });
-    if(tipoSelecionado === 'entrega' && !endereco) return Swal.fire({ icon:'warning', title:'Atenção!', text:'Informe seu endereço completo!', background:'#111', color:'#fff', confirmButtonColor:'#c9973a' });
+        window.delMesaFech = async (id, val) => {
+            const ok = await confirmarSenhaExcluir();
+            if (!ok) return;
+            await deleteDoc(doc(db, 'mesas_historico', id));
+            toast('Mesa removida do caixa!');
+        };
 
-    if (Math.abs(totalNumerico - totalPago) > 0.05) {
-        return Swal.fire({ icon:'warning', title:'Pagamento Incompleto', text:`Faltam R$ ${(totalNumerico - totalPago).toFixed(2).replace('.', ',')}`, background:'#111', color:'#fff', confirmButtonColor:'#c9973a' });
-    }
-    const resumoPagamento = pagamentosRealizados.map(p => `${p.metodo} (R$ ${p.valor.toFixed(2).replace('.', ',')})`).join(' + ');
-
-    // Cálculo de troco para o WhatsApp
-    const pagDinheiro = pagamentosRealizados.find(p => p.metodo === 'Dinheiro');
-    let infoTrocoWhats = "";
-    if (pagDinheiro && pagDinheiro.entregue > pagDinheiro.valor) {
-        const valorTroco = pagDinheiro.entregue - pagDinheiro.valor;
-        infoTrocoWhats = `\n*TROCO PARA:* R$ ${pagDinheiro.entregue.toFixed(2).replace('.', ',')} (Troco: R$ ${valorTroco.toFixed(2).replace('.', ',')})`;
-    }
-
-    const pedidoFirestore = {
-        cliente: nome,
-        telefone: telefone,
-        bairro,
-        endereco,
-        tipoPedido: tipoSelecionado,
-        pagamento: resumoPagamento,
-        troco: troco, // Valor "Troco para quanto?"
-        itens: carrinho.map(i => ({ nome: i.nome, preco: i.precoUnitario, qty: i.qty, obs: i.obs || '', extras: i.extras || '' })),
-        taxaEntrega,
-        total: totalNumerico,
-        status: "pendente",
-        origem: "delivery",
-        data: serverTimestamp()
-    };
-
-    try {
-        await addDoc(collection(db, "pedidos"), pedidoFirestore);
-
-        let msg = `*🔥 NOVO PEDIDO - GC BURGUER *\n`;
-        msg += `*Tipo:* ${tipoSelecionado === 'retirada' ? '🏪 RETIRADA NO LOCAL' : '🛵 ENTREGA'}\n`;
-        msg += `------------------------------\n`;
-        carrinho.forEach(i => {
-            msg += `✅ *${i.nome}* ${i.qty > 1 ? `x${i.qty}` : ''}\n`;
-            if(i.extras) msg += `   _Adicionais: ${i.extras}_\n`;
-            if(i.obs)    msg += `   _Obs: ${i.obs}_\n`;
-            msg += `   Subtotal: R$ ${(i.precoUnitario * i.qty).toFixed(2).replace('.', ',')}\n\n`;
-        });
-        msg += `------------------------------\n`;
-        msg += `*TOTAL: R$ ${totalNumerico.toFixed(2).replace('.', ',')}*\n\n`;
-        msg += `*PAGAMENTO:* ${resumoPagamento}`;
-        msg += infoTrocoWhats; 
-        
-        msg += `\n------------------------------\n`;
-        msg += `*CLIENTE:* ${nome}\n`;
-        msg += `*TELEFONE:* ${telefone}\n`;
-        if (tipoSelecionado === 'entrega') {
-            msg += `*ENDEREÇO:* ${endereco}\n*BAIRRO:* ${bairro}`;
+        // ── MESAS GRID ─────────────────────────────────────────────────────────────────
+        function renderMesasGrid() {
+            const g = document.getElementById('mesas-grid');
+            if (!g) return;
+            g.innerHTML = '';
+            let nOcp = 0, nLiv = 0;
+            for (let i = 1; i <= TOTAL_MESAS; i++) {
+                const id = `mesa_${i}`;
+                const mesa = mesasAtivas[id];
+                const oc = !!mesa;
+                oc ? nOcp++ : nLiv++;
+                if (oc) {
+                    const val = mesa.itens.reduce((s, x) => s + x.preco * x.qty, 0);
+                    const nIt = mesa.itens.reduce((s, x) => s + x.qty, 0);
+                    const itensHtml = mesa.itens.length > 0
+                        ? mesa.itens.slice(0, 4).map(it => `
+                    <div class="mesa-item-row">
+                        <span class="mesa-item-nome">${it.qty}x ${it.nome}</span>
+                        <span class="mesa-item-preco">${R(it.preco * it.qty)}</span>
+                    </div>`).join('') + (mesa.itens.length > 4 ? `<div style="font-size:0.72rem;opacity:0.4;padding-top:4px;">+${mesa.itens.length - 4} itens...</div>` : '')
+                        : '<div style="font-size:0.78rem;opacity:0.3;text-align:center;padding:6px 0;">Sem itens ainda</div>';
+                    const jaEnviado = mesa.enviadoCozinhaEm && mesa.ultimaAtualizacao &&
+                        (mesa.enviadoCozinhaEm?.seconds || 0) >= (mesa.ultimaAtualizacao?.seconds || 0);
+                    const obsHtml = mesa.obs
+                        ? `<div style="font-size:0.75rem;color:rgba(255,255,255,0.45);margin-bottom:10px;display:flex;align-items:flex-start;gap:5px;"><i class="fas fa-sticky-note" style="color:var(--gold);margin-top:2px;font-size:0.7rem;"></i><span>${mesa.obs}</span></div>`
+                        : '';
+                    g.innerHTML += `
+            <div class="mesa-card ocupada">
+                <div class="mesa-card-top">
+                    <div class="mesa-num">MESA ${i}</div>
+                    <div class="mesa-status-badge badge-ocupada">OCUPADA</div>
+                </div>
+                <div class="mesa-garcom-row"><i class="fas fa-user-tie" style="font-size:0.75rem;"></i><span>${mesa.garcom}</span><span style="margin-left:auto;font-size:0.7rem;color:rgba(255,255,255,0.3);">${nIt} itens</span></div>
+                <div class="mesa-itens-lista">${itensHtml}</div>
+                ${obsHtml}
+                <div class="mesa-total-row">
+                    <div class="mesa-total-label">Total parcial</div>
+                    <div class="mesa-total-val">${R(val)}</div>
+                </div>
+                <div class="mesa-actions">
+                    <button class="mesa-act-btn btn-pedido" onclick="abrirMesa('${id}',${i});event.stopPropagation();"><i class="fas fa-plus"></i> PEDIDO</button>
+                    <button class="mesa-act-btn ${jaEnviado ? 'btn-cozinha-ok' : 'btn-cozinha'}" onclick="enviarCozinhaDireto('${id}');event.stopPropagation();"><i class="fas fa-${jaEnviado ? 'check' : 'fire'}"></i> ${jaEnviado ? 'ENVIADO' : 'COZINHA'}</button>
+                    <button class="mesa-act-btn btn-fechar" style="grid-column:1/-1;" onclick="abrirFechamentoDireto('${id}',${i});event.stopPropagation();"><i class="fas fa-check-circle"></i> FECHAR CONTA</button>
+                </div>
+            </div>`;
+                } else {
+                    g.innerHTML += `
+            <div class="mesa-card livre">
+                <div class="mesa-card-top">
+                    <div class="mesa-num">MESA ${i}</div>
+                    <div class="mesa-status-badge badge-livre">LIVRE</div>
+                </div>
+                <div class="mesa-livre-inner">
+                    <div class="mesa-livre-icon">🪑</div>
+                    <div class="mesa-livre-text">Disponível</div>
+                </div>
+                <button class="btn-abrir-mesa" onclick="abrirMesa('${id}',${i})"><i class="fas fa-plus"></i> ABRIR MESA</button>
+            </div>`;
+                }
+            }
+            const so = document.getElementById('stat-ocp');
+            const sl = document.getElementById('stat-liv');
+            if (so) so.textContent = `${nOcp} ocupada${nOcp !== 1 ? 's' : ''}`;
+            if (sl) sl.textContent = `${nLiv} livre${nLiv !== 1 ? 's' : ''}`;
         }
 
-        window.open(`https://wa.me/5599991154876?text=${encodeURIComponent(msg)}`);
+        window.enviarCozinhaDireto = async (mesaId) => {
+            const mesa = mesasAtivas[mesaId];
+            if (!mesa || !mesa.itens.length) { Swal.fire({ icon: 'warning', title: 'Mesa vazia!', background: '#111', color: '#fff' }); return; }
+            const jaEnviado = mesa.enviadoCozinhaEm && mesa.ultimaAtualizacao && mesa.enviadoCozinhaEm.seconds >= mesa.ultimaAtualizacao.seconds;
+            if (jaEnviado) { Swal.fire({ icon: 'info', title: 'Já enviado!', background: '#111', color: '#fff', timer: 2000, showConfirmButton: false }); return; }
+            await updateDoc(doc(db, 'mesas', mesaId), { ultimaAtualizacao: new Date(), enviadoCozinhaEm: new Date() });
+            Swal.fire({ icon: 'success', title: 'Enviado!', timer: 1500, showConfirmButton: false, background: '#111', color: '#fff' });
+        };
 
-        carrinho = [];
-        pagamentosRealizados = [];
-        atualizarInterface();
-        document.getElementById('cart-sidebar').classList.remove('open');
-        fecharPix();
-        Swal.fire({ icon: 'success', title: 'Pedido Enviado!', background: '#111', color: '#fff', confirmButtonColor: '#c9973a' });
-    } catch (error) {
-        console.error("Erro:", error);
-    }
-};
+        window.abrirFechamentoDireto = async (mesaId, numero) => {
+            mesaAtual = { mesaId, numero };
+            pagAtual = '';
+            _pagsMesa = [];
+            const mesa = mesasAtivas[mesaId];
+            if (!mesa || !mesa.itens.length) { Swal.fire({ icon: 'warning', title: 'Mesa vazia!', background: '#111', color: '#fff' }); return; }
+            garcomAtual = mesa.garcom;
+            carrinho = mesa.itens.map(x => ({ ...x }));
+            document.getElementById('modal-titulo').textContent = `🧾 Fechar Mesa ${numero}`;
+            document.getElementById('modal').classList.add('open');
+            renderFechamento();
+        };
 
-// Função auxiliar para garantir o cálculo correto em qualquer parte do script
-function calcularTotalGeral() {
-    const subtotal = carrinho.reduce((s, i) => s + i.precoUnitario * i.qty, 0);
-    const tipoSelecionado = document.querySelector('input[name="tipo-pedido"]:checked')?.value || 'entrega';
-    const bairroSelect = document.getElementById('bairro');
-    const taxaEntrega = tipoSelecionado === 'retirada' ? 0 : parseFloat(bairroSelect.options[bairroSelect.selectedIndex].dataset.fee || 0);
-    return subtotal + taxaEntrega;
-};
+        // ── FECHAMENTO COM PAGAMENTOS PARCIAIS ─────────────────────────────────────────
+        function renderFechamento() {
+            const mesa = mesasAtivas[mesaAtual?.mesaId];
+            if (!mesa) return;
+            const tot = mesa.itens.reduce((s, i) => s + (i.preco * i.qty), 0);
+            const totalPago = _pagsMesa.reduce((s, p) => s + p.valor, 0);
+            const restante = Math.max(0, tot - totalPago);
+            const quitado = restante <= 0.01;
 
-window.fecharPix = () => document.getElementById('modal-pix').style.display = 'none';
-window.toggleCart = () => {
-    if (!verificarStatusLoja()) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Estamos fechados!',
-            text: `Voltamos às ${HORARIO_ABERTURA}:00. Fique à vontade para ver o cardápio! 😊`,
-            background: '#111',
-            color: '#fff',
-            confirmButtonColor: '#c9973a'
-        });
-        return;
-    }
-    document.getElementById('cart-sidebar').classList.toggle('open');
-};
-inicializarApp();
+            const obsHtml = mesa.obs
+                ? `<div class="obs-badge" style="margin-bottom:10px;"><i class="fas fa-sticky-note"></i><span>${mesa.obs}</span></div>`
+                : '';
 
+            const listaPags = _pagsMesa.length
+                ? `<div class="pags-lista">
+            <div style="font-size:0.72rem;color:rgba(255,255,255,0.4);font-weight:700;letter-spacing:1px;margin-bottom:6px;">PAGAMENTOS REGISTRADOS:</div>
+            ${_pagsMesa.map((p, i) => `
+                <div class="pag-row">
+                    <span>${p.metodo}</span>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <span style="color:var(--green);font-weight:700;">${R(p.valor)}</span>
+                        <button class="btn-rem-pag" onclick="removerPagMesa(${i})">✕</button>
+                    </div>
+                </div>`).join('')}
+            <div style="display:flex;justify-content:space-between;padding-top:8px;font-size:0.82rem;">
+                <span style="opacity:0.5;">Pago:</span><span style="color:var(--green);font-weight:700;">${R(totalPago)}</span>
+            </div>
+            ${!quitado
+                    ? `<div style="display:flex;justify-content:space-between;font-size:0.82rem;margin-top:3px;">
+                    <span style="opacity:0.5;">Falta:</span><span style="color:#e74c3c;font-weight:700;">${R(restante)}</span>
+                   </div>`
+                    : `<div style="color:var(--green);font-size:0.78rem;font-weight:700;margin-top:5px;text-align:center;">✅ VALOR QUITADO</div>`
+                }
+          </div>`
+                : '';
 
-// ── STATUS DA LOJA — TEMPO REAL ────────────────
-(async function() {
-    try {
-        const { getFirestore, doc, onSnapshot } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
-        const { getApp } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js");
-        const db = getFirestore(getApp());
-        onSnapshot(doc(db, 'config', 'loja'), (snap) => {
-            const aberta = snap.exists() ? snap.data().aberta !== false : true;
-            if (!aberta) {
-                document.getElementById('tela-fechada').style.display = 'flex';
-                document.body.style.overflow = 'hidden';
-            } else {
-                document.getElementById('tela-fechada').style.display = 'none';
-                document.body.style.overflow = '';
+            document.getElementById('modal-body').innerHTML = `
+        <div style="text-align:center;margin-bottom:14px;">
+            <div style="font-size:1.5rem;">🧾</div>
+            <div style="color:var(--gold);font-weight:700;margin-top:4px;font-family:'Bebas Neue',sans-serif;letter-spacing:2px;font-size:1.2rem;">Mesa ${mesa.numero} — ${mesa.garcom}</div>
+        </div>
+        ${obsHtml}
+        ${mesa.itens.map(i => `
+            <div class="ticket-item">
+                <span>${i.qty}x ${i.nome}</span>
+                <span>${R(i.preco * i.qty)}</span>
+            </div>`).join('')}
+        <div class="ticket-total"><span>TOTAL</span><span>${R(tot)}</span></div>
+
+        ${listaPags}
+
+        <p style="margin:15px 0 8px;font-size:0.82rem;opacity:0.5;">
+            ${quitado ? 'Adicionar outro pagamento (opcional):' : `Adicionar pagamento — faltam ${R(restante)}:`}
+        </p>
+        <div class="pag-btns">
+            <button class="pag-btn" onclick="addPagMesa('PIX',${tot})">💠 PIX</button>
+            <button class="pag-btn" onclick="addPagMesa('Dinheiro',${tot})">💵 Dinheiro</button>
+            <button class="pag-btn" onclick="addPagMesa('Cartão',${tot})">💳 Cartão</button>
+        </div>
+
+        <div class="act-row" style="margin-top:15px;">
+            <button style="background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.6);border:1px solid var(--border);" onclick="fecharModal()">← Cancelar</button>
+            <button style="background:${quitado ? '#27ae60' : '#555'};color:white;cursor:${quitado ? 'pointer' : 'not-allowed'};"
+                    onclick="${quitado ? `confirmarFechamento(${tot})` : 'avisoFaltaPag()'}">
+                ✅ CONFIRMAR
+            </button>
+        </div>`;
+        }
+
+        window.addPagMesa = async (metodo, tot) => {
+            const jaPago = _pagsMesa.reduce((s, p) => s + p.valor, 0);
+            const falta = Math.max(0, tot - jaPago);
+            if (falta <= 0.01) {
+                Swal.fire({ icon: 'info', title: 'Já quitado!', text: 'O valor total já foi atingido.', background: '#111', color: '#fff', timer: 1800, showConfirmButton: false });
+                return;
             }
-        });
-    } catch(e) {
-        console.log('Erro ao verificar status:', e.message);
+            const { value: valorStr } = await Swal.fire({
+                title: `Pagar com ${metodo}`,
+                text: `Restam: ${R(falta)}`,
+                input: 'number',
+                inputValue: falta.toFixed(2),
+                inputAttributes: { step: '0.01', min: '0.01' },
+                showCancelButton: true,
+                confirmButtonColor: '#e8a930',
+                cancelButtonText: 'Cancelar',
+                background: '#111', color: '#fff',
+                inputValidator: v => {
+                    if (!v || parseFloat(v) <= 0) return 'Digite um valor válido!';
+                    if (parseFloat(v) > falta + 0.05) return `Valor maior que o restante (${R(falta)})!`;
+                }
+            });
+            if (!valorStr) return;
+            const valor = parseFloat(valorStr);
+            _pagsMesa.push({ metodo, valor });
+
+            if (metodo === 'Dinheiro') {
+                const { value: trocoPara } = await Swal.fire({
+                    title: '💵 Troco',
+                    text: `Pago: ${R(valor)}. Troco para quanto?`,
+                    input: 'number',
+                    inputValue: valor.toFixed(2),
+                    inputAttributes: { step: '0.01', min: valor.toFixed(2) },
+                    showCancelButton: true,
+                    confirmButtonColor: '#e8a930',
+                    cancelButtonText: 'Sem troco',
+                    background: '#111', color: '#fff',
+                });
+                if (trocoPara) {
+                    const troco = parseFloat(trocoPara) - valor;
+                    if (troco > 0) Swal.fire({ icon: 'info', title: 'Troco', html: `Troco de <b>${R(troco)}</b>`, background: '#111', color: '#fff', timer: 2500, showConfirmButton: false });
+                }
+            }
+            renderFechamento();
+        };
+
+        window.removerPagMesa = (idx) => { _pagsMesa.splice(idx, 1); renderFechamento(); };
+        window.avisoFaltaPag = () => {
+            const mesa = mesasAtivas[mesaAtual?.mesaId];
+            const tot = mesa ? mesa.itens.reduce((s, i) => s + i.preco * i.qty, 0) : 0;
+            const falta = Math.max(0, tot - _pagsMesa.reduce((s, p) => s + p.valor, 0));
+            Swal.fire({ icon: 'warning', title: 'Pagamento incompleto!', text: `Faltam ${R(falta)} para quitar o total.`, background: '#111', color: '#fff', confirmButtonColor: '#e8a930' });
+        };
+
+        window.confirmarFechamento = async tot => {
+            const mesa = mesasAtivas[mesaAtual.mesaId];
+            // Monta resumo de pagamentos
+            const resumoPag = _pagsMesa.length
+                ? _pagsMesa.map(p => `${p.metodo} (${R(p.valor)})`).join(' + ')
+                : (pagAtual || 'Não informado');
+
+            await addDoc(collection(db, 'mesas_historico'), {
+                numero: mesa.numero, garcom: mesa.garcom, itens: mesa.itens,
+                obs: mesa.obs || '', pagamento: resumoPag, total: tot, fechadoEm: new Date()
+            });
+            await deleteDoc(doc(db, 'mesas', mesaAtual.mesaId));
+            _pagsMesa = [];
+            fecharModal();
+            Swal.fire({ icon: 'success', title: '🎉 Mesa Fechada!', html: `Total: <b>${R(tot)}</b><br>Pagamento: ${resumoPag}`, background: '#111', color: '#fff', timer: 2500, showConfirmButton: false });
+        };
+
+        // ── CARDÁPIO DE MESAS ──────────────────────────────────────────────────────────
+        window.abrirMesa = (mesaId, numero) => {
+            mesaAtual = { mesaId, numero };
+            carrinho = [];
+            garcomAtual = '';
+            pagAtual = '';
+            _pagsMesa = [];
+            document.getElementById('modal-titulo').textContent = `🍽️ Mesa ${numero}`;
+            const mesa = mesasAtivas[mesaId];
+            if (!mesa) renderGarcons(numero);
+            else { garcomAtual = mesa.garcom; carrinho = mesa.itens.map(x => ({ ...x })); renderCardapio(); }
+            document.getElementById('modal').classList.add('open');
+        };
+window.aplicarDesconto = async (pedidoId, totalAtual) => {
+    const { value: pct } = await Swal.fire({
+        title: '🏷️ Aplicar Desconto',
+        html: `<div style="font-size:0.85rem;opacity:0.6;margin-bottom:8px;">Total atual: <b style="color:#2ecc71;">${R(totalAtual)}</b></div>`,
+        input: 'number',
+        inputLabel: 'Porcentagem de desconto (%)',
+        inputPlaceholder: 'Ex: 10',
+        inputAttributes: { min: 1, max: 100, step: 1 },
+        showCancelButton: true,
+        confirmButtonText: 'Aplicar',
+        confirmButtonColor: '#2ecc71',
+        cancelButtonText: 'Cancelar',
+        background: '#111', color: '#fff',
+        inputValidator: v => {
+            if (!v || isNaN(v)) return 'Digite uma porcentagem válida!';
+            if (v < 1 || v > 100) return 'Entre 1% e 100%.';
+        }
+    });
+    if (!pct) return;
+    const desconto = totalAtual * (parseFloat(pct) / 100);
+    const novoTotal = totalAtual - desconto;
+    const { isConfirmed } = await Swal.fire({
+        icon: 'question',
+        title: `Desconto de ${pct}%`,
+        html: `De <b>${R(totalAtual)}</b> por <b style="color:#2ecc71;">${R(novoTotal)}</b><br><span style="opacity:0.5;font-size:0.85rem;">Economia de ${R(desconto)}</span>`,
+        showCancelButton: true,
+        confirmButtonText: 'Confirmar',
+        confirmButtonColor: '#2ecc71',
+        cancelButtonText: 'Cancelar',
+        background: '#111', color: '#fff',
+    });
+    if (!isConfirmed) return;
+    try {
+       await updateDoc(doc(db, 'pedidos', pedidoId), { 
+    total: novoTotal,
+    desconto: desconto  // ← adiciona isso
+});
+        toast(`Desconto de ${pct}% aplicado!`);
+    } catch (e) {
+        Swal.fire({ icon: 'error', title: 'Erro!', text: e.message, background: '#111', color: '#fff' });
     }
-})();
- // Bloqueios de segurança
-  document.addEventListener('keydown', function (e) {
-    if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) { e.preventDefault(); }
-    if (e.key === 'F12') { e.preventDefault(); }
-  });
-  document.addEventListener('keydown', function (event) {
-    if (event.ctrlKey && event.shiftKey && event.key === 'I') { event.preventDefault(); }
-  });
-  document.addEventListener('contextmenu', function (event) { event.preventDefault(); });
-</script>
+};
+
+window.aplicarDescontoMesa = async (mesaId, totalAtual) => {
+    const { value: pct } = await Swal.fire({
+        title: '🏷️ Aplicar Desconto',
+        html: `<div style="font-size:0.85rem;opacity:0.6;margin-bottom:8px;">Total atual: <b style="color:#2ecc71;">${R(totalAtual)}</b></div>`,
+        input: 'number',
+        inputLabel: 'Porcentagem de desconto (%)',
+        inputPlaceholder: 'Ex: 10',
+        inputAttributes: { min: 1, max: 100, step: 1 },
+        showCancelButton: true,
+        confirmButtonText: 'Aplicar',
+        confirmButtonColor: '#2ecc71',
+        cancelButtonText: 'Cancelar',
+        background: '#111', color: '#fff',
+        inputValidator: v => {
+            if (!v || isNaN(v)) return 'Digite uma porcentagem válida!';
+            if (v < 1 || v > 100) return 'Entre 1% e 100%.';
+        }
+    });
+    if (!pct) return;
+    const desconto = totalAtual * (parseFloat(pct) / 100);
+    const novoTotal = totalAtual - desconto;
+    const { isConfirmed } = await Swal.fire({
+        icon: 'question',
+        title: `Desconto de ${pct}%`,
+        html: `De <b>${R(totalAtual)}</b> por <b style="color:#2ecc71;">${R(novoTotal)}</b><br><span style="opacity:0.5;font-size:0.85rem;">Economia de ${R(desconto)}</span>`,
+        showCancelButton: true,
+        confirmButtonText: 'Confirmar',
+        confirmButtonColor: '#2ecc71',
+        cancelButtonText: 'Cancelar',
+        background: '#111', color: '#fff',
+    });
+    if (!isConfirmed) return;
+    try {
+        await updateDoc(doc(db, 'mesas_historico', mesaId), { 
+    total: novoTotal,
+    desconto: desconto  // ← adiciona isso
+});
+        toast(`Desconto de ${pct}% aplicado!`);
+    } catch (e) {
+        Swal.fire({ icon: 'error', title: 'Erro!', text: e.message, background: '#111', color: '#fff' });
+    }
+};
+        window.fecharModal = () => {
+            document.getElementById('modal').classList.remove('open');
+            mesaAtual = null; carrinho = [];
+        };
+
+        function renderGarcons(numero) {
+            document.getElementById('modal-body').innerHTML = `
+        <p style="opacity:0.5;margin-bottom:14px;font-size:0.86rem;">Quem está atendendo a <b>Mesa ${numero}</b>?</p>
+        <div class="garcons-grid">
+            ${GARCONS.map(g => `<button class="garcom-btn" onclick="escolherGarcom('${g.nome}')"><span class="garcom-icon">${g.icon}</span>${g.nome}</button>`).join('')}
+        </div>`;
+        }
+
+        window.escolherGarcom = nome => { garcomAtual = nome; carrinho = []; renderCardapio(); };
+        let carrinhoSnapshot = [];
+
+        function renderCardapio() {
+            const mesa = mesasAtivas[mesaAtual?.mesaId];
+            carrinhoSnapshot = mesa ? JSON.parse(JSON.stringify(mesa.itens)) : [];
+
+            const cardapioHtml = Object.entries(CARDAPIO).map(([cat, itens]) => `
+        <div class="cat-bloco">
+            <div class="cat-header" onclick="toggleCat(this)">
+                <span class="cat-name">${cat}</span>
+                <i class="fas fa-chevron-down chev"></i>
+            </div>
+            <div class="cat-itens">
+                ${itens.map(item => `
+                    <button class="item-btn" onclick="addItem('${item.nome.replace(/'/g, "\\'")}',${item.preco})">
+                        <span class="i-nome">${item.nome}</span>
+                        <span class="i-preco">${R(item.preco)}</span>
+                    </button>`).join('')}
+            </div>
+        </div>`).join('');
+
+            const adicionaisHtml = `
+        <div class="cat-bloco">
+            <div class="cat-header" onclick="toggleCat(this)" style="background:rgba(255,255,255,0.03);">
+                <span class="cat-name" style="font-size:0.8rem;opacity:0.6;">➕ Adicionais / Extras</span>
+                <i class="fas fa-chevron-down chev"></i>
+            </div>
+            <div class="cat-itens">
+                ${ADICIONAIS.map(item => `
+                    <button class="item-btn" onclick="addItem('+ ${item.nome.replace(/'/g, "\\'")}',${item.preco})">
+                        <span class="i-nome">+ ${item.nome}</span>
+                        <span class="i-preco">${R(item.preco)}</span>
+                    </button>`).join('')}
+            </div>
+        </div>`;
+
+            document.getElementById('modal-body').innerHTML = `
+        <div style="font-size:0.8rem;opacity:0.45;margin-bottom:13px;">Atendente: <b style="color:var(--gold);opacity:1;">${garcomAtual}</b></div>
+        ${cardapioHtml}
+        ${adicionaisHtml}
+        <div class="cart-box">
+            <div class="cart-title"><i class="fas fa-shopping-cart"></i> Carrinho</div>
+            <div id="cart-itens">${renderCartItens()}</div>
+            <div class="cart-total"><span>Total:</span><span id="cart-tot">${R(totalCarrinho())}</span></div>
+        </div>
+        <div style="margin-top:13px;">
+            <button style="width:100%;background:rgba(232,169,48,0.12);color:var(--gold);border:1px solid rgba(232,169,48,0.3);padding:13px;border-radius:10px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;font-size:0.85rem;" onclick="salvarPedido()">
+                💾 SALVAR PEDIDO
+            </button>
+        </div>
+        ${mesa ? `<div style="margin-top:8px;"><button onclick="cancelarMesa()" style="width:100%;background:rgba(231,76,60,0.08);color:#e74c3c;border:1px solid rgba(231,76,60,0.25);padding:11px;border-radius:10px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;font-size:0.8rem;">🗑️ CANCELAR MESA</button></div>` : ''}`;
+        }
+
+        window.toggleCat = header => { header.classList.toggle('open'); header.nextElementSibling.classList.toggle('open'); };
+
+        function renderCartItens() {
+            if (!carrinho.length) return '<p style="opacity:0.3;font-size:0.82rem;text-align:center;padding:8px 0;">Nenhum item ainda.</p>';
+            return carrinho.map((it, i) => `
+        <div class="cart-item" style="flex-direction:column;align-items:stretch;gap:5px;">
+            <div style="display:flex;align-items:center;gap:6px;">
+                <span style="flex:1;margin-right:6px;font-size:0.85rem;">${it.nome}</span>
+                <div class="qtd-ctrl">
+                    <button class="qtd-btn" onclick="chgQtd(${i},-1)">−</button>
+                    <span>${it.qty}x</span>
+                    <button class="qtd-btn" onclick="chgQtd(${i},1)">+</button>
+                    <span style="color:var(--gold);min-width:55px;text-align:right;">${R(it.preco * it.qty)}</span>
+                </div>
+            </div>
+            <input type="text" placeholder="obs deste item" value="${(it.obs || '').replace(/"/g, '&quot;')}"
+                oninput="setObsItem(${i},this.value)"
+                style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:5px 8px;color:#fff;font-size:0.75rem;font-family:'Outfit',sans-serif;width:100%;box-sizing:border-box;"/>
+        </div>`).join('');
+        }
+
+        const totalCarrinho = () => carrinho.reduce((s, i) => s + i.preco * i.qty, 0);
+
+        function refreshCart() {
+            const el = document.getElementById('cart-itens');
+            if (el) el.innerHTML = renderCartItens();
+            const tv = document.getElementById('cart-tot');
+            if (tv) tv.textContent = R(totalCarrinho());
+        }
+
+        window.setObsItem = (idx, valor) => { if (carrinho[idx]) carrinho[idx].obs = valor; };
+        window.addItem = (nome, preco) => {
+            const ex = carrinho.find(i => i.nome === nome);
+            if (ex) ex.qty++; else carrinho.push({ nome, preco, qty: 1 });
+            refreshCart();
+            toast(`${nome} adicionado!`);
+        };
+        window.chgQtd = (idx, d) => {
+            carrinho[idx].qty += d;
+            if (carrinho[idx].qty <= 0) carrinho.splice(idx, 1);
+            refreshCart();
+        };
+
+        function temItensNovos() {
+            if (!carrinho.length) return false;
+            const snapMap = {};
+            carrinhoSnapshot.forEach(i => { snapMap[i.nome] = (snapMap[i.nome] || 0) + i.qty; });
+            for (const it of carrinho) { if (it.qty > (snapMap[it.nome] || 0)) return true; }
+            return false;
+        }
+
+        window.salvarPedido = async () => {
+            if (!mesaAtual?.mesaId) return;
+            if (!carrinho.length) { Swal.fire({ icon: 'warning', title: 'Carrinho vazio!', background: '#111', color: '#fff' }); return; }
+            try {
+                const mesaRef = doc(db, 'mesas', mesaAtual.mesaId);
+                const novos = temItensNovos();
+                const dados = {
+                    itens: carrinho, garcom: garcomAtual || 'Balcão',
+                    numero: mesaAtual.numero,
+                    ...(novos ? { ultimaAtualizacao: new Date(), enviadoCozinhaEm: new Date() } : {})
+                };
+                if (mesasAtivas[mesaAtual.mesaId]) await updateDoc(mesaRef, dados);
+                else await setDoc(mesaRef, dados);
+                Swal.fire({ icon: 'success', title: 'Salvo!', text: novos ? 'Enviado para a cozinha!' : 'Salvo sem novos itens.', timer: 2000, showConfirmButton: false, background: '#111', color: '#fff' });
+                fecharModal();
+            } catch (e) { Swal.fire({ icon: 'error', title: 'Erro!', text: e.message, background: '#111', color: '#fff' }); }
+        };
+
+        window.cancelarMesa = async () => {
+            const r = await Swal.fire({ title: 'Cancelar mesa?', text: 'Todos os itens serão removidos.', icon: 'warning', showCancelButton: true, confirmButtonColor: '#c0392b', confirmButtonText: 'Cancelar mesa', background: '#111', color: '#fff' });
+            if (r.isConfirmed) { await deleteDoc(doc(db, 'mesas', mesaAtual.mesaId)); fecharModal(); }
+        };
+
+        // ── ESTOQUE ────────────────────────────────────────────────────────────────────
+        let estoqueIniciado = false;
+        function iniciarEstoque() {
+            if (estoqueIniciado) return;
+            estoqueIniciado = true;
+            onSnapshot(doc(db, 'estoque', 'disponibilidade'), snap => {
+                const data = snap.data() || {};
+                const el = document.getElementById('lista-estoque');
+                if (!el) return;
+                el.innerHTML = '';
+                ESTOQUE_ITENS.forEach(item => {
+                    const id = item.toLowerCase().replace(/\s/g, '_');
+                    const ok = data[id] !== false;
+                    el.innerHTML += `
+            <div class="item-estoque">
+                <span style="font-weight:500;">${item}</span>
+                <label class="switch">
+                    <input type="checkbox" ${ok ? 'checked' : ''} onchange="toggleEstoque('${id}',this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>`;
+                });
+            });
+        }
+
+        window.toggleEstoque = async (id, status) => {
+            await updateDoc(doc(db, 'estoque', 'disponibilidade'), { [id]: status })
+                .catch(() => setDoc(doc(db, 'estoque', 'disponibilidade'), { [id]: status }));
+        };
+
+        window.zerarDia = async () => {
+    const ok = await confirmarSenhaExcluir();
+    if (!ok) return;
+    const r = await Swal.fire({ title: 'Zerar o Caixa?', text: 'Todos os pedidos serão apagados!', icon: 'warning', showCancelButton: true, background: '#111', color: '#fff' });
+    if (r.isConfirmed) {
+        const [s1, s2, s3] = await Promise.all([
+            getDocs(collection(db, 'pedidos')),
+            getDocs(collection(db, 'mesas_historico')),
+            getDocs(collection(db, 'mesas')) // ← adiciona isso
+        ]);
+        s1.docs.forEach(d => deleteDoc(doc(db, 'pedidos', d.id)));
+        s2.docs.forEach(d => deleteDoc(doc(db, 'mesas_historico', d.id)));
+        s3.docs.forEach(d => deleteDoc(doc(db, 'mesas', d.id))); // ← e isso
+        toast('Caixa zerado!');
+    }
+};
+
+        // ── PDF ────────────────────────────────────────────────────────────────────────
+       window.gerarPDF = () => {
+    const { jsPDF } = window.jspdf;
+    const p = new jsPDF();
+    const dataHoje = new Date().toLocaleDateString('pt-BR');
+    p.setFontSize(18); p.setFont('helvetica', 'bold');
+    p.text("GC BURGUER", 105, 16, { align: 'center' });
+    p.setFontSize(11); p.setFont('helvetica', 'normal');
+    p.text(`Relatório do Dia — ${dataHoje}`, 105, 24, { align: 'center' });
+    p.setDrawColor(200, 200, 200); p.line(14, 28, 196, 28);
+    let y = 36;
+
+    function cabecalhoSecao(titulo) {
+        p.setFontSize(10); p.setFont('helvetica', 'bold');
+        p.setFillColor(240, 240, 240); p.rect(14, y, 182, 7, 'F');
+        p.text(titulo, 16, y + 5); y += 10;
+    }
+
+    const nomesBebidas = new Set([...CARDAPIO['bebidas'].map(x => x.nome), ...CARDAPIO['açaí'].map(x => x.nome)]);
+    const mapa = {};
+    [...pedidos, ...mesasFech].forEach(doc => {
+        (doc.itens || []).forEach(i => {
+            const nome = i.nome || '?'; const preco = parseFloat(i.preco) || 0; const qty = parseInt(i.qty) || 1;
+            if (!mapa[nome]) mapa[nome] = { qty: 0, total: 0 };
+            mapa[nome].qty += qty; mapa[nome].total += preco * qty;
+        });
+    });
+    const lanches = Object.entries(mapa).filter(([n]) => !nomesBebidas.has(n));
+    const bebidas = Object.entries(mapa).filter(([n]) => nomesBebidas.has(n));
+
+    cabecalhoSecao('  LANCHES & COMBOS');
+    p.autoTable({ head: [['Item', 'Qtd', 'Total']], body: lanches.map(([nome, d]) => [nome, `${d.qty}x`, R(d.total)]), startY: y, margin: { left: 14, right: 14 }, headStyles: { fillColor: [232, 169, 48], textColor: 0, fontStyle: 'bold' }, styles: { fontSize: 9 }, columnStyles: { 1: { halign: 'center', cellWidth: 20 }, 2: { halign: 'right', cellWidth: 30 } } });
+    y = p.lastAutoTable.finalY + 8;
+
+    cabecalhoSecao('  BEBIDAS & AÇAÍ');
+    p.autoTable({ head: [['Item', 'Qtd', 'Total']], body: bebidas.map(([nome, d]) => [nome, `${d.qty}x`, R(d.total)]), startY: y, margin: { left: 14, right: 14 }, headStyles: { fillColor: [52, 152, 219], textColor: 255, fontStyle: 'bold' }, styles: { fontSize: 9 }, columnStyles: { 1: { halign: 'center', cellWidth: 20 }, 2: { halign: 'right', cellWidth: 30 } } });
+    y = p.lastAutoTable.finalY + 12;
+
+    // ── Soma dos pagamentos (mesma lógica do renderCaixa corrigido) ──
+    let tPix = 0, tDin = 0, tCrd = 0, tSemPag = 0;
+
+    pedidos.forEach(px => {
+        const pagsArr = parsePagamentos(px.pagamento || '');
+        if (pagsArr.length > 0) {
+            const somaPags = pagsArr.reduce((s, pg) => s + pg.valor, 0);
+            const totalReal = parseTotal(px.total);
+            pagsArr.forEach(pg => {
+                if (pg.metodo === 'PIX') tPix += pg.valor;
+                else if (pg.metodo === 'Dinheiro') tDin += pg.valor;
+                else tCrd += pg.valor;
+            });
+            const diff = totalReal - somaPags;
+            if (diff > 0.05) tSemPag += diff;
+        } else {
+            const v = parseTotal(px.total);
+            const m = normalizarPagamento(px.pagamento);
+            if (m === 'PIX') tPix += v;
+            else if (m === 'Dinheiro') tDin += v;
+            else if (m === 'Cartão') tCrd += v;
+            else tSemPag += v;
+        }
+    });
+
+    mesasFech.forEach(mx => {
+        const pagsArr = parsePagamentos(mx.pagamento || '');
+        if (pagsArr.length > 0) {
+            pagsArr.forEach(pg => {
+                if (pg.metodo === 'PIX') tPix += pg.valor;
+                else if (pg.metodo === 'Dinheiro') tDin += pg.valor;
+                else tCrd += pg.valor;
+            });
+        } else {
+            const v = parseFloat(mx.total) || 0;
+            const pg = normalizarPagamento(mx.pagamento);
+            if (pg === 'PIX') tPix += v;
+            else if (pg === 'Dinheiro') tDin += v;
+            else tCrd += v;
+        }
+    });
+
+    const tot = tPix + tDin + tCrd + tSemPag;
+
+    if (y > 230) { p.addPage(); y = 20; }
+    p.setFontSize(10); p.setFont('helvetica', 'bold');
+    p.setFillColor(240, 240, 240); p.rect(14, y, 182, 7, 'F');
+    p.text('FATURAMENTO TOTAL', 16, y + 5); y += 12;
+
+    const linhasFaturamento = [
+        ['PIX', R(tPix)],
+        ['Dinheiro', R(tDin)],
+        ['Cartão', R(tCrd)],
+        ...(tSemPag > 0 ? [['A receber', R(tSemPag)]] : []),
+        ['TOTAL GERAL', R(tot)]
+    ];
+
+    p.autoTable({
+        body: linhasFaturamento,
+        startY: y, margin: { left: 14, right: 14 }, styles: { fontSize: 10 },
+        columnStyles: { 1: { halign: 'right' } },
+        didParseCell: data => {
+            const isUltima = data.row.index === linhasFaturamento.length - 1;
+            const isAReceber = tSemPag > 0 && data.row.index === linhasFaturamento.length - 2;
+            if (isUltima) {
+                data.cell.styles.fontStyle = 'bold';
+                data.cell.styles.fillColor = [232, 169, 48];
+                data.cell.styles.textColor = 0;
+                data.cell.styles.fontSize = 12;
+            }
+            if (isAReceber) {
+                data.cell.styles.textColor = [230, 126, 34];
+                data.cell.styles.fontStyle = 'bold';
+            }
+        }
+    });
+
+    const totalPages = p.internal.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+        p.setPage(i); p.setFontSize(8); p.setFont('helvetica', 'normal'); p.setTextColor(150);
+        p.text(`GC BURGUER — Gerado em ${new Date().toLocaleString('pt-BR')}`, 14, 290);
+        p.text(`Página ${i}/${totalPages}`, 196, 290, { align: 'right' });
+        p.setTextColor(0);
+    }
+    p.save(`relatorio_gc_${dataHoje.replace(/\//g, '-')}.pdf`);
+};
+
+        // ── STATUS LOJA ────────────────────────────────────────────────────────────────
+        let lojaAberta = true;
+        async function carregarStatusLoja() {
+            try {
+                const snap = await getDoc(doc(db, 'config', 'loja'));
+                lojaAberta = snap.exists() ? (snap.data().aberta !== false) : true;
+                atualizarBtnLoja();
+            } catch (e) { console.error(e); }
+        }
+        function atualizarBtnLoja() {
+            const btn = document.getElementById('btn-status-loja'); const icon = document.getElementById('loja-icon'); const label = document.getElementById('loja-label');
+            if (!btn) return;
+            if (lojaAberta) { btn.className = 'btn-fechar-loja aberta'; icon.className = 'fas fa-store'; label.textContent = 'LOJA ABERTA'; }
+            else { btn.className = 'btn-fechar-loja'; icon.className = 'fas fa-store-slash'; label.textContent = 'LOJA FECHADA'; }
+        }
+        window.toggleStatusLoja = async () => {
+            const novoStatus = !lojaAberta;
+            const { isConfirmed } = await Swal.fire({ title: novoStatus ? '🟢 Abrir Loja?' : '🔴 Fechar Loja?', text: novoStatus ? 'Abrir a loja para os clientes?' : 'Fechar a loja?', icon: 'question', showCancelButton: true, confirmButtonText: novoStatus ? 'Sim, abrir!' : 'Sim, fechar!', confirmButtonColor: novoStatus ? '#27ae60' : '#e74c3c', cancelButtonText: 'Cancelar', background: '#111', color: '#fff' });
+            if (!isConfirmed) return;
+            await setDoc(doc(db, 'config', 'loja'), { aberta: novoStatus });
+            lojaAberta = novoStatus;
+            atualizarBtnLoja();
+            window.toast(novoStatus ? '✅ Loja aberta!' : '🔴 Loja fechada!');
+        };
+        carregarStatusLoja();
+
+        // ── MENU MOBILE ────────────────────────────────────────────────────────────────
+        window.toggleMenuMobile = (event) => {
+            event.stopPropagation();
+            document.getElementById('menu-extras').classList.toggle('show');
+        };
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('menu-extras');
+            if (menu && !menu.contains(e.target)) menu.classList.remove('show');
+        });
+   
+        const BT = {
+            device: null, char: null, _keepAliveTimer: null, LARGURA: 32,
+            async verificarAutoConectar() {
+                if (navigator.bluetooth && navigator.bluetooth.getDevices) {
+                    try { const devices = await navigator.bluetooth.getDevices(); if (devices.length > 0) { this.device = devices[0]; return await this.reconectar(); } } catch (e) { }
+                }
+            },
+            _iniciarKeepAlive() {
+                this._pararKeepAlive();
+                this._keepAliveTimer = setInterval(async () => { if (!this.char) { this._pararKeepAlive(); return; } try { await this.char.writeValueWithoutResponse(new Uint8Array([0x1B, 0x40])); } catch (e) { this.char = null; this._pararKeepAlive(); } }, 20000);
+            },
+            _pararKeepAlive() { if (this._keepAliveTimer) { clearInterval(this._keepAliveTimer); this._keepAliveTimer = null; } },
+            async reconectar() {
+                if (!this.device) return false;
+                try {
+                    const server = await this.device.gatt.connect(); const services = await server.getPrimaryServices(); let ch = null;
+                    for (const svc of services) { const chars = await svc.getCharacteristics(); for (const c of chars) { if (c.properties.writeWithoutResponse || c.properties.write) { ch = c; break; } } if (ch) break; }
+                    if (!ch) throw new Error('Característica não encontrada.');
+                    this.char = ch; this._iniciarKeepAlive(); return true;
+                } catch (e) { return false; }
+            },
+            async conectar() {
+                if (!navigator.bluetooth) { Swal.fire({ icon: 'warning', title: 'Bluetooth não suportado', background: '#111', color: '#fff' }); return false; }
+                try {
+                    this.device = await navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb', '49535343-fe7d-4ae5-8fa9-9fafd205e455', '0000ff00-0000-1000-8000-00805f9b34fb', 'e7810a71-73ae-499d-8c15-faa9aef0c3f2'] });
+                    const server = await this.device.gatt.connect(); const services = await server.getPrimaryServices(); let ch = null;
+                    for (const svc of services) { const chars = await svc.getCharacteristics(); for (const c of chars) { if (c.properties.writeWithoutResponse || c.properties.write) { ch = c; break; } } if (ch) break; }
+                    if (!ch) throw new Error('Característica de escrita não encontrada.');
+                    this.char = ch;
+                    this.device.addEventListener('gattserverdisconnected', async () => { this.char = null; this._pararKeepAlive(); for (let t = 0; t < 3; t++) { await new Promise(r => setTimeout(r, 1500)); if (await this.reconectar()) return; } });
+                    this._iniciarKeepAlive(); window.toast('Impressora conectada!'); return true;
+                } catch (e) { return false; }
+            },
+            async enviar(bytes) {
+                if (!this.char) { if (this.device) { const ok = await this.reconectar(); if (!ok) return false; } else { const ok = await this.conectar(); if (!ok) return false; } }
+                const CHUNK = 64;
+                try { for (let i = 0; i < bytes.length; i += CHUNK) { const fatia = bytes.slice(i, i + CHUNK); if (this.char.properties.writeWithoutResponse) await this.char.writeValueWithoutResponse(fatia); else await this.char.writeValue(fatia); await new Promise(r => setTimeout(r, 50)); } return true; } catch (e) { this.char = null; return false; }
+            }
+        };
+
+        window.addEventListener('load', () => BT.verificarAutoConectar());
+        window.btConectar = () => BT.conectar();
+
+        function escPos() {
+            const buf = [], enc = new TextEncoder();
+            const p = (b) => buf.push(...(typeof b === 'string' ? enc.encode(limparEsc(b)) : b));
+            const INIT = [0x1B, 0x40], CENTRALIZAR = [0x1B, 0x61, 0x01], ESQUERDA = [0x1B, 0x61, 0x00],
+                BOLD_ON = [0x1B, 0x45, 0x01], BOLD_OFF = [0x1B, 0x45, 0x00],
+                DUPLO_ON = [0x1D, 0x21, 0x11], DUPLO_OFF = [0x1D, 0x21, 0x00],
+                CORTAR = [0x1D, 0x56, 0x41, 0x03], NOVA_LINHA = [0x0A];
+            return {
+                init() { p(INIT); return this; }, centro() { p(CENTRALIZAR); return this; }, esquerda() { p(ESQUERDA); return this; },
+                bold(on) { p(on ? BOLD_ON : BOLD_OFF); return this; }, duplo(on) { p(on ? DUPLO_ON : DUPLO_OFF); return this; },
+                linha(t = '') { p(t + '\n'); return this; }, nl() { p(NOVA_LINHA); return this; },
+                separador(c = '-') { p(c.repeat(BT.LARGURA) + '\n'); return this; },
+                cortar() { p(CORTAR); return this; }, bytes() { return new Uint8Array(buf); }
+            };
+        }
+        function limparEsc(t) { return String(t).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\x20-\x7E\n]/g, ''); }
+        function Fmt(v) { const n = typeof v === 'number' ? v : parseFloat(v) || 0; return 'R$' + n.toFixed(2).replace('.', ','); }
+        function agora() { const d = new Date(); return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear() + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); }
+        function linhaItem(nome, valor) { const valStr = Fmt(valor); const limiteNome = BT.LARGURA - valStr.length - 1; let nomeLimpo = limparEsc(nome).substring(0, limiteNome); const espacos = BT.LARGURA - nomeLimpo.length - valStr.length; return nomeLimpo + ' '.repeat(Math.max(1, espacos)) + valStr; }
+
+        function gerarCupomDelivery(p) {
+            const itens = p.itens || [], total = typeof p.total === 'number' ? p.total : parseFloat(p.total) || 0, bairro = limparEsc(p.bairro || ''), taxa = (p.taxaEntrega !== undefined) ? p.taxaEntrega : 0, subtotal = total - taxa;
+            const doc = escPos().init().centro().duplo(true).bold(true).linha('GC BURGUER').duplo(false).bold(false).linha('DELIVERY / BALCAO').separador('=').esquerda().linha('DATA: ' + agora()).bold(true).linha('CLIENTE: ' + limparEsc(p.cliente || '').toUpperCase()).bold(false).linha('END: ' + limparEsc(p.endereco || 'Retirada'));
+            if (bairro) doc.linha('BAIRRO: ' + bairro);
+            doc.linha('PAG: ' + limparEsc(p.pagamento || '')).separador('-').bold(true).linha('ITENS DO PEDIDO:').bold(false).nl();
+            itens.forEach(i => { const q = parseInt(i.qty) || 1; const vUnit = parseFloat(i.preco) || parseFloat(i.precoTotal) || 0; doc.linha(`${q}x ${limparEsc(i.nome)}`).linha(' '.repeat(17) + 'Sub: ' + Fmt(vUnit * q)); if (i.obs) doc.linha('  >> ' + limparEsc(i.obs)); });
+            doc.separador('-');
+            if (taxa > 0) { doc.linha(linhaItem('Subtotal', subtotal)).linha(linhaItem('Entrega', taxa)).separador('-'); }
+            doc.bold(true).duplo(true).linha(linhaItem('TOTAL', total)).duplo(false).bold(false).separador('=').nl().centro().linha('OBRIGADO PELA PREFERENCIA!').nl().nl().cortar();
+            return doc.bytes();
+        }
+
+        function gerarCupomMesa(m) {
+            const itens = m.itens || [], total = parseFloat(m.total) || itens.reduce((s, i) => s + (i.preco || 0) * (i.qty || 1), 0);
+            const doc = escPos().init().centro().duplo(true).bold(true).linha('MESA ' + m.numero).duplo(false).bold(false).linha('CONTA FECHADA').separador('=').esquerda().linha('ATENDENTE: ' + limparEsc(m.garcom || '')).linha('PAG: ' + limparEsc(m.pagamento || '')).linha('HORA: ' + agora()).separador('-').bold(true).linha('ITENS:').bold(false).nl();
+            itens.forEach(i => { const q = parseInt(i.qty) || 1; const vUnit = parseFloat(i.preco) || 0; doc.linha(`${q}x ${limparEsc(i.nome)}`).linha(' '.repeat(17) + 'Sub: ' + Fmt(vUnit * q)); });
+            if (m.obs) doc.linha('OBS: ' + limparEsc(m.obs));
+            doc.separador('-').bold(true).duplo(true).linha(linhaItem('TOTAL', total)).duplo(false).bold(false).nl().centro().linha('OBRIGADO PELA PREFERENCIA!').nl().nl().cortar();
+            return doc.bytes();
+        }
+
+        window.imprimirMesaBT = async (dadosJson) => {
+    try {
+        const m = typeof dadosJson === 'string' ? JSON.parse(dadosJson) : dadosJson;
+        const docRef = await addDoc(collection(db, 'reimpressoes'), {
+            cliente: `MESA ${m.numero}`,
+            numero: m.numero,
+            garcom: m.garcom || '',
+            endereco: 'balcao / mesa',
+            telefone: '',
+            pagamento: m.pagamento || '',
+            itens: m.itens || [],
+            total: m.total || 0,
+            desconto: m.desconto || 0,
+            obs: m.obs || '',
+            data: new Date(),
+            tipo: 'MESA'
+        });
+        setTimeout(async () => { try { await deleteDoc(docRef); } catch (e) { } }, 10000);
+        window.toast('Reimpressão enviada para a impressora!');
+    } catch (e) {
+        Swal.fire({ icon: 'error', title: 'Erro!', text: e.message, background: '#111', color: '#fff' });
+    }
+};
+
+        // ── SOM ─────────────────────────────────────────────────────────────────────────
+        let somAtivo = false;
+        window.toggleSom = () => {
+            somAtivo = !somAtivo;
+            document.getElementById('som-icon').className = somAtivo ? 'fas fa-volume-up' : 'fas fa-volume-mute';
+            document.getElementById('som-label').textContent = somAtivo ? 'SOM ON' : 'SOM';
+            document.getElementById('btn-som').style.background = somAtivo ? 'rgba(232,169,48,0.15)' : 'none';
+            if (somAtivo) { const b = document.getElementById('bell'); b.volume = 0; b.play().then(() => b.pause()).catch(() => { }); b.volume = 1; }
+            window.toast(somAtivo ? '🔔 Som ativado!' : '🔕 Som desativado!');
+        };
+        window.tocarSino = () => { if (!somAtivo) return; const b = document.getElementById('bell'); b.currentTime = 0; b.play().catch(() => { }); };
+
+        // ── OLHINHO NAS SENHAS ──────────────────────────────────────────────────────────
+        const _swalOrig = Swal.fire.bind(Swal);
+        Swal.fire = function (opts, ...args) {
+            if (opts && opts.input === 'password') {
+                const _didOpen = opts.didOpen;
+                opts.didOpen = (popup) => {
+                    if (_didOpen) _didOpen(popup);
+                    const inp = popup.querySelector('.swal2-input');
+                    if (!inp) return;
+                    inp.style.paddingRight = '44px';
+                    const btn = document.createElement('button');
+                    btn.type = 'button'; btn.innerHTML = '<i class="fas fa-eye"></i>';
+                    btn.style.cssText = 'position:absolute;right:60px;top:55%;transform:translateY(-50%);background:none;border:none;color:rgba(255,255,255,0.4);cursor:pointer;font-size:1rem;padding:4px;line-height:1;transition:color 0.2s;';
+                    btn.onclick = () => { const v = inp.type === 'text'; inp.type = v ? 'password' : 'text'; btn.innerHTML = `<i class="fas fa-eye${v ? '' : '-slash'}"></i>`; inp.focus(); };
+                    inp.parentElement.style.position = 'relative'; inp.parentElement.appendChild(btn);
+                };
+            }
+            return _swalOrig(opts, ...args);
+        };
+        
+
+        // Bloqueios de segurança
+        document.addEventListener('keydown', e => { if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) e.preventDefault(); if (e.key === 'F12') e.preventDefault(); if (e.ctrlKey && e.shiftKey && e.key === 'I') e.preventDefault(); });
+        document.addEventListener('contextmenu', e => e.preventDefault());
+    </script>
 </body>
+
 </html>
