@@ -1823,7 +1823,7 @@
                     <i class="fas fa-plus-circle"></i> ADICIONAR ITEM AO PEDIDO
                 </button>
                 <button class="btn-imprimir-bt" style="background:rgba(232,169,48,0.12);color:#e8a930;border-color:rgba(232,169,48,0.35);margin-bottom:2px;"
-                    onclick="adicionarPontoFidelidade('${p.cliente.replace(/'/g, "\\'")}','${p.id}')">
+                    onclick="adicionarPontoFidelidade('${p.cliente.replace(/'/g, "\\'")}','${p.id}','${(p.telefone || '').replace(/\D/g, '')}')">
                     <i class="fas fa-star"></i> +1 FIDELIDADE
                     <span style="margin-left:6px;background:rgba(232,169,48,0.2);padding:2px 8px;border-radius:10px;font-size:0.7rem;">
                         ${contagemFid}/10
@@ -3101,7 +3101,7 @@ function iniciarFidelidade() {
 }
 
 // ── ADICIONAR PONTO ──
-window.adicionarPontoFidelidade = async (nomeCliente, pedidoId) => {
+window.adicionarPontoFidelidade = async (nomeCliente, pedidoId, telefone = '') => {
     if (!nomeCliente || nomeCliente.trim() === '') {
         Swal.fire({ icon: 'warning', title: 'Nome inválido!', background: '#111', color: '#fff' });
         return;
@@ -3141,7 +3141,7 @@ window.adicionarPontoFidelidade = async (nomeCliente, pedidoId) => {
     await setDoc(ref, dados);
 
     if (ganhouPremio) {
-        Swal.fire({
+        await Swal.fire({
             icon: 'success',
             title: '🎉 PRÊMIO DESBLOQUEADO!',
             html: `<b style="color:#e8a930;font-size:1.2rem;">${nomeCliente.trim()}</b><br>
@@ -3151,8 +3151,24 @@ window.adicionarPontoFidelidade = async (nomeCliente, pedidoId) => {
             confirmButtonColor: '#e8a930',
             confirmButtonText: 'Incrível! 🍔'
         });
+
+        // WhatsApp — prêmio
+        if (telefone) {
+            const tel = telefone.replace(/\D/g, '');
+            const msg = `🎉 Parabéns, ${nomeCliente.trim()}! Você completou 10 pedidos e ganhou um LANCHE GRÁTIS! 🍔\n\nVenha resgatar no seu próximo pedido. Obrigado pela preferência! — GC BURGUER`;
+            window.open(`https://wa.me/55${tel}?text=${encodeURIComponent(msg)}`);
+        }
+
     } else {
         toast(`+1 ponto para ${nomeCliente.trim()}! (${dados.contagem}/10)`);
+
+        // WhatsApp — ponto normal
+        if (telefone) {
+            const tel = telefone.replace(/\D/g, '');
+            const faltam = 10 - dados.contagem;
+            const msg = `⭐ Olá, ${nomeCliente.trim()}! Você acaba de ganhar +1 ponto no nosso programa de fidelidade!\n\n🍔 Pontos: ${dados.contagem}/10\n📍 Faltam apenas ${faltam} pedido${faltam !== 1 ? 's' : ''} para ganhar um lanche grátis!\n\nObrigado pela preferência! — GC BURGUER`;
+            window.open(`https://wa.me/55${tel}?text=${encodeURIComponent(msg)}`);
+        }
     }
 };
 
@@ -3319,6 +3335,3 @@ window.switchTab = (id, el) => {
 </body>
 
 </html>
-
-
-<button class="btn-imprimir-bt" onclick='reimprimirNota(
