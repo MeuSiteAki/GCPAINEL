@@ -1765,9 +1765,11 @@
             const dadosBT = JSON.stringify({ cliente: p.cliente, endereco: p.endereco || '', bairro: bairroTag, pagamento: p.pagamento, itens: p.itens, total: totalNum, desconto: p.desconto || 0 });
 
             // Badge de fidelidade do cliente
-            const chaveCliente = (p.cliente || '').trim().toLowerCase().replace(/\s+/g, '_');
-            const dadosFid = clientesFidelidade[chaveCliente];
-            const contagemFid = dadosFid ? (dadosFid.contagem || 0) : 0;
+           // Badge de fidelidade do cliente
+const telCliente = (p.telefone || '').replace(/\D/g, '');
+const chaveCliente = telCliente || (p.cliente || '').trim().toLowerCase().replace(/\s+/g, '_');
+const dadosFid = clientesFidelidade[chaveCliente];
+const contagemFid = dadosFid ? (dadosFid.contagem || 0) : 0;
             const temPremioFid = dadosFid && (dadosFid.premiosGanhos || 0) > 0;
             const corFid = contagemFid >= 8 ? '#e8a930' : contagemFid >= 5 ? '#3498db' : 'rgba(255,255,255,0.3)';
             const fidBadgeHtml = dadosFid ? `
@@ -1909,19 +1911,25 @@ window.toggleVerMais = () => { verMaisDelivery = !verMaisDelivery; renderPedidos
 
 // Mesas não têm nome de cliente fixo, então abre um prompt para digitar
 window.abrirFidelidadeMesa = async (mesaId, numeroMesa) => {
-    const { value: nomeCliente } = await Swal.fire({
+    const { value: dados } = await Swal.fire({
         title: `⭐ Fidelidade — Mesa ${numeroMesa}`,
-        input: 'text',
-        inputLabel: 'Nome do cliente',
-        inputPlaceholder: 'Ex: João Silva',
+        html: `
+            <input id="swal-nome" class="swal2-input" placeholder="Nome do cliente">
+            <input id="swal-tel" class="swal2-input" placeholder="Celular (ex: 94999999999)">
+        `,
         showCancelButton: true,
         confirmButtonText: 'Adicionar ponto',
         confirmButtonColor: '#e8a930',
         cancelButtonText: 'Cancelar',
         background: '#111', color: '#fff',
-        inputValidator: v => { if (!v || v.trim() === '') return 'Digite o nome do cliente!'; }
+        preConfirm: () => {
+            const nome = document.getElementById('swal-nome').value.trim();
+            const tel = document.getElementById('swal-tel').value.replace(/\D/g, '');
+            if (!nome) { Swal.showValidationMessage('Digite o nome do cliente!'); return false; }
+            return { nome, tel };
+        }
     });
-    if (nomeCliente) adicionarPontoFidelidade(nomeCliente.trim(), mesaId);
+    if (dados) adicionarPontoFidelidade(dados.nome, mesaId, dados.tel);
 };
 
         // ── EDITAR PEDIDO DELIVERY ─────────────────────────────────────────────────────
@@ -3107,15 +3115,34 @@ window.adicionarPontoFidelidade = async (nomeCliente, pedidoId, telefone = '') =
         return;
     }
 
-    const chave = nomeCliente.trim().toLowerCase().replace(/\s+/g, '_');
+    const telLimpo = telefone.replace(/\D/g, '');
+
+    if (!telLimpo) {
+        const { isConfirmed } = await Swal.fire({
+            icon: 'warning',
+            title: 'Sem telefone!',
+            text: 'Este pedido não tem número de celular. Deseja continuar usando o nome como chave?',
+            showCancelButton: true,
+            confirmButtonText: 'Sim, usar nome',
+            confirmButtonColor: '#e8a930',
+            cancelButtonText: 'Cancelar',
+            background: '#111', color: '#fff'
+        });
+        if (!isConfirmed) return;
+    }
+
+    const chave = telLimpo || nomeCliente.trim().toLowerCase().replace(/\s+/g, '_');
     const ref = doc(db, 'fidelidade', chave);
     const snap = await getDoc(ref);
 
     let dados = snap.exists()
         ? snap.data()
-        : { nome: nomeCliente.trim(), contagem: 0, totalPedidos: 0, premiosGanhos: 0 };
+        : { nome: nomeCliente.trim(), telefone: telLimpo, contagem: 0, totalPedidos: 0, premiosGanhos: 0 };
 
-    // Evita contar o mesmo pedido duas vezes
+    // Atualiza o nome sempre (pode ter digitado diferente antes)
+    dados.nome = nomeCliente.trim();
+    if (telLimpo) dados.telefone = telLimpo;
+
     const pedidosContados = dados.pedidosContados || [];
     if (pedidoId && pedidosContados.includes(pedidoId)) {
         Swal.fire({
@@ -3152,22 +3179,18 @@ window.adicionarPontoFidelidade = async (nomeCliente, pedidoId, telefone = '') =
             confirmButtonText: 'Incrível! 🍔'
         });
 
-        // WhatsApp — prêmio
-        if (telefone) {
-            const tel = telefone.replace(/\D/g, '');
+        if (telLimpo) {
             const msg = `🎉 Parabéns, ${nomeCliente.trim()}! Você completou 10 pedidos e ganhou um LANCHE GRÁTIS! 🍔\n\nVenha resgatar no seu próximo pedido. Obrigado pela preferência! — GC BURGUER`;
-            window.open(`https://wa.me/55${tel}?text=${encodeURIComponent(msg)}`);
+            window.open(`https://wa.me/55${telLimpo}?text=${encodeURIComponent(msg)}`);
         }
 
     } else {
         toast(`+1 ponto para ${nomeCliente.trim()}! (${dados.contagem}/10)`);
 
-        // WhatsApp — ponto normal
-        if (telefone) {
-            const tel = telefone.replace(/\D/g, '');
+        if (telLimpo) {
             const faltam = 10 - dados.contagem;
             const msg = `⭐ Olá, ${nomeCliente.trim()}! Você acaba de ganhar +1 ponto no nosso programa de fidelidade!\n\n🍔 Pontos: ${dados.contagem}/10\n📍 Faltam apenas ${faltam} pedido${faltam !== 1 ? 's' : ''} para ganhar um lanche grátis!\n\nObrigado pela preferência! — GC BURGUER`;
-            window.open(`https://wa.me/55${tel}?text=${encodeURIComponent(msg)}`);
+            window.open(`https://wa.me/55${telLimpo}?text=${encodeURIComponent(msg)}`);
         }
     }
 };
@@ -3246,8 +3269,9 @@ function renderFidelidadeConteudo() {
                 <div>
                     <div style="font-weight:700;font-size:1rem;">${c.nome}</div>
                     <div style="font-size:0.72rem;opacity:0.4;margin-top:2px;">
-                        ${c.totalPedidos || 0} pedidos no total
-                    </div>
+    ${c.totalPedidos || 0} pedidos no total
+    ${c.telefone ? ` · 📱 ${c.telefone}` : ''}
+</div>
                 </div>
                 <div style="display:flex;gap:6px;align-items:center;">
                     <span style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:${corBarra};">${cnt}/10</span>
@@ -3335,3 +3359,5 @@ window.switchTab = (id, el) => {
 </body>
 
 </html>
+
+
