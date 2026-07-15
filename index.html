@@ -2299,10 +2299,11 @@ if (met) met.innerHTML = `
                     <div class="mesa-total-label">Total parcial</div>
                     <div class="mesa-total-val">${R(val)}</div>
                 </div>
-                <div class="mesa-actions">
+             <div class="mesa-actions">
                     <button class="mesa-act-btn btn-pedido" onclick="abrirMesa('${id}',${i});event.stopPropagation();"><i class="fas fa-plus"></i> PEDIDO</button>
                     <button class="mesa-act-btn ${jaEnviado ? 'btn-cozinha-ok' : 'btn-cozinha'}" onclick="enviarCozinhaDireto('${id}');event.stopPropagation();"><i class="fas fa-${jaEnviado ? 'check' : 'fire'}"></i> ${jaEnviado ? 'ENVIADO' : 'COZINHA'}</button>
                     <button class="mesa-act-btn btn-fechar" style="grid-column:1/-1;" onclick="abrirFechamentoDireto('${id}',${i});event.stopPropagation();"><i class="fas fa-check-circle"></i> FECHAR CONTA</button>
+                    <button class="mesa-act-btn btn-pedido" style="grid-column:1/-1;" onclick="reimprimirComandaMesa('${id}');event.stopPropagation();"><i class="fas fa-print"></i> REIMPRIMIR COMANDA</button>
                 </div>
             </div>`;
                 } else {
@@ -2333,6 +2334,28 @@ if (met) met.innerHTML = `
             if (jaEnviado) { Swal.fire({ icon: 'info', title: 'Já enviado!', background: '#111', color: '#fff', timer: 2000, showConfirmButton: false }); return; }
             await updateDoc(doc(db, 'mesas', mesaId), { ultimaAtualizacao: new Date(), enviadoCozinhaEm: new Date() });
             Swal.fire({ icon: 'success', title: 'Enviado!', timer: 1500, showConfirmButton: false, background: '#111', color: '#fff' });
+        };
+
+        window.reimprimirComandaMesa = async (mesaId) => {
+            const mesa = mesasAtivas[mesaId];
+            if (!mesa || !mesa.itens || !mesa.itens.length) {
+                Swal.fire({ icon: 'warning', title: 'Mesa sem itens!', background: '#111', color: '#fff' });
+                return;
+            }
+            try {
+                const docRef = await addDoc(collection(db, 'reimpressoes'), {
+                    tipo: 'COMANDA_MESA',
+                    numero: mesa.numero,
+                    garcom: mesa.garcom || '',
+                    itens: mesa.itens,
+                    obs: mesa.obs || '',
+                    data: new Date()
+                });
+                setTimeout(async () => { try { await deleteDoc(docRef); } catch (e) { } }, 10000);
+                window.toast('Comanda enviada para impressão!');
+            } catch (e) {
+                Swal.fire({ icon: 'error', title: 'Erro!', text: e.message, background: '#111', color: '#fff' });
+            }
         };
 
         window.abrirFechamentoDireto = async (mesaId, numero) => {
@@ -3361,3 +3384,5 @@ window.switchTab = (id, el) => {
 </body>
 
 </html>
+
+
