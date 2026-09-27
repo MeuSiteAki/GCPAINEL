@@ -1878,10 +1878,27 @@ function normalizeStr(s){
     .trim();
 }
 
+/* Gera uma versão "limpa" (só letras/números) do texto,
+   guardando o índice original de cada caractere mantido —
+   isso permite ignorar hífen/espaço na busca e ainda
+   destacar certinho o trecho no texto original. */
+function buildIndex(nomeOriginal){
+  const map = [];
+  let loose = '';
+  for (let i=0; i<nomeOriginal.length; i++){
+    const baseChar = nomeOriginal[i].normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+    if (/[a-z0-9]/.test(baseChar)){
+      loose += baseChar;
+      map.push(i);
+    }
+  }
+  return { loose, map };
+}
+
 window.gordo_filtrarCardapio = (valor) => {
-  const termo = normalizeStr(valor);
+  const { loose: termoLoose } = buildIndex(valor);
   const clearBtn = $('mlBuscaClear');
-  if (clearBtn) clearBtn.style.display = termo ? 'flex' : 'none';
+  if (clearBtn) clearBtn.style.display = valor ? 'flex' : 'none';
 
   document.querySelectorAll('#mlBody .cat-wrap').forEach(catWrap=>{
     const lista = catWrap.querySelector('.cat-itens');
@@ -1889,19 +1906,23 @@ window.gordo_filtrarCardapio = (valor) => {
     let temResultado = false;
 
     lista.querySelectorAll('.ci-row').forEach(row=>{
-      const nome     = row.dataset.nome || '';
       const original = row.dataset.original || '';
       const nomeSpan = row.querySelector('.ci-nome');
-      const bate = !termo || nome.includes(termo);
+      const { loose, map } = buildIndex(original);
+      const bate = !termoLoose || loose.includes(termoLoose);
 
       row.classList.toggle('ci-hidden', !bate);
       if (bate) temResultado = true;
 
-      if (termo && bate){
-        const idx = nome.indexOf(termo);
-        nomeSpan.innerHTML = idx >= 0
-          ? original.substring(0,idx) + '<mark>' + original.substring(idx, idx+termo.length) + '</mark>' + original.substring(idx+termo.length)
-          : original;
+      if (termoLoose && bate){
+        const idx = loose.indexOf(termoLoose);
+        if (idx >= 0){
+          const startO = map[idx];
+          const endO   = map[idx + termoLoose.length - 1] + 1;
+          nomeSpan.innerHTML = original.substring(0,startO) + '<mark>' + original.substring(startO,endO) + '</mark>' + original.substring(endO);
+        } else {
+          nomeSpan.textContent = original;
+        }
       } else {
         nomeSpan.textContent = original;
       }
@@ -1909,7 +1930,7 @@ window.gordo_filtrarCardapio = (valor) => {
 
     catWrap.classList.toggle('cat-wrap-hidden', !temResultado);
 
-    if (termo){
+    if (termoLoose){
       lista.classList.add('busca-ativa');
       btn.classList.add('open');
     } else {
@@ -2199,3 +2220,4 @@ window.enviarParaMotoboy = function(p) {
 </html> 
 
 
+window.gordo_filtrarCardapio = (valor) => {
