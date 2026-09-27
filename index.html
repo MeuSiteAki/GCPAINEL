@@ -714,6 +714,38 @@ body{
         border-radius: 8px;
     }
 }
+
+/* ── BUSCA NO CARDÁPIO (MESAS) ── */
+.ml-search-wrap{
+  position:relative;flex-shrink:0;
+  padding:10px 12px;
+  background:rgba(0,0,0,.25);
+  border-bottom:1px solid rgba(255,255,255,.07);
+}
+.ml-search-wrap i.fa-search{
+  position:absolute;left:22px;top:50%;transform:translateY(-50%);
+  color:rgba(255,255,255,.3);font-size:.8rem;pointer-events:none;
+}
+#mlBusca{
+  width:100%;padding:9px 34px 9px 32px;
+  background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);
+  border-radius:10px;color:var(--cream);font-family:'Nunito',sans-serif;
+  font-size:.82rem;font-weight:700;outline:none;transition:border-color .2s;
+}
+#mlBusca:focus{border-color:var(--yellow);}
+#mlBusca::placeholder{color:rgba(255,255,255,.25);}
+#mlBuscaClear{
+  position:absolute;right:20px;top:50%;transform:translateY(-50%);
+  background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.5);
+  width:22px;height:22px;border-radius:6px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:.65rem;
+  transition:background .15s;
+}
+#mlBuscaClear:hover{background:rgba(255,255,255,.18);}
+.ci-row.ci-hidden{display:none !important;}
+.cat-itens.busca-ativa{display:block !important;}
+.cat-wrap-hidden{display:none !important;}
+.ci-nome mark{background:rgba(245,200,0,.4);color:#1a0a00;border-radius:3px;padding:0 2px;}
 </style>
 </head>
 <body>
@@ -840,6 +872,14 @@ body{
   <div class="ml-header">
     <div class="ml-title" id="mlTitulo">Mesa 1 — Adicionar</div>
     <button class="ml-close" onclick="fecharMenuLateral()"><i class="fas fa-times"></i></button>
+  </div>
+    <div class="ml-search-wrap">
+    <i class="fas fa-search"></i>
+    <input type="text" id="mlBusca" placeholder="Buscar lanche, bebida..." autocomplete="off"
+      oninput="window.gordo_filtrarCardapio(this.value)">
+    <button type="button" id="mlBuscaClear" onclick="window.gordo_limparBusca()" style="display:none;">
+      <i class="fas fa-times"></i>
+    </button>
   </div>
   <div class="ml-body" id="mlBody"></div>
   <div class="ml-cart">
@@ -1466,7 +1506,7 @@ $('btnPDF').addEventListener('click', async ()=>{
    ═══════════════════════════════════════════════════ */
 const TOTAL_MESAS = 15;
 const ATENDENTES  = ['Eloá','Matheus','Rafael'];
-const ATENDENTE_ICONS = { Eloá:'👩‍🍳', Bia:'👩‍🍳', Rafael:'🧑‍🍳' };
+const ATENDENTE_ICONS = { Eloá:'👩‍🍳', Matheus:'🧑‍🍳', Rafael:'🧑‍🍳' };
 let mesasData  = [];
 let mesaAtiva  = null;
 let carrinhoTemp = [];
@@ -1818,6 +1858,10 @@ window.gordo_prepararAdd = (n) => {
   $('mlTitulo').textContent = `Mesa ${n} — Adicionar`;
   renderMenuCardapio();
   renderCarrinho();
+  const buscaInput = $('mlBusca');
+  if (buscaInput) buscaInput.value = '';
+  const clearBtn = $('mlBuscaClear');
+  if (clearBtn) clearBtn.style.display = 'none';
   document.getElementById('menu-lateral-gordo').classList.add('active');
 };
 
@@ -1826,19 +1870,75 @@ window.fecharMenuLateral = () => {
   mesaAtiva    = null;
   carrinhoTemp = [];
 };
+function normalizeStr(s){
+  return String(s||'')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g,'')
+    .trim();
+}
 
+window.gordo_filtrarCardapio = (valor) => {
+  const termo = normalizeStr(valor);
+  const clearBtn = $('mlBuscaClear');
+  if (clearBtn) clearBtn.style.display = termo ? 'flex' : 'none';
+
+  document.querySelectorAll('#mlBody .cat-wrap').forEach(catWrap=>{
+    const lista = catWrap.querySelector('.cat-itens');
+    const btn   = catWrap.querySelector('.cat-btn');
+    let temResultado = false;
+
+    lista.querySelectorAll('.ci-row').forEach(row=>{
+      const nome     = row.dataset.nome || '';
+      const original = row.dataset.original || '';
+      const nomeSpan = row.querySelector('.ci-nome');
+      const bate = !termo || nome.includes(termo);
+
+      row.classList.toggle('ci-hidden', !bate);
+      if (bate) temResultado = true;
+
+      if (termo && bate){
+        const idx = nome.indexOf(termo);
+        nomeSpan.innerHTML = idx >= 0
+          ? original.substring(0,idx) + '<mark>' + original.substring(idx, idx+termo.length) + '</mark>' + original.substring(idx+termo.length)
+          : original;
+      } else {
+        nomeSpan.textContent = original;
+      }
+    });
+
+    catWrap.classList.toggle('cat-wrap-hidden', !temResultado);
+
+    if (termo){
+      lista.classList.add('busca-ativa');
+      btn.classList.add('open');
+    } else {
+      lista.classList.remove('busca-ativa');
+      lista.classList.remove('open');
+      btn.classList.remove('open');
+    }
+  });
+};
+
+window.gordo_limparBusca = () => {
+  const input = $('mlBusca');
+  if (input) input.value = '';
+  window.gordo_filtrarCardapio('');
+  if (input) input.focus();
+};
 /* ── RENDER CARDÁPIO NO MENU ── */
 function renderMenuCardapio(){
   const body = $('mlBody'); body.innerHTML='';
   Object.entries(CARDAPIO).forEach(([cat, itens])=>{
     const catDiv = document.createElement('div');
+    catDiv.className = 'cat-wrap';
     const btn    = document.createElement('button');
     btn.className = 'cat-btn';
     btn.innerHTML = `${cat} <i class="fas fa-chevron-down chev"></i>`;
     const lista = document.createElement('div');
     lista.className = 'cat-itens';
     lista.innerHTML = itens.map(item=>`
-      <div class="ci-row">
+      <div class="ci-row" data-nome="${normalizeStr(item.n)}" data-original="${item.n.replace(/"/g,'&quot;')}">
         <span class="ci-nome">${item.n}</span>
         <span class="ci-preco">${fmtBRL(item.p)}</span>
         <button class="ci-add" onclick="window.gordo_addItem('${item.n.replace(/'/g,"\\'")}',${item.p})">+</button>
