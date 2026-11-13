@@ -1369,6 +1369,31 @@
         .btn-imprimir-bt:hover {
             background: rgba(232, 169, 48, 0.22);
         }
+        .btn-rem-item {
+    background: rgba(231, 76, 60, 0.12);
+    border: 1px solid rgba(231, 76, 60, 0.35);
+    color: #e74c3c;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    font-size: 0.7rem;
+    line-height: 1;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 8px;
+    padding: 0;
+    transition: 0.18s;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+}
+
+.btn-rem-item:hover {
+    background: #e74c3c;
+    color: #fff;
+}
     </style>
 </head>
 
@@ -1560,8 +1585,8 @@
             "Pastel de Carne", "Pastel de Pizza", "Pastel de Frango", "Pastel Frango com Catupiry",
             "Pastel Frango com Queijo", "Pastel Calabresa com Queijo", "Pastel Carne com Queijo",
             "Pastel de Queijo", "Pastel Tudão", "Pastel Romeu e Julieta",
-            "Refrigerante lata 220ml", "Refrigerante lata 350ml", "Refrigerante 1 litro",
-            "Refrigerante 2 litros", "Agua sem gás", "Agua com gás",
+            "Refri lata 220ml", "Refri lata 350ml", "Refri 1L a partir:",
+            "Refri 2L", "Agua sem gás", "Agua com gás",
             "Suco 300ml", "Suco 500ml", "Vitamina 300ml", "Vitamina 500ml",
             "Açaí 300ml", "Açaí 400ml", "Açaí 500ml", "Bolo no Pote"
         ];
@@ -1807,11 +1832,17 @@ const contagemFid = dadosFid ? (dadosFid.contagem || 0) : 0;
                     }
                 </div>
                 <div class="lista-itens-card">
-                    ${(p.itens || []).map(i => {
+                                   ${(p.itens || []).map((i, idx) => {
                         const vUnit = parseFloat(i.preco) || parseFloat(i.precoTotal) || 0;
                         const qtd = parseInt(i.qty) || 1;
                         return `<div class="item-linha-wrapper" style="margin-bottom:5px;">
-                            <div class="item-linha"><span>${qtd}x ${i.nome}</span><b>${R(vUnit * qtd)}</b></div>
+                            <div class="item-linha">
+                                <span>${qtd}x ${i.nome}</span>
+                                <span style="display:flex;align-items:center;">
+                                    <b>${R(vUnit * qtd)}</b>
+                                    <button class="btn-rem-item" title="Remover 1 unidade" onclick="removerUmItemPedido('${p.id}',${idx})">✕</button>
+                                </span>
+                            </div>
                             ${i.obs ? `<div style="font-size:0.72rem;color:#aaa;margin-left:15px;opacity:0.8;">↳ ${i.obs}</div>` : ''}
                         </div>`;
                     }).join('')}
@@ -2087,6 +2118,80 @@ window.abrirFidelidadeMesa = async (mesaId, numeroMesa) => {
                 Swal.fire({ icon: 'error', title: 'Erro!', text: e.message, background: '#111', color: '#fff' });
             }
         };
+
+        // ── REMOVER 1 UNIDADE DE UM ITEM DO PEDIDO ─────────────────────────────────────
+// ── REMOVER 1 UNIDADE DE UM ITEM DO PEDIDO ─────────────────────────────────────
+window.removerUmItemPedido = async (pedidoId, idx) => {
+    const p = pedidos.find(x => x.id === pedidoId);
+    if (!p || !p.itens || !p.itens[idx]) return;
+
+    const ok = await confirmarSenhaExcluir();
+    if (!ok) return;
+
+    const itens = p.itens.map(i => ({ ...i }));
+    const item = itens[idx];
+    const vUnit = parseFloat(item.preco) || parseFloat(item.precoTotal) || 0;
+    const qtd = parseInt(item.qty) || 1;
+
+    // Último item do pedido
+    if (itens.length === 1 && qtd === 1) {
+        const r = await Swal.fire({
+            title: 'Último item do pedido!',
+            text: 'Remover este item vai excluir o pedido inteiro. Continuar?',
+            icon: 'warning', showCancelButton: true,
+            confirmButtonText: 'Sim, excluir pedido', confirmButtonColor: '#e74c3c',
+            cancelButtonText: 'Cancelar', background: '#111', color: '#fff'
+        });
+        if (!r.isConfirmed) return;
+        await deleteDoc(doc(db, 'pedidos', pedidoId));
+        toast('Pedido excluído!');
+        return;
+    }
+
+    // Diminui 1 unidade (ou remove a linha)
+    if (qtd > 1) item.qty = qtd - 1;
+    else itens.splice(idx, 1);
+
+    const totalAtual = parseTotal(p.total);
+    const novoTotal = Math.max(0, totalAtual - vUnit);
+
+    // ── Ajusta o texto do pagamento para acompanhar o novo total ──
+    let novoPagamento = p.pagamento || '';
+    const pagsArr = parsePagamentos(novoPagamento);
+    const temValores = pagsArr.length > 0 && pagsArr.some(pg => pg.valor > 0);
+
+    if (temValores) {
+        let aDescontar = vUnit;
+        // Desconta do último método para o primeiro
+        const ajustados = pagsArr.map(pg => ({ ...pg }));
+        for (let k = ajustados.length - 1; k >= 0 && aDescontar > 0.001; k--) {
+            const tira = Math.min(ajustados[k].valor, aDescontar);
+            ajustados[k].valor -= tira;
+            aDescontar -= tira;
+        }
+        const partes = novoPagamento.split('+').map(s => s.trim());
+        const novasPartes = [];
+        ajustados.forEach((pg, k) => {
+            if (pg.valor > 0.001) {
+                const valFmt = pg.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                const nomeMetodo = (partes[k] || '').replace(/\s*\(.*$/, '').trim() || pg.metodo;
+                novasPartes.push(`${nomeMetodo} (${valFmt})`);
+            }
+        });
+        novoPagamento = novasPartes.join(' + ');
+    }
+
+    try {
+        await updateDoc(doc(db, 'pedidos', pedidoId), {
+            itens: itens,
+            total: novoTotal,
+            pagamento: novoPagamento
+        });
+        toast(`1x ${item.nome} removido!`);
+    } catch (e) {
+        Swal.fire({ icon: 'error', title: 'Erro!', text: e.message, background: '#111', color: '#fff' });
+    }
+};
 
         // ── MARCAR SAIU ────────────────────────────────────────────────────────────────
         window.marcarSaiu = async (pedidoId, tel, cliente) => {
@@ -3386,3 +3491,5 @@ window.switchTab = (id, el) => {
 </body>
 
 </html>
+
+
