@@ -1394,10 +1394,28 @@
     background: #e74c3c;
     color: #fff;
 }
+.login-box{background:#111;border:1px solid rgba(232,169,48,.3);border-radius:20px;padding:30px 24px;width:100%;max-width:360px;text-align:center}
+.login-brand{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:4px;color:var(--gold)}
+.login-box p{opacity:.5;font-size:.85rem;margin:4px 0 18px}
+.login-btn{width:100%;margin-top:14px;padding:13px;border:none;border-radius:10px;background:var(--gold);color:#000;font-weight:800;letter-spacing:1px;cursor:pointer;font-family:'Outfit',sans-serif}
+.login-btn:disabled{opacity:.5}
+#login-erro{color:#e74c3c;font-size:.8rem;margin-top:10px;min-height:18px}
+.semana-dia{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.semana-banner{background:rgba(231,76,60,.1);border:1px solid rgba(231,76,60,.4);color:#e74c3c;border-radius:10px;padding:12px 14px;font-size:.85rem;font-weight:600;margin-bottom:12px}
     </style>
 </head>
 
 <body>
+    <div id="login-overlay" style="position:fixed;inset:0;background:#080808;z-index:20000;display:flex;align-items:center;justify-content:center;padding:20px;">
+    <div class="login-box">
+        <div class="login-brand">GC BURGUER</div>
+        <p>Acesso ao painel</p>
+        <input id="login-email" type="email" class="inp-pdv" placeholder="E-mail" autocomplete="username">
+        <input id="login-senha" type="password" class="inp-pdv" placeholder="Senha" autocomplete="current-password" style="margin-top:10px;">
+        <button id="login-btn" class="login-btn" onclick="fazerLogin()">ENTRAR</button>
+        <div id="login-erro"></div>
+    </div>
+</div>
     <audio id="bell" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
     <div class="topbar">
@@ -1425,6 +1443,10 @@
                     style="background:none;border:1px solid rgba(232,169,48,0.3);color:var(--gold);border-radius:8px;padding:8px 12px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:0.75rem;font-weight:700;display:flex;align-items:center;gap:6px;transition:0.2s;margin-left:8px;">
                     <i class="fas fa-volume-mute" id="som-icon"></i> <span id="som-label">SOM</span>
                 </button>
+                <button onclick="sairPainel()" title="Sair"
+    style="background:none;border:1px solid rgba(231,76,60,0.35);color:#e74c3c;border-radius:8px;padding:8px 12px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:0.75rem;font-weight:700;margin-left:8px;">
+    <i class="fas fa-sign-out-alt"></i>
+</button>
                 <button class="tab-btn btn-mais" onclick="toggleMenuMobile(event)"><i class="fas fa-bars"></i></button>
             </div>
         </div>
@@ -1484,6 +1506,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, onSnapshot, query, orderBy, deleteDoc, doc, getDocs, updateDoc, setDoc, addDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const fb = initializeApp({
             apiKey: "AIzaSyBBQTI4ziKYQn9OLA8cjLAwcal7gdBy8mk",
@@ -1494,6 +1517,7 @@
             appId: "1:668924901739:web:035c64ea31ac3d9da3742e"
         });
         const db = getFirestore(fb);
+        const auth = getAuth(fb);
 
         const TOTAL_MESAS = 10;
         const SENHA_HASH = "9754f15d9ed62a1dc6ae8f7c457515f562ff3830af3bbdd528c347b40ff87b9d";
@@ -1703,7 +1727,7 @@
         }
 
         function renderCaixaConteudo() {
-            document.getElementById('caixa-conteudo').innerHTML = `
+    document.getElementById('caixa-conteudo').innerHTML = `
         <div class="caixa-container">
             <div style="background:var(--card);padding:20px;border-radius:15px;border:1px solid var(--border);">
                 <h3 style="font-family:'Bebas Neue',sans-serif;letter-spacing:3px;color:var(--gold);margin-top:0;font-size:1.4rem;">RELATÓRIO DO DIA</h3>
@@ -1716,38 +1740,92 @@
                 <div id="c-metodos"></div>
                 <div style="margin-top:22px;display:flex;flex-direction:column;gap:10px;">
                     <button onclick="gerarPDF()" style="background:#27ae60;color:white;border:none;padding:14px;border-radius:10px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;"><i class="fas fa-file-pdf"></i> BAIXAR RELATÓRIO</button>
-                    <button onclick="zerarDia()" style="background:#c0392b;color:white;border:none;padding:14px;border-radius:10px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;"><i class="fas fa-trash"></i> ZERAR DIA</button>
+                    <button onclick="zerarDia()" style="background:#c0392b;color:white;border:none;padding:14px;border-radius:10px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;"><i class="fas fa-calendar-check"></i> FECHAR / ZERAR DIA</button>
                 </div>
             </div>
-        </div>`;
-            renderCaixa();
-        }
+        </div>
 
-        // ── FIREBASE LISTENERS ─────────────────────────────────────────────────────────
-        let primeiroSnapPedidos = true;
-        onSnapshot(query(collection(db, 'pedidos'), orderBy('data', 'desc')), snap => {
-            pedidos = snap.docs.map(d => ({ id: d.id, tipo: 'delivery', ...d.data() }));
-            renderPedidos();
-            renderCaixa();
-            if (primeiroSnapPedidos) { primeiroSnapPedidos = false; return; }
-            window.tocarSino?.();
-        });
+        <div id="caixa-semanal" style="margin-top:24px;"></div>`;
+    renderCaixa();
+    renderSemana();
+}
 
-        onSnapshot(collection(db, 'mesas'), snap => {
-            mesasAtivas = {};
-            snap.docs.forEach(d => { mesasAtivas[d.id] = { id: d.id, ...d.data() }; });
-            renderMesasGrid();
-            renderPedidos();
-        });
+        // ── FIREBASE LISTENERS (só iniciam depois do login) ──────────────────────────
+let listenersIniciados = false;
+let primeiroSnapPedidos = true;
+let primeiroSnapMesas = true;
+let semanaCaixa = [];
 
-        let primeiroSnapMesas = true;
-        onSnapshot(query(collection(db, 'mesas_historico'), orderBy('fechadoEm', 'desc')), snap => {
-            mesasFech = snap.docs.map(d => ({ id: d.id, tipo: 'mesa', ...d.data() }));
-            renderPedidos();
-            renderCaixa();
-            if (primeiroSnapMesas) { primeiroSnapMesas = false; return; }
-            window.tocarSino?.();
-        });
+function iniciarListeners() {
+    if (listenersIniciados) return;
+    listenersIniciados = true;
+
+    onSnapshot(query(collection(db, 'pedidos'), orderBy('data', 'desc')), snap => {
+        pedidos = snap.docs.map(d => ({ id: d.id, tipo: 'delivery', ...d.data() }));
+        renderPedidos();
+        renderCaixa();
+        if (primeiroSnapPedidos) { primeiroSnapPedidos = false; return; }
+        window.tocarSino?.();
+    });
+
+    onSnapshot(collection(db, 'mesas'), snap => {
+        mesasAtivas = {};
+        snap.docs.forEach(d => { mesasAtivas[d.id] = { id: d.id, ...d.data() }; });
+        renderMesasGrid();
+        renderPedidos();
+    });
+
+    onSnapshot(query(collection(db, 'mesas_historico'), orderBy('fechadoEm', 'desc')), snap => {
+        mesasFech = snap.docs.map(d => ({ id: d.id, tipo: 'mesa', ...d.data() }));
+        renderPedidos();
+        renderCaixa();
+        if (primeiroSnapMesas) { primeiroSnapMesas = false; return; }
+        window.tocarSino?.();
+    });
+
+    onSnapshot(collection(db, 'caixa_semanal'), snap => {
+        semanaCaixa = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => b.id.localeCompare(a.id));
+        renderSemana();
+    });
+
+    iniciarFidelidade();
+    carregarStatusLoja();
+}
+
+// ── LOGIN ────────────────────────────────────────────────────────────────────
+onAuthStateChanged(auth, user => {
+    const ov = document.getElementById('login-overlay');
+    if (user) { ov.style.display = 'none'; iniciarListeners(); }
+    else { ov.style.display = 'flex'; }
+});
+
+window.fazerLogin = async () => {
+    const email = document.getElementById('login-email').value.trim();
+    const senha = document.getElementById('login-senha').value;
+    const erro = document.getElementById('login-erro');
+    const btn = document.getElementById('login-btn');
+    erro.textContent = '';
+    if (!email || !senha) { erro.textContent = 'Preencha e-mail e senha.'; return; }
+    btn.disabled = true; btn.textContent = 'ENTRANDO...';
+    try {
+        await signInWithEmailAndPassword(auth, email, senha);
+        document.getElementById('login-senha').value = '';
+    } catch (e) {
+        erro.textContent = e.code === 'auth/too-many-requests'
+            ? 'Muitas tentativas. Aguarde alguns minutos.'
+            : 'E-mail ou senha incorretos.';
+    }
+    btn.disabled = false; btn.textContent = 'ENTRAR';
+};
+
+window.sairPainel = async () => {
+    await signOut(auth);
+    location.reload();
+};
+
+['login-email', 'login-senha'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') window.fazerLogin(); });
+});
 
         // ── SENHA EXCLUIR ──────────────────────────────────────────────────────────────
         async function confirmarSenhaExcluir() {
@@ -2897,21 +2975,247 @@ window.aplicarDescontoMesa = async (mesaId, totalAtual) => {
                 .catch(() => setDoc(doc(db, 'estoque', 'disponibilidade'), { [id]: status }));
         };
 
-        window.zerarDia = async () => {
+        // ── CAIXA SEMANAL ────────────────────────────────────────────────────────────
+const DIAS_SEMANA_MAX = 7;
+
+function chaveHoje() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+const fmtDataId = id => id.split('-').reverse().join('/');
+
+function calcularResumoDia() {
+    let tPix = 0, tDin = 0, tCrd = 0, tSemPag = 0, tDesconto = 0;
+    const mapa = {};
+    const addItens = lista => (lista || []).forEach(i => {
+        const nome = i.nome || '?';
+        const preco = parseFloat(i.preco) || 0;
+        const qty = parseInt(i.qty) || 1;
+        if (!mapa[nome]) mapa[nome] = { nome, qty: 0, total: 0 };
+        mapa[nome].qty += qty;
+        mapa[nome].total += preco * qty;
+    });
+    const somaPag = pg => {
+        if (pg.metodo === 'PIX') tPix += pg.valor;
+        else if (pg.metodo === 'Dinheiro') tDin += pg.valor;
+        else tCrd += pg.valor;
+    };
+
+    pedidos.forEach(p => {
+        const pagsArr = parsePagamentos(p.pagamento || '');
+        const totalReal = parseTotal(p.total);
+        if (pagsArr.length > 0 && pagsArr.some(pg => pg.valor > 0)) {
+            const somaPags = pagsArr.reduce((s, pg) => s + pg.valor, 0);
+            pagsArr.forEach(somaPag);
+            const diff = totalReal - somaPags;
+            if (diff > 0.05) tSemPag += diff;
+        } else {
+            const m = normalizarPagamento(p.pagamento);
+            if (m === 'PIX') tPix += totalReal;
+            else if (m === 'Dinheiro') tDin += totalReal;
+            else if (m === 'Cartão') tCrd += totalReal;
+            else tSemPag += totalReal;
+        }
+        tDesconto += parseFloat(p.desconto) || 0;
+        addItens(p.itens);
+    });
+
+    mesasFech.forEach(m => {
+        const pagsArr = parsePagamentos(m.pagamento || '');
+        if (pagsArr.length > 0) pagsArr.forEach(somaPag);
+        else {
+            const v = parseFloat(m.total) || 0;
+            const pg = normalizarPagamento(m.pagamento);
+            if (pg === 'PIX') tPix += v;
+            else if (pg === 'Dinheiro') tDin += v;
+            else tCrd += v;
+        }
+        tDesconto += parseFloat(m.desconto) || 0;
+        addItens(m.itens);
+    });
+
+    return {
+        pix: tPix, dinheiro: tDin, cartao: tCrd, aReceber: tSemPag, desconto: tDesconto,
+        total: tPix + tDin + tCrd + tSemPag,
+        qtdPedidos: pedidos.length + mesasFech.length,
+        itens: Object.values(mapa)
+    };
+}
+
+window.zerarDia = async () => {
     const ok = await confirmarSenhaExcluir();
     if (!ok) return;
-    const r = await Swal.fire({ title: 'Zerar o Caixa?', text: 'Todos os pedidos serão apagados!', icon: 'warning', showCancelButton: true, background: '#111', color: '#fff' });
-    if (r.isConfirmed) {
+
+    if (!pedidos.length && !mesasFech.length) {
+        Swal.fire({ icon: 'info', title: 'Nada para fechar', text: 'Não há pedidos neste dia.', background: '#111', color: '#fff' });
+        return;
+    }
+
+    const idHoje = chaveHoje();
+    const jaTemHoje = semanaCaixa.some(d => d.id === idHoje);
+    if (!jaTemHoje && semanaCaixa.length >= DIAS_SEMANA_MAX) {
+        Swal.fire({
+            icon: 'warning', title: 'Semana completa!',
+            html: 'Já existem 7 dias guardados.<br>Baixe o PDF semanal e use <b>APAGAR SEMANA</b> antes de fechar um novo dia.',
+            background: '#111', color: '#fff', confirmButtonColor: '#e8a930'
+        });
+        return;
+    }
+
+    const r = await Swal.fire({
+        title: 'Fechar o dia?',
+        html: 'O faturamento será <b>guardado no caixa semanal</b> e os pedidos do dia serão apagados.',
+        icon: 'warning', showCancelButton: true,
+        confirmButtonText: 'Sim, fechar dia', confirmButtonColor: '#c0392b',
+        cancelButtonText: 'Cancelar', background: '#111', color: '#fff'
+    });
+    if (!r.isConfirmed) return;
+
+    try {
+        const res = calcularResumoDia();
+        const ref = doc(db, 'caixa_semanal', idHoje);
+        const snap = await getDoc(ref);
+
+        let final = { ...res, data: idHoje, fechadoEm: new Date() };
+        if (snap.exists()) {
+            // Se fechar duas vezes no mesmo dia, soma com o que já estava guardado
+            const a = snap.data();
+            const mapa = {};
+            [...(a.itens || []), ...res.itens].forEach(i => {
+                if (!mapa[i.nome]) mapa[i.nome] = { nome: i.nome, qty: 0, total: 0 };
+                mapa[i.nome].qty += i.qty; mapa[i.nome].total += i.total;
+            });
+            final = {
+                data: idHoje, fechadoEm: new Date(),
+                pix: (a.pix || 0) + res.pix, dinheiro: (a.dinheiro || 0) + res.dinheiro,
+                cartao: (a.cartao || 0) + res.cartao, aReceber: (a.aReceber || 0) + res.aReceber,
+                desconto: (a.desconto || 0) + res.desconto, total: (a.total || 0) + res.total,
+                qtdPedidos: (a.qtdPedidos || 0) + res.qtdPedidos, itens: Object.values(mapa)
+            };
+        }
+        await setDoc(ref, final);
+
         const [s1, s2, s3] = await Promise.all([
             getDocs(collection(db, 'pedidos')),
             getDocs(collection(db, 'mesas_historico')),
-            getDocs(collection(db, 'mesas')) // ← adiciona isso
+            getDocs(collection(db, 'mesas'))
         ]);
-        s1.docs.forEach(d => deleteDoc(doc(db, 'pedidos', d.id)));
-        s2.docs.forEach(d => deleteDoc(doc(db, 'mesas_historico', d.id)));
-        s3.docs.forEach(d => deleteDoc(doc(db, 'mesas', d.id))); // ← e isso
-        toast('Caixa zerado!');
+        await Promise.all([
+            ...s1.docs.map(d => deleteDoc(doc(db, 'pedidos', d.id))),
+            ...s2.docs.map(d => deleteDoc(doc(db, 'mesas_historico', d.id))),
+            ...s3.docs.map(d => deleteDoc(doc(db, 'mesas', d.id)))
+        ]);
+        toast('Dia fechado e guardado na semana!');
+    } catch (e) {
+        Swal.fire({ icon: 'error', title: 'Erro!', text: e.message, background: '#111', color: '#fff' });
     }
+};
+
+function renderSemana() {
+    if (!abasLiberadas['aba-caixa']) return;
+    const el = document.getElementById('caixa-semanal');
+    if (!el) return;
+
+    const soma = k => semanaCaixa.reduce((s, d) => s + (d[k] || 0), 0);
+    const completa = semanaCaixa.length >= DIAS_SEMANA_MAX;
+
+    el.innerHTML = `
+    <div style="background:var(--card);padding:20px;border-radius:15px;border:1px solid rgba(232,169,48,0.25);">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+            <h3 style="font-family:'Bebas Neue',sans-serif;letter-spacing:3px;color:var(--gold);margin:0;font-size:1.4rem;">
+                <i class="fas fa-calendar-week"></i> CAIXA SEMANAL
+                <span class="section-label-count">${semanaCaixa.length}/${DIAS_SEMANA_MAX} dias</span>
+            </h3>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--green);letter-spacing:2px;">${R(soma('total'))}</div>
+        </div>
+
+        ${completa ? `<div class="semana-banner">⚠️ Semana completa (7 dias). Baixe o PDF e apague a semana para começar uma nova.</div>` : ''}
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:14px;font-size:0.8rem;">
+            <div class="semana-dia" style="flex-direction:column;align-items:flex-start;"><span style="opacity:.5">PIX</span><b>${R(soma('pix'))}</b></div>
+            <div class="semana-dia" style="flex-direction:column;align-items:flex-start;"><span style="opacity:.5">Dinheiro</span><b>${R(soma('dinheiro'))}</b></div>
+            <div class="semana-dia" style="flex-direction:column;align-items:flex-start;"><span style="opacity:.5">Cartão</span><b>${R(soma('cartao'))}</b></div>
+            <div class="semana-dia" style="flex-direction:column;align-items:flex-start;"><span style="opacity:.5">Descontos</span><b style="color:#e74c3c;">${R(soma('desconto'))}</b></div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:8px;">
+            ${semanaCaixa.length ? semanaCaixa.map(d => `
+                <div class="semana-dia">
+                    <div>
+                        <div style="font-weight:700;">${fmtDataId(d.id)}</div>
+                        <div style="font-size:0.72rem;opacity:.45;">${d.qtdPedidos || 0} pedidos · PIX ${R(d.pix || 0)} · Din ${R(d.dinheiro || 0)} · Cartão ${R(d.cartao || 0)}</div>
+                    </div>
+                    <b style="color:var(--gold);font-size:1.05rem;">${R(d.total || 0)}</b>
+                </div>`).join('')
+            : '<div style="opacity:.3;text-align:center;padding:20px;font-size:.85rem;">Nenhum dia guardado ainda.</div>'}
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;">
+            <button onclick="gerarPDFSemanal()" style="background:#27ae60;color:white;border:none;padding:13px;border-radius:10px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;"><i class="fas fa-file-pdf"></i> PDF SEMANAL</button>
+            <button onclick="apagarSemana()" style="background:#c0392b;color:white;border:none;padding:13px;border-radius:10px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;"><i class="fas fa-trash"></i> APAGAR SEMANA</button>
+        </div>
+    </div>`;
+}
+
+window.apagarSemana = async () => {
+    if (!semanaCaixa.length) { toast('Semana já está vazia!'); return; }
+    const ok = await confirmarSenhaExcluir();
+    if (!ok) return;
+    const r = await Swal.fire({
+        title: 'Apagar a semana inteira?',
+        html: `Isso apaga <b>${semanaCaixa.length} dia(s)</b> guardados (${R(semanaCaixa.reduce((s, d) => s + (d.total || 0), 0))}).<br>Esta ação não pode ser desfeita.`,
+        icon: 'warning', showCancelButton: true,
+        confirmButtonText: 'Sim, apagar tudo', confirmButtonColor: '#c0392b',
+        cancelButtonText: 'Cancelar', background: '#111', color: '#fff'
+    });
+    if (!r.isConfirmed) return;
+    try {
+        await Promise.all(semanaCaixa.map(d => deleteDoc(doc(db, 'caixa_semanal', d.id))));
+        toast('Semana apagada!');
+    } catch (e) {
+        Swal.fire({ icon: 'error', title: 'Erro!', text: e.message, background: '#111', color: '#fff' });
+    }
+};
+
+window.gerarPDFSemanal = () => {
+    if (!semanaCaixa.length) { toast('Nenhum dia guardado!'); return; }
+    const { jsPDF } = window.jspdf;
+    const p = new jsPDF();
+    const dias = [...semanaCaixa].sort((a, b) => a.id.localeCompare(b.id));
+    const soma = k => dias.reduce((s, d) => s + (d[k] || 0), 0);
+
+    p.setFontSize(18); p.setFont('helvetica', 'bold');
+    p.text('GC BURGUER', 105, 16, { align: 'center' });
+    p.setFontSize(11); p.setFont('helvetica', 'normal');
+    p.text(`Caixa Semanal — ${fmtDataId(dias[0].id)} a ${fmtDataId(dias[dias.length - 1].id)}`, 105, 24, { align: 'center' });
+
+    p.autoTable({
+        startY: 32, margin: { left: 10, right: 10 },
+        head: [['Data', 'Pedidos', 'PIX', 'Dinheiro', 'Cartão', 'A receber', 'Descontos', 'Total']],
+        body: dias.map(d => [fmtDataId(d.id), d.qtdPedidos || 0, R(d.pix || 0), R(d.dinheiro || 0), R(d.cartao || 0), R(d.aReceber || 0), R(d.desconto || 0), R(d.total || 0)]),
+        foot: [['TOTAL', soma('qtdPedidos'), R(soma('pix')), R(soma('dinheiro')), R(soma('cartao')), R(soma('aReceber')), R(soma('desconto')), R(soma('total'))]],
+        headStyles: { fillColor: [232, 169, 48], textColor: 0, fontStyle: 'bold' },
+        footStyles: { fillColor: [240, 240, 240], textColor: 0, fontStyle: 'bold' },
+        styles: { fontSize: 8 },
+        columnStyles: { 1: { halign: 'center' }, 2: { halign: 'right' }, 3: { halign: 'right' }, 4: { halign: 'right' }, 5: { halign: 'right' }, 6: { halign: 'right' }, 7: { halign: 'right' } }
+    });
+
+    // Itens vendidos na semana
+    const mapa = {};
+    dias.forEach(d => (d.itens || []).forEach(i => {
+        if (!mapa[i.nome]) mapa[i.nome] = { qty: 0, total: 0 };
+        mapa[i.nome].qty += i.qty; mapa[i.nome].total += i.total;
+    }));
+    p.autoTable({
+        startY: p.lastAutoTable.finalY + 10, margin: { left: 10, right: 10 },
+        head: [['Item vendido na semana', 'Qtd', 'Total']],
+        body: Object.entries(mapa).sort((a, b) => b[1].qty - a[1].qty).map(([n, d]) => [n, `${d.qty}x`, R(d.total)]),
+        headStyles: { fillColor: [52, 152, 219], textColor: 255, fontStyle: 'bold' },
+        styles: { fontSize: 9 },
+        columnStyles: { 1: { halign: 'center', cellWidth: 20 }, 2: { halign: 'right', cellWidth: 30 } }
+    });
+
+    p.save(`caixa_semanal_${dias[0].id}_a_${dias[dias.length - 1].id}.pdf`);
 };
 
         // ── PDF ────────────────────────────────────────────────────────────────────────
@@ -3491,5 +3795,7 @@ window.switchTab = (id, el) => {
 </body>
 
 </html>
+
+
 
 
